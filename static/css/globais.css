@@ -1,0 +1,68 @@
+/* =========================================================================
+   1. FONTES E TIPOGRAFIA (Design System)
+   ========================================================================= */
+/* Importação externa das famílias de fontes do Google Fonts: Poppins (Títulos) e Inter (Textos/Leitura) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+
+/* Definição de variáveis globais do CSS para padronização da identidade visual */
+:root {
+    --font-titles: 'Poppins', sans-serif; /* Variável para fontes de destaque/títulos */
+    --font-body: 'Inter', sans-serif;     /* Variável para fontes de leitura e elementos de interface */
+}
+
+/* Força a aplicação da fonte de corpo 'Inter' nos principais componentes de texto, tabelas e botões */
+body, table, .btn, .badge, .dropdown-item, p, span, li, .btn-pilula {
+    font-family: var(--font-body) !important;
+}
+
+/* Padroniza todos os níveis de cabeçalho com a fonte 'Poppins', peso semibold e ajuste sutil de aproximação das letras */
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-titles) !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.02em;
+}
+
+/* Classe utilitária para colunas financeiras ou numéricas.
+   'tabular-nums' garante que todos os números tenham a mesma largura (mono-espaçados), evitando que a tabela oscile visualmente */
+.font-numeric {
+    font-weight: 500 !important;
+    font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================================
+   2. STICKY FOOTER (Mantém o rodapé colado na base da página)
+   ========================================================================= */
+/* Configura o corpo da página como um container Flexbox vertical ocupando no mínimo 100% da altura da tela (viewport) */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Força o container principal ou bloco de conteúdo ('main') a crescer e ocupar todo o espaço vertical disponível no meio */
+body > .container, 
+body > main {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Com o elemento do meio esticado (flex-grow), a margem superior automática empurra o rodapé permanentemente para o fim da página */
+footer {
+    margin-top: auto !important;
+}
+
+/* =========================================================================
+   3. EFEITOS VISUAIS E COMPONENTES GLOBAIS
+   ========================================================================= */
+/* Define a suavidade da animação de transição para os links de redes sociais no rodapé/editorial */
+.social-link-editorial {
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Efeito ao passar o mouse (hover): aumenta a opacidade, eleva levemente o ícone em 2px e adiciona um brilho difuso ao redor */
+.social-link-editorial:hover {
+    opacity: 1 !important;
+    transform: translateY(-2px);
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.25));
+}

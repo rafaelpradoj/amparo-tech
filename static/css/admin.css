@@ -1,0 +1,139 @@
+/* =========================================================================
+   1. DATATABLES - CUSTOMIZAÇÃO DE BOTÕES E GRADIENTES
+   ========================================================================= */
+/* Remove gradientes e fundos padrão dos botões de exportação/ação do DataTables, forçando o estilo outline verde */
+div.dt-buttons .btn-outline-success {
+    background: transparent !important;
+    background-image: none !important;
+    color: #198754 !important;
+    border: 1px solid #198754 !important;
+    box-shadow: none !important;
+}
+
+/* Define o comportamento de preenchimento do botão ao passar o mouse (hover) */
+div.dt-buttons .btn-outline-success:hover {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+}
+
+/* =========================================================================
+   2. FILTRO INLINE MINIMALISTA (ESTILO PÍLULA)
+   ========================================================================= */
+/* Container principal que agrupa os botões de filtro rápido no painel */
+.pilulas-container {
+    background-color: #111315 !important; /* Fundo escuro profundo */
+    padding: 4px;
+    border-radius: 8px;
+    border: 1px solid #2d3135;
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+}
+
+/* Estilo base de cada botão (pílula) não selecionado dentro do filtro */
+.btn-pilula {
+    background: transparent;
+    color: #adb5bd !important;
+    border: none !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 6px;
+    transition: all 0.2s ease; /* Transição suave de cor no hover */
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Feedback visual sutil ao passar o mouse sobre uma pílula inativa */
+.btn-pilula:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+}
+
+/* Destaca a pílula que representa o filtro atualmente ativo (Fundo Azul) */
+.btn-pilula.ativa {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+/* Inverte as cores do badge numérico interno quando a pílula correspondente estiver ativa */
+.btn-pilula.ativa .badge {
+    background-color: #ffffff !important;
+    color: #111315 !important;
+}
+
+/* Badge neutro com cor sólida para os estados não ativos */
+.hard-color-badge {
+    background-color: #495057;
+    color: white;
+}
+
+/* =========================================================================
+   3. CAMPOS DE PESQUISA CUSTOMIZADOS (DATATABLES)
+   ========================================================================= */
+/* Alinha os blocos de busca global do DataTables em linha para as 4 tabelas do painel */
+#containerPesquisaPendencias .dt-search, 
+#containerPesquisaCampanhas .dt-search, 
+#containerPesquisaEstoque .dt-search,
+#containerPesquisaAuditoria .dt-search {
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+/* Padroniza o visual dark dos inputs de pesquisa (tamanho, bordas e cor de fundo) */
+#containerPesquisaPendencias .dt-search input, 
+#containerPesquisaCampanhas .dt-search input, 
+#containerPesquisaEstoque .dt-search input,
+#containerPesquisaAuditoria .dt-search input {
+    width: 100% !important;
+    padding: 7px 14px !important;
+    font-size: 0.95rem !important;
+    background-color: #1a1d20 !important;
+    border: 1px solid #495057 !important;
+    border-radius: 6px !important;
+}
+
+/* Oculta a linha de layout superior nativa do wrapper de Pendências para usar o container customizado */
+#tabelaPendencias_wrapper > .dt-layout-row:first-child {
+    display: none !important;
+}
+
+/* =========================================================================
+   4. COMPONENTES DO BOOTSTRAP (TABS E DROPDOWNS)
+   ========================================================================= */
+/* Efeito de hover nos itens do menu dropdown no modo escuro */
+.dropdown-menu-dark .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+}
+
+/* Define a cor padrão do texto das abas (Tabs) não selecionadas */
+.nav-tabs .nav-link {
+  color: #f8f9fa;
+}
+
+/* Altera a cor da borda ao passar o mouse sobre uma aba inativa */
+.nav-tabs .nav-link:hover {
+  border-color: #6c757d;
+}
+
+/* Estiliza especificamente a aba que está aberta/ativa (Fundo escuro e texto em Destaque Verde) */
+.nav-tabs .nav-link.active {
+  background-color: #212529 !important;
+  color: #198754 !important;
+  font-weight: bold;
+  border-color: #6c757d #6c757d transparent #6c757d !important; /* Remove a borda inferior para fundir com o painel */
+}
+
+/* Correção visual nas setas de ordenação da tabela: Força a cor amarela (warning) nas setas ativas */
+table.dataTable thead th.dt-ordering-asc span.dt-column-order::before,
+table.dataTable thead th.dt-ordering-desc span.dt-column-order::after,
+table.dataTable thead th.dt-ordering-asc::before,
+table.dataTable thead th.dt-ordering-desc::after {
+    color: #ffc107 !important; 
+    opacity: 1 !important; /* Garante visibilidade total sem a opacidade padrão atenuada da biblioteca */
+}

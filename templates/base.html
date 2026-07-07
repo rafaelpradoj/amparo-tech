@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-br" data-bs-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}{% endblock %}</title>
+    
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/globais.css') }}" />
+  </head>
+  <body>
+    
+    <nav
+      class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary shadow-sm mb-4"
+    >
+      <div class="container">
+        <div class="d-flex align-items-center">
+          <a class="navbar-brand text-success fw-bold mb-0" href="/">
+            <i class="bi bi-heart-fill"></i> AmparoTech
+          </a>
+          {% if 'operador_id' in session %}
+          <span class="text-light opacity-75 small ms-3 d-sm-inline">
+            <i class="bi bi-person-circle"></i> Olá,
+            <strong class="text-info">{{ session['operador_login'] }}</strong>
+          </span>
+          {% endif %}
+        </div>
+
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Início</a>
+            </li>
+
+            <li class="nav-item">
+              <a href="/sobre" class="nav-link">Quem Somos</a>
+            </li>
+
+            {% if 'operador_id' in session %}
+            <li class="nav-item">
+              <a class="nav-link text-warning" href="/admin"
+                >Painel do Operador</a
+              >
+            </li>
+            <li class="nav-item ms-2">
+              <a class="nav-link text-danger" href="/logout"
+                ><i class="bi bi-box-arrow-right"></i> Sair</a
+              >
+            </li>
+            {% else %}
+            <li class="nav-item">
+              <a class="nav-link text-warning" href="/login">Acesso Restrito</a>
+            </li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container mt-5">
+      {% with messages = get_flashed_messages(with_categories=true) %} 
+        {% if messages %} 
+          {% for category, message in messages %}
+          <div
+            class="alert alert-{{ category }} alert-dismissible fade show shadow-sm"
+            role="alert"
+          >
+            {{ message }}
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="alert"
+              aria-label="Close"
+            ></button>
+          </div>
+          {% endfor %} 
+        {% endif %} 
+      {% endwith %} 
+      
+      {% block content %} {% endblock %}
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    
+    <script src="{{ url_for('static', filename='js/utilidades.js') }}"></script>
+  </body>
+</html>

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Login - AmparoTech{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+  <div class="col-md-5">
+    <div class="card shadow border-secondary bg-dark text-light">
+      
+      <div class="card-header bg-success text-white border-secondary text-center">
+        <h1 class="mb-0 fs-4"><i class="bi bi-box-arrow-in-right"></i> Acesso Restrito</h1>
+      </div>
+      
+      <div class="card-body p-4">
+        <form action="/login" method="POST">
+          
+          <div class="mb-3">
+            <label class="form-label">Usuário</label>
+            <input type="text" name="login" class="form-control bg-secondary text-light border-secondary" required>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label">Senha</label>
+            <div class="input-group">
+              <input type="password" name="senha" class="form-control bg-secondary text-light border-secondary" required>
+              <button class="btn btn-outline-secondary border-secondary text-light" type="button" onclick="togglePassword(this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-success w-100 fw-bold mb-3">Entrar</button>
+        </form>
+        
+        <div class="text-center mt-2">
+          <a href="#" class="text-warning text-decoration-none" data-bs-toggle="modal" data-bs-target="#modalRecuperarSenha">
+            <i class="bi bi-question-circle"></i> Esqueci minha senha
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="modalRecuperarSenha" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog text-start">
+    <div class="modal-content bg-dark text-light border-secondary">
+      
+      <div class="modal-header border-warning">
+        <h2 class="modal-title text-warning fs-5"><i class="bi bi-key"></i> Recuperação de Senha</h2>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      
+      <form action="/recuperar_senha" method="POST" class="m-0">
+        <div class="modal-body">
+          <p class="small text-body-secondary">Preencha os dados abaixo para criar uma nova senha. A sua palavra-chave deve ser exatamente a mesma cadastrada no sistema.</p>
+          
+          <div class="mb-3">
+            <label class="form-label">Seu Login:</label>
+            <input type="text" class="form-control bg-secondary text-light border-secondary" name="login_recup" required>
+          </div>
+          
+          <div class="mb-4">
+            <label class="form-label">Sua Palavra-Chave Secreta:</label>
+            <div class="input-group">
+              <input type="password" class="form-control bg-secondary text-light border-secondary" name="palavra_recup" required>
+              <button class="btn btn-outline-secondary border-secondary text-light" type="button" onclick="togglePassword(this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+          
+          <hr class="border-secondary">
+          
+          <div class="mb-3">
+            <label class="form-label">Nova Senha:</label>
+            <div class="input-group">
+              <input type="password" class="form-control bg-secondary text-light border-secondary" name="nova_senha" required>
+              <button class="btn btn-outline-secondary border-secondary text-light" type="button" onclick="togglePassword(this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-2">
+            <label class="form-label">Confirmar Nova Senha:</label>
+            <div class="input-group">
+              <input type="password" class="form-control bg-secondary text-light border-secondary" name="confirma_nova_senha" required>
+              <button class="btn btn-outline-secondary border-secondary text-light" type="button" onclick="togglePassword(this)">
+                <i class="bi bi-eye"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-footer border-secondary">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="btn btn-warning fw-bold text-dark">Redefinir Senha</button>
+        </div>
+      </form>
+      
+    </div>
+  </div>
+</div>
+{% endblock %}
