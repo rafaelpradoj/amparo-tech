@@ -23,6 +23,7 @@ O **AmparoTech** é uma plataforma web desenvolvida para conectar a solidariedad
 * **Banco de Dados:** PostgreSQL com a biblioteca Psycopg 3 para gerenciamento assíncrono e transações seguras.
 * **Autenticação:** Werkzeug Security para criptografia e validação forte de hashes de senhas e chaves de segurança.
 * **Frontend:** Bootstrap 5 (Tema Escuro), DataTables (com plugins para ordenação alfabética sem acentos e exportação integrada para planilhas Excel) e Chart.js.
+* **Hospedagem / Infraestrutura:** Deploy nativo no Heroku (PaaS), com banco de dados Heroku Postgres e servidor WSGI Gunicorn.
 
 ## 📂 Estrutura de Diretórios Recomendada
 
@@ -67,6 +68,12 @@ Certifique-se de possuir o Python 3.x e o banco de dados PostgreSQL devidamente 
 Crie um ambiente virtual em seu terminal e instale as bibliotecas requeridas:
 
 ```bash
+# Clonar repositório
+git clone https://github.com/rafaelpradoj/amparo-tech.git
+
+# Entrar no diretório
+cd amparo-tech
+
 # Criar ambiente virtual
 python -m venv venv
 
