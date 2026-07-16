@@ -102,6 +102,15 @@ div.dt-buttons .btn-outline-success:hover {
     display: none !important;
 }
 
+/* Estiliza margem superior do filtro inferior (wrapper) */
+#tabelaPendencias_wrapper .row:last-child, 
+#tabelaInventario_wrapper .row:last-child,
+#tabelaEstoque_wrapper .row:last-child,
+#tabelaAuditoria_wrapper .row:last-child
+{
+    margin-top: 2rem !important;
+}
+
 /* =========================================================================
    4. COMPONENTES DO BOOTSTRAP (TABS E DROPDOWNS)
    ========================================================================= */
