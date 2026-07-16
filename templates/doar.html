@@ -44,6 +44,9 @@
               id="doador"
               name="doador"
               placeholder="Deixe em branco para doar anonimamente"
+              pattern="[A-Za-zÀ-ÿ\s]+" 
+              title="Por favor, insira apenas letras."
+              oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '')"
             />
           </div>
 
