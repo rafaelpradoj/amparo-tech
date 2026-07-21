@@ -13,7 +13,8 @@
       
       <div class="card-body p-4">
         <form action="/login" method="POST">
-          
+          <!-- Token CSRF dinâmico gerado pelo servidor -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="mb-3">
             <label class="form-label">Usuário</label>
             <input type="text" name="login" class="form-control bg-secondary text-light border-secondary" required>
@@ -52,6 +53,8 @@
       </div>
       
       <form action="/recuperar_senha" method="POST" class="m-0">
+        <!-- Token CSRF dinâmico gerado pelo servidor -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <p class="small text-body-secondary">Preencha os dados abaixo para criar uma nova senha. A sua palavra-chave deve ser exatamente a mesma cadastrada no sistema.</p>
           

@@ -123,6 +123,8 @@
                       <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
                         <form action="/admin/aprovar/{{ pendencia[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-success mx-2">Aprovar</button>
                         </form>
                       </div>
@@ -143,6 +145,8 @@
                       <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
                         <form action="/admin/recusar/{{ pendencia[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger mx-2">Recusar</button>
                         </form>
                       </div>
@@ -219,6 +223,8 @@
                       <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
                         <form action="/admin/operador/excluir/{{ op[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger mx-2">Revogar Acesso</button>
                         </form>
                       </div>
@@ -302,9 +308,11 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                       </div>
                       <form action="/admin/item/editar/{{ item[0] }}" method="POST" class="m-0">
+                        <!-- Token CSRF dinâmico gerado pelo servidor -->
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="modal-body">
                           <div class="mb-3">
-                            <label class="form-label">Nome Actual da Campanha:</label>
+                            <label class="form-label">Nome Atual da Campanha:</label>
                             <input type="text" class="form-control bg-dark text-body-secondary border-secondary" value="{{ item[1] }}" readonly />
                             <input type="hidden" name="nome_atual" value="{{ item[1] }}" />
                           </div>
@@ -379,6 +387,8 @@
                       <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
                         <form action="/admin/item/excluir/{{ item[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <button type="submit" class="btn btn-danger mx-2">Arquivar</button>
                         </form>
                       </div>
@@ -462,6 +472,8 @@
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <form action="/admin/estoque/ajustar/{{ item[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="entrada">
                           <div class="modal-body">
                             <p><strong class="text-body-secondary">Adicionar ao estoque</strong><br><span class="font-numeric">{{ item[1] }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
@@ -491,6 +503,8 @@
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <form action="/admin/estoque/ajustar/{{ item[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
                             <p><strong class="text-body-secondary">Remover do estoque</strong><br><span class="font-numeric">{{ item[1] }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
@@ -530,6 +544,8 @@
                         <div class="modal-footer border-secondary">
                           <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
                           <form action="/admin/estoque/excluir_definitivo/{{ item[0] }}" method="POST" class="m-0">
+                            <!-- Token CSRF dinâmico gerado pelo servidor -->
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                             <button type="submit" class="btn btn-danger fw-bold mx-2">Remover Produto</button>
                           </form>
                         </div>
@@ -625,6 +641,8 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="/admin/item/novo" method="POST" class="m-0">
+        <!-- Token CSRF dinâmico gerado pelo servidor -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <div class="row">
             <div class="col-md-6 mb-3">
@@ -685,6 +703,8 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form action="/admin/operador/novo" method="POST" class="m-0">
+        <!-- Token CSRF dinâmico gerado pelo servidor -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <div class="mb-3">
             <label class="form-label">Login de Acesso:</label>
@@ -729,6 +749,8 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <form action="/admin/estoque/novo_produto" method="POST" class="m-0">
+        <!-- Token CSRF dinâmico gerado pelo servidor -->
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <p class="text-body-secondary small mb-4">Utilize este formulário para adicionar itens físicos que a ONG já possui ou comprou. <strong class="text-light">Isto não criará uma campanha na página inicial.</strong></p>
           <div class="row">
@@ -788,6 +810,8 @@
       <div class="modal-body">
         
         <form action="/admin/categoria/nova" method="POST" class="mb-4 m-0">
+          <!-- Token CSRF dinâmico gerado pelo servidor -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <label class="form-label text-body-secondary fw-medium">Adicionar Nova Categoria:</label>
           <div class="input-group">
             <input type="text" class="form-control bg-secondary text-light border-secondary" name="nome" placeholder="Ex: Vestuário" required>
@@ -803,6 +827,8 @@
           <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center">
             <span><i class="bi bi-tag text-info me-2"></i> {{ cat[1] }}</span>
             <form action="/admin/categoria/excluir/{{ cat[0] }}" method="POST" class="m-0">
+              <!-- Token CSRF dinâmico gerado pelo servidor -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
               <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" title="Remover"><i class="bi bi-trash"></i></button>
             </form>
           </li>

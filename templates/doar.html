@@ -35,7 +35,8 @@
         <hr class="border-secondary opacity-25">
 
         <form action="/doar/{{ item[0] }}" method="POST">
-          
+          <!-- Token CSRF dinâmico gerado pelo servidor -->
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
           <div class="mb-3">
             <label for="doador" class="form-label text-light fw-medium">Seu Nome (Opcional):</label>
             <input

@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from routes.public import public_bp
 from routes.auth import auth_bp
 from routes.admin import admin_bp
+from flask_wtf.csrf import CSRFProtect
 
 # Carrega as variáveis de ambiente globais a partir do arquivo .env (ex: SECRET_KEY, DATABASE_URL)
 load_dotenv()
@@ -15,6 +16,9 @@ app = Flask(__name__)
 
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
 app.secret_key = os.getenv("SECRET_KEY")
+
+# Inicializa a proteção global contra CSRF blindando todas as rotas
+csrf = CSRFProtect(app)
 
 # Registra os componentes de rotas (Blueprints) no núcleo do ecossistema do app
 app.register_blueprint(public_bp)
