@@ -17,11 +17,19 @@ O **AmparoTech** é uma plataforma web desenvolvida para conectar a solidariedad
 * **Gestão de Contas Master:** Controle de permissões avançado restrito a administradores Master para inclusão e revogação de acessos de operadores padrão.
 * **Relatórios Gráficos:** Exibição analítica do desempenho das arrecadações comparando o saldo atual com as metas necessárias por meio de gráficos de barras dinâmicos.
 
+### 🛡️ Segurança Avançada (Pentest Mitigations)
+* **Prevenção de CSRF:** Proteção global contra *Cross-Site Request Forgery* via tokens criptográficos dinâmicos exigidos em todas as mutações de estado (POST).
+* **Mitigação de Race Conditions:** Travas de concorrência atômicas executadas nativamente no banco de dados (`UPDATE ... AND status = 'Pendente'`) para impedir duplicação de saldo por *exploits* automatizados.
+* **Rate Limiting:** Regras rígidas de limite de requisições por IP implementadas para bloquear tentativas de ataques de Força Bruta no login e *Spam* de formulários no banco de dados (Prevenção de DoS).
+
 ## 🛠️ Tecnologias Utilizadas
 
 * **Backend:** Python 3 + Flask (Arquitetura modular baseada em Blueprints).
 * **Banco de Dados:** PostgreSQL com a biblioteca Psycopg 3 para gerenciamento assíncrono e transações seguras.
-* **Autenticação:** Werkzeug Security para criptografia e validação forte de hashes de senhas e chaves de segurança.
+* **Segurança e Autenticação:** 
+  * Werkzeug Security (Hashes de senhas criptografadas).
+  * Flask-WTF (Prevenção contra falsificação de requisições).
+  * Flask-Limiter (Controle e barreira de requisições abusivas).
 * **Frontend:** Bootstrap 5 (Tema Escuro), DataTables (com plugins para ordenação alfabética sem acentos e exportação integrada para planilhas Excel) e Chart.js.
 * **Hospedagem / Infraestrutura:** Deploy nativo no Heroku (PaaS), com banco de dados Heroku Postgres e servidor WSGI Gunicorn.
 
@@ -48,7 +56,8 @@ amparotech/
 │   ├── doar.html
 │   ├── index.html
 │   ├── login.html
-│   └── sobre.html
+│   ├── sobre.html
+│   └── 429.html
 ├── utils/
 │   ├── db.py
 │   └── decorators.py
