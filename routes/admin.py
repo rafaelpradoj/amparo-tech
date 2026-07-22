@@ -98,11 +98,20 @@ def painel():
 @login_required
 def aprovar_doacao(id_doacao):
     """
-    Aprova uma doação pendente, incrementando o saldo arrecadado da campanha
+    Aprova uma doação pendente com proteção contra Race Condition (Atomic UPDATE), incrementando o saldo arrecadado da campanha
     e o estoque físico do produto associado. Registra a ação na auditoria.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Coleta os dados necessários da doação antes de efetivar as alterações
+        # TENTA atualizar o status da doação, apenas se o status atual ainda for 'Pendente'.
+        # O banco de dados garante que apenas UMA requisição simultânea conseguirá fazer isso.
+        cursor.execute("UPDATE doacoes SET status = 'Aprovado' WHERE id = %s AND status = 'Pendente'", (id_doacao,))
+        
+        # Se nenhuma linha foi afetada, o ataque (ou duplo clique) foi interceptado!
+        if cursor.rowcount == 0:
+            flash("Operação cancelada: Esta doação já foi processada por outra requisição!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        # Se passou da trava acima, temos garantia absoluta de que esta é a única thread processando a aprovação.
         cursor.execute("""
             SELECT d.id_campanha, d.quantidade, p.nome, d.doador, c.id_produto 
             FROM doacoes d 
@@ -115,12 +124,11 @@ def aprovar_doacao(id_doacao):
         if info:
             id_da_campanha, quantidade_doada, nome_item, doador, id_do_produto = info
             
-            # Atualiza o status da doação, o progresso da campanha e o estoque físico do produto
-            cursor.execute("UPDATE doacoes SET status = 'Aprovado' WHERE id = %s", (id_doacao,))
+            # Atualiza o progresso da campanha e o estoque físico do produto
             cursor.execute("UPDATE campanhas SET arrecadado = arrecadado + %s WHERE id = %s", (quantidade_doada, id_da_campanha))
             cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico + %s WHERE id = %s", (quantidade_doada, id_do_produto))
             
-            # Registra o log detalhado da aprovação na tabela de auditoria
+            # Registra o log detalhado da operação na tabela de auditoria
             descricao_legivel = f"Aprovou a entrada de {quantidade_doada}x '{nome_item}' doados por {doador}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Aprovação', %s, %s)", (descricao_legivel, session['operador_id']))
         conn.commit()
@@ -132,11 +140,17 @@ def aprovar_doacao(id_doacao):
 @login_required
 def recusar_doacao(id_doacao):
     """
-    Recusa uma promessa de doação pendente. Altera apenas o status da doação
-    para 'Recusado' sem alterar os estoques ou campanhas. Registra a ação na auditoria.
+    Recusa uma promessa de doação pendente com proteção contra Race Condition (Atomic UPDATE). Registra a ação na auditoria.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Coleta dados para gerar a descrição legível da auditoria
+        # Mesma trava atômica aplicada na função de aprovar promessa. TENTA atualizar o status da doação, apenas se o status atual ainda for 'Pendente'.
+        # O banco de dados garante que apenas UMA requisição simultânea conseguirá fazer isso.
+        cursor.execute("UPDATE doacoes SET status = 'Recusado' WHERE id = %s AND status = 'Pendente'", (id_doacao,))
+        
+        if cursor.rowcount == 0:
+            flash("Operação cancelada: Esta doação já foi processada por outra requisição!", "danger")
+            return redirect(url_for('admin.painel'))
+        
         cursor.execute("""
             SELECT d.quantidade, p.nome, d.doador 
             FROM doacoes d 
@@ -146,16 +160,13 @@ def recusar_doacao(id_doacao):
         """, (id_doacao,))
         info = cursor.fetchone()
         
-        # Modifica o status da doação
-        cursor.execute("UPDATE doacoes SET status = 'Recusado' WHERE id = %s", (id_doacao,))
-        
         if info:
             qtd, nome_item, doador = info
             descricao_legivel = f"Recusou a promessa de {qtd}x '{nome_item}' de {doador}"
         else:
             descricao_legivel = "Recusou uma promessa de doação"
 
-        # Salva o evento no histórico de logs
+        # Registra o log detalhado da operação na tabela de auditoria
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (descricao_legivel, session['operador_id']))
         conn.commit()
         
