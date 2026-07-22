@@ -34,32 +34,40 @@ def quem_somos():
 @public_bp.route("/doar/<int:id_campanha>", methods=["GET", "POST"])
 def doar(id_campanha):
     """
-    Gerencia a intenção de doação para uma campanha específica.
-    GET: Apresenta os dados da campanha escolhida em um formulário de intenção.
-    POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'.
+    Gerencia a intenção de doação para uma campanha específica, contendo validação rigorosa de inputs (Backend Validation).
     """
     if request.method == "POST":
-        # Captura os dados inseridos pelo doador no formulário
-        quantidade_doada = request.form.get("quantidade")
+        # Captura os dados inseridos no formulário (pode vir texto, negativo ou vazio)
+        quantidade_raw = request.form.get("quantidade")
         nome_doador = request.form.get("doador")
 
-        # Fallback de segurança: Caso o nome não seja preenchido ou possua apenas espaços, define como anônimo
+        # Try/except para travar quantidade doações e retornar apenas números > 0 (Improper Input Validation Mitigation)
+        try:
+            # Tenta converter obrigatoriamente para inteiro numérico
+            quantidade_doada = int(quantidade_raw)
+            
+            if quantidade_doada <= 0:
+                raise ValueError("Quantidade negativa ou zero.")
+                
+        except (ValueError, TypeError):
+            flash("A quantidade informada é inválida. Insira apenas números positivos!", "danger")
+            return redirect(url_for('public.doar', id_campanha=id_campanha))
+
         if not nome_doador or nome_doador.strip() == "":
             nome_doador = 'Doador Anônimo'
 
+        # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'.
         with get_db_connection() as conn, conn.cursor() as cursor:
-            # Insere a nova promessa de doação (aguardando a confirmação física no painel admin)
             cursor.execute("""
                 INSERT INTO doacoes (id_campanha, quantidade, doador, status) 
                 VALUES (%s, %s, %s, 'Pendente')
             """, (id_campanha, quantidade_doada, nome_doador))
             conn.commit()
             
-        # Alerta o usuário sobre o prazo de 7 dias para efetivar a entrega física (regra alinhada ao painel admin)
         flash("Promessa recebida com sucesso! Você tem até 7 dias corridos para realizar a entrega. Contamos com você!", "success")
         return redirect(url_for('public.index'))
 
-    # Comportamento para o método GET: Busca os dados da campanha selecionada para montar a tela de doação
+    # GET: Apresenta os dados da campanha escolhida em um formulário de intenção.
     with get_db_connection() as conn, conn.cursor() as cursor:
         cursor.execute("""
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
