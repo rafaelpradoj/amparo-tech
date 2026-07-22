@@ -193,6 +193,11 @@ def novo_item():
         nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida}{unidade}"
     else:
         nome_padronizado = f"{produto_base} - {qtd_medida}{unidade}"
+
+    # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
+    if len(nome_padronizado) > 150:
+        flash(f"O nome do produto excedeu o limite máximo de 150 caracteres!", "danger")
+        return redirect(url_for('admin.painel'))
     
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Verifica se o produto com esse nome padronizado já existe no sistema
@@ -239,6 +244,11 @@ def novo_produto_estoque():
         nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida}{unidade}"
     else:
         nome_padronizado = f"{produto_base} - {qtd_medida}{unidade}"
+
+    # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
+    if len(nome_padronizado) > 150:
+        flash(f"O nome do produto excedeu o limite máximo de 150 caracteres!", "danger")
+        return redirect(url_for('admin.painel'))
         
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Impede o cadastro de produtos com nomes idênticos no estoque
@@ -288,6 +298,11 @@ def editar_item(id_campanha):
         else:
             novo_nome = request.form.get("nome_atual")
             
+        # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
+        if novo_nome and len(novo_nome) > 150:
+            flash(f"O nome do produto excedeu o limite máximo de 150 caracteres!", "danger")
+            return redirect(url_for('admin.painel'))
+
         nova_categoria = request.form.get("categoria")
         nova_meta = request.form.get("meta")
         
@@ -314,10 +329,12 @@ def editar_item(id_campanha):
             else:
                 descricao_legivel = f"Atualizou os dados da campanha '{nome_antigo}'"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-            flash("Campanha updated com sucesso!", "success")
+            flash("Campanha atualizada com sucesso!", "success")
         conn.commit()
         
     return redirect(url_for('admin.painel'))
+
+
 
 @admin_bp.route("/admin/item/excluir/<int:id_campanha>", methods=["POST"])
 @login_required
