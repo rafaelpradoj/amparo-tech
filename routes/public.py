@@ -50,7 +50,7 @@ def doar(id_campanha):
                 raise ValueError("Quantidade negativa ou zero.")
                 
         except (ValueError, TypeError):
-            flash("A quantidade informada é inválida. Insira apenas números positivos!", "danger")
+            flash("Quantidade informada inválida. Insira apenas números positivos!", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         if not nome_doador or nome_doador.strip() == "":

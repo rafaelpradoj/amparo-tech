@@ -24,6 +24,12 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
 app.secret_key = os.getenv("SECRET_KEY")
 
+app.config.update(
+    # Exige que o cookie só seja transmitido em conexões HTTPS (criptografadas)
+    SESSION_COOKIE_SECURE=True,
+    # Impede que o cookie seja enviado por requisições originadas de outros sites
+    SESSION_COOKIE_SAMESITE='Lax'
+)
 
 # Inicializa a proteção global contra CSRF blindando todas as rotas
 csrf = CSRFProtect(app)
