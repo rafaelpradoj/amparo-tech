@@ -56,8 +56,16 @@ def doar(id_campanha):
         if not nome_doador or nome_doador.strip() == "":
             nome_doador = 'Doador Anônimo'
 
-        # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'.
+        # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'
         with get_db_connection() as conn, conn.cursor() as cursor:
+            # Verifica se a campanha existe e está ATIVA antes de aceitar a doação (IDOR Mitigation)
+            cursor.execute("SELECT ativo FROM campanhas WHERE id = %s", (id_campanha,))
+            campanha_status = cursor.fetchone()
+            
+            if not campanha_status or not campanha_status[0]:
+                flash("Operação negada: Esta campanha foi encerrada ou não está mais recebendo doações.", "warning")
+                return redirect(url_for('public.index'))
+
             cursor.execute("""
                 INSERT INTO doacoes (id_campanha, quantidade, doador, status) 
                 VALUES (%s, %s, %s, 'Pendente')
@@ -69,12 +77,18 @@ def doar(id_campanha):
 
     # GET: Apresenta os dados da campanha escolhida em um formulário de intenção.
     with get_db_connection() as conn, conn.cursor() as cursor:
+        # Impede carregar a tela se o ativo for FALSE (IDOR Mitigation)
         cursor.execute("""
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.id = %s
+            WHERE c.id = %s AND c.ativo = TRUE
         """, (id_campanha,))
         campanha = cursor.fetchone()
+        
+        # Se o atacante tentar forçar o link de uma campanha oculta, ele é barrado aqui
+        if not campanha:
+            flash("A campanha solicitada não foi encontrada ou já foi arquivada!", "danger")
+            return redirect(url_for('public.index'))
             
     return render_template("doar.html", item=campanha)
