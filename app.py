@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # Importação dos Blueprints (módulos de rotas) divididos por responsabilidade
 from routes.public import public_bp
@@ -15,6 +16,11 @@ load_dotenv()
 
 # Inicializa a instância principal da aplicação Flask
 app = Flask(__name__)
+
+# Informa ao Flask que ele está atrás de um Proxy
+# Isso permite que ele leia o cabeçalho 'X-Forwarded-For' e pegue o IP real do atacante
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
 app.secret_key = os.getenv("SECRET_KEY")
 
