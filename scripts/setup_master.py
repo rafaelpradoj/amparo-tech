@@ -2,7 +2,6 @@ import os
 import sys
 
 # Garante a inclusão do diretório pai no path do sistema para
-# permitir a importação dos utilitários de banco de dados em 'utils'
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from dotenv import load_dotenv
@@ -13,10 +12,14 @@ from utils.db import get_db_connection
 load_dotenv()
 
 # Recupera as credenciais do operador Master a partir do ambiente (.env),
-# adotando valores padrão seguros de fallback caso as variáveis não estejam definidas
-admin_login = os.getenv("MASTER_LOGIN", "admin")
-admin_senha = os.getenv("MASTER_PASSWORD", "master123")
-admin_recup = os.getenv("MASTER_RECOVERY", "amparo2026")
+admin_login = os.getenv("MASTER_LOGIN")
+admin_senha = os.getenv("MASTER_PASSWORD")
+admin_recup = os.getenv("MASTER_RECOVERY")
+
+if not admin_login or not admin_senha or not admin_recup:
+    print("Falha ao iniciar: As credenciais Master não foram encontradas nas variáveis de ambiente.")
+    print("Ação abortada (Fail-Fast). O sistema foi impedido de usar credenciais padrão inseguras.")
+    sys.exit(1) # Desliga o script imediatamente devolvendo erro ao sistema operacional
 
 print("A conectar à base de dados para configurar a conta Master...")
 
