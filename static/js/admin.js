@@ -194,27 +194,58 @@ $(document).ready(function() {
       if (textoAcao) acoesUnicas.add(textoAcao);
     });
 
-    // Popula o menu dinâmico de Operadores
+    // Popula o menu dinâmico de Operadores (Blindado contra XSS)
     let $menuOperador = $('#menuDinamicoOperador');
     $menuOperador.empty(); 
     Array.from(operadoresUnicos).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(function(operador) {
-      let itemHTML = `<li><a class="dropdown-item dropdown-item-operador py-2 fw-semibold d-flex justify-content-between align-items-center" href="#" data-operador="${operador}">
-            <span><i class="bi bi-person-fill text-info me-2"></i> ${operador}</span> 
-            <span class="badge rounded-pill hard-color-badge count-op-item" data-op-name="${operador}">0</span>
-          </a></li>`;
-      $menuOperador.append(itemHTML);
+      let $li = $('<li>');
+      
+      let $a = $('<a>', {
+          class: 'dropdown-item dropdown-item-operador py-2 fw-semibold d-flex justify-content-between align-items-center',
+          href: '#',
+          'data-operador': operador
+      });
+      
+      let $spanIcone = $('<span>')
+          .html('<i class="bi bi-person-fill text-info me-2"></i> ')
+          .append(document.createTextNode(operador)); // Cria nó de texto puro
+          
+      let $spanBadge = $('<span>', {
+          class: 'badge rounded-pill hard-color-badge count-op-item',
+          'data-op-name': operador
+      }).text('0'); // .text() neutraliza scripts
+
+      $a.append($spanIcone).append($spanBadge);
+      $li.append($a);
+      $menuOperador.append($li);
     });
 
-    // Popula o menu dinâmico de Ações de Auditoria
+    // Popula o menu dinâmico de Ações de Auditoria (Blindado contra XSS)
     let $menuAcao = $('#menuDinamicoAuditoria');
     $menuAcao.empty(); 
     Array.from(acoesUnicas).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(function(acao) {
       let icone = 'bi-activity'; let cor = 'text-light';
-      let itemHTML = `<li><a class="dropdown-item dropdown-item-auditoria py-2 fw-semibold d-flex justify-content-between align-items-center" href="#" data-acao="${acao}">
-            <span><i class="bi ${icone} ${cor} me-2"></i> ${acao}</span> 
-            <span class="badge rounded-pill hard-color-badge count-aud-item" data-aud-name="${acao}">0</span>
-          </a></li>`;
-      $menuAcao.append(itemHTML);
+      
+      let $li = $('<li>');
+      
+      let $a = $('<a>', {
+          class: 'dropdown-item dropdown-item-auditoria py-2 fw-semibold d-flex justify-content-between align-items-center',
+          href: '#',
+          'data-acao': acao
+      });
+      
+      let $spanIcone = $('<span>')
+          .html('<i class="bi ' + icone + ' ' + cor + ' me-2"></i> ')
+          .append(document.createTextNode(acao)); // Cria nó de texto puro
+          
+      let $spanBadge = $('<span>', {
+          class: 'badge rounded-pill hard-color-badge count-aud-item',
+          'data-aud-name': acao
+      }).text('0'); // .text() neutraliza scripts
+
+      $a.append($spanIcone).append($spanBadge);
+      $li.append($a);
+      $menuAcao.append($li);
     });
   }
 
@@ -348,15 +379,35 @@ $(document).ready(function() {
       if (textoCat) templatesUnicos.add(textoCat);
     });
 
+    // Popula o menu dinâmico de Categorias de forma blindada contra XSS
     let $menu = $('#menuDinamicoCategoriaEstoque');
     $menu.empty(); 
     Array.from(templatesUnicos).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(function(categoria) {
       let icone = 'bi-tag-fill'; let cor = 'text-light';
-      let itemHTML = `<li><a class="dropdown-item dropdown-item-categoria py-2 fw-semibold d-flex justify-content-between align-items-center" href="#" data-categoria="${categoria}">
-            <span><i class="bi ${icone} ${cor} me-2"></i> ${categoria}</span> 
-            <span class="badge rounded-pill hard-color-badge count-cat-item" data-cat-name="${categoria}">0</span>
-          </a></li>`;
-      $menu.append(itemHTML);
+      
+      // Construção programática de nós do DOM via jQuery
+      let $li = $('<li>');
+      
+      let $a = $('<a>', {
+          class: 'dropdown-item dropdown-item-categoria py-2 fw-semibold d-flex justify-content-between align-items-center',
+          href: '#',
+          'data-categoria': categoria // O jQuery faz o escape automático dos atributos data
+      });
+      
+      // Cria o ícone em HTML, mas apensa o nome da categoria apenas como nó de texto
+      let $spanIcone = $('<span>')
+          .html('<i class="bi ' + icone + ' ' + cor + ' me-2"></i> ')
+          .append(document.createTextNode(categoria)); 
+          
+      let $spanBadge = $('<span>', {
+          class: 'badge rounded-pill hard-color-badge count-cat-item',
+          'data-cat-name': categoria
+      }).text('0'); // .text() neutraliza scripts
+      
+      // Monta as peças
+      $a.append($spanIcone).append($spanBadge);
+      $li.append($a);
+      $menu.append($li);
     });
   }
 

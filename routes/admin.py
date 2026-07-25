@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash
+from markupsafe import escape
 from utils.db import get_db_connection
 from utils.decorators import login_required, master_required
 
@@ -529,7 +530,9 @@ def nova_categoria():
     Cadastra uma nova categoria de agrupamento de produtos. 
     Aplica formatação Title Case e evita termos duplicados.
     """
-    nome = request.form.get("nome", "").strip().title()
+    # Transforma scripts maliciosos em texto puro.
+    nome_cru = request.form.get("nome", "").strip().title()
+    nome = escape(nome_cru)
     
     if not nome:
         flash("O nome da categoria não pode estar vazio!", "danger")
@@ -548,6 +551,10 @@ def nova_categoria():
             flash(f"Categoria '{nome}' criada com sucesso!", "success")
             
     return redirect(url_for('admin.painel'))
+
+
+
+
 
 @admin_bp.route("/admin/categoria/excluir/<int:id_cat>", methods=["POST"])
 @login_required
