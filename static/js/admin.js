@@ -70,7 +70,7 @@ document.addEventListener("DOMContentLoaded", function () {
 // =========================================================================
 $(document).ready(function() {
   // Configuração de localização global para o idioma Português do Brasil
-  const configuracaoIdioma = { url: 'https://cdn.datatables.net/plug-ins/2.0.8/i18n/pt-BR.json' };
+  const configuracaoIdioma = { url: '/static/js/pt-BR.json' };
 
   // Extensão personalizada do DataTables para ignorar acentos e tags HTML ao ordenar alfabeticamente
   $.fn.dataTable.ext.type.order['sem-acentos-pre'] = function (dados) {

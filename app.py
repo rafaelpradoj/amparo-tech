@@ -58,6 +58,38 @@ app.register_blueprint(admin_bp)
 def ratelimit_handler(e):
     return render_template("429.html"), 429
 
+# Security Headers HTTP
+@app.after_request
+def adicionar_cabecalhos_seguranca(response):
+    """
+    Injeta cabeçalhos HTTP de segurança em todas as respostas do servidor.
+    Mitigações exigidas por auditorias SAST/DAST modernas.
+    """
+    # Previne Clickjacking
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    
+    # Bloqueia MIME Sniffing
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    
+    # Referrer Policy 
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    
+    # Permissions Policy 
+    response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    
+    # Content-Security-Policy (CSP) - A última linha de defesa contra XSS
+    csp = (
+        "default-src 'self'; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net; "
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdn.datatables.net; "
+        "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; "
+        "img-src 'self' data:;"
+    )
+    response.headers['Content-Security-Policy'] = csp
+    
+    return response
+
+
 # Verifica se o script está sendo executado diretamente pelo terminal
 if __name__ == "__main__":
     # Inicia o servidor de desenvolvimento local com o modo de depuração (debug) ativo.
