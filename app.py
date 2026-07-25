@@ -80,11 +80,15 @@ def adicionar_cabecalhos_seguranca(response):
     # Content-Security-Policy (CSP) - A última linha de defesa contra XSS
     csp = (
         "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net; "
+        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net https://cdnjs.cloudflare.com; "
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdn.datatables.net; "
         "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; "
         "img-src 'self' data:;"
     )
+
+
+
+
     response.headers['Content-Security-Policy'] = csp
     
     return response
