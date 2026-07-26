@@ -70,7 +70,7 @@ def painel():
                    a.descricao 
             FROM auditoria a
             JOIN operadores o ON a.id_operador = o.id
-            ORDER BY a.data DESC;
+            ORDER BY a.id DESC;
         """)
         lista_auditoria = cursor.fetchall()
 

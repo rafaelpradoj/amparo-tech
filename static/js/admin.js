@@ -156,7 +156,7 @@ $(document).ready(function() {
   const tabelaAuditoria = $('#tabelaAuditoria').DataTable({
     language: configuracaoIdioma,
     pageLength: 10, 
-    order: [[0, 'desc']], // Ordena logs pelo ID/Data decrescente (mais recentes primeiro)
+    order: [], // Ficou vazio para respeitar a ordem imutável de IDs do backend
     columnDefs: [ { type: 'sem-acentos', targets: [1, 2, 3] } ],
     layout: {
       topStart: {
