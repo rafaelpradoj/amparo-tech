@@ -132,25 +132,27 @@ $(document).ready(function() {
     tabelaInventario.column(2).search('Ativo').draw(); 
   });
   
-  // --- ABA AUDITORIA ---
+ // --- ABA AUDITORIA ---
   // Injeção de lógica customizada de busca global para filtros combinados (Operador + Ação)
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaAuditoria') return true;
+      
       const operadorAtivo = $('#tabelaAuditoria').data('operador-ativo');
       const acaoAtiva = $('#tabelaAuditoria').data('acao-ativa');
-      if (!operadorAtivo && !acaoAtiva) return true; // Se nenhum filtro estiver ativo, exibe a linha
+      if (!operadorAtivo && !acaoAtiva) return true; 
 
-      // Extrai o texto limpo removendo marcações HTML das células de Operador e Ação
       const textoOperadorLinha = $('<div>').html(data[1]).text().trim(); 
       const textoAcaoLinha = $('<div>').html(data[2]).text().trim();     
+      
+      const padronizar = (str) => str ? String(str).normalize("NFC").trim() : "";
       
       let matchOperador = true;
       let matchAcao = true;
 
-      if (operadorAtivo) matchOperador = (textoOperadorLinha === operadorAtivo);
-      if (acaoAtiva) matchAcao = (textoAcaoLinha === acaoAtiva);
+      if (operadorAtivo) matchOperador = (padronizar(textoOperadorLinha) === padronizar(operadorAtivo));
+      if (acaoAtiva) matchAcao = (padronizar(textoAcaoLinha) === padronizar(acaoAtiva));
 
-      return matchOperador && matchAcao; // Retorna verdadeiro se a linha atender a ambos os critérios
+      return matchOperador && matchAcao;
   });
 
   const tabelaAuditoria = $('#tabelaAuditoria').DataTable({
@@ -331,13 +333,21 @@ $(document).ready(function() {
   });
 
   // --- ABA ESTOQUE ---
+  
+  // Função auxiliar para normalizar categorias (ignora acentos e letras maiúsculas)
+  const normalizarCategoria = (str) => str ? String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+
   // Injeção de lógica customizada de busca global para filtro por Categorias no Estoque Físico
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaEstoque') return true;
+      
       const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativa');
       if (!categoriaAtiva) return true; 
+      
       const textoCategoriaLinha = $('<div>').html(data[1]).text().trim(); 
-      return textoCategoriaLinha === categoriaAtiva;
+      
+      // Compara a linha e a pílula clicada após remover acentos de ambas
+      return normalizarCategoria(textoCategoriaLinha) === normalizarCategoria(categoriaAtiva);
   });
 
   const tabelaEstoque = $('#tabelaEstoque').DataTable({
@@ -367,22 +377,30 @@ $(document).ready(function() {
     }
   });
 
-  // Monta as opções do dropdown de categoria mapeando a coluna correspondente no estoque
+  // Monta as opções do dropdown AGRUPANDO categorias que diferem apenas por acento/case
   function construirDropdownCategoriaDinamicamente() {
-    let templatesUnicos = new Set();
+    let categoriasMap = new Map(); // Mapa para guardar: nome_normalizado -> Nome Original
+
     tabelaEstoque.rows().every(function() {
       let textoCat = $('<div>').html(this.data()[1]).text().trim();
-      if (textoCat) templatesUnicos.add(textoCat);
+      if (textoCat) {
+        let normalizado = normalizarCategoria(textoCat);
+        // Guarda apenas a primeira variação encontrada. Ex: se já tem "Construção", ignora "construcao" no menu
+        if (!categoriasMap.has(normalizado)) {
+          categoriasMap.set(normalizado, textoCat);
+        }
+      }
     });
 
     let $menu = $('#menuDinamicoCategoriaEstoque');
     $menu.empty(); 
-    Array.from(templatesUnicos).sort((a, b) => a.localeCompare(b, 'pt-BR')).forEach(function(categoria) {
+    
+    let categoriasUnicas = Array.from(categoriasMap.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    categoriasUnicas.forEach(function(categoria) {
       let icone = 'bi-tag-fill'; let cor = 'text-light';
-      
       let $li = $('<li>');
       
-      // Uso explícito de .addClass() e .attr() para garantir o funcionamento do filtro
       let $a = $('<a>')
           .addClass('dropdown-item dropdown-item-categoria py-2 fw-semibold d-flex justify-content-between align-items-center')
           .attr('href', '#')
@@ -394,7 +412,7 @@ $(document).ready(function() {
           
       let $spanBadge = $('<span>')
           .addClass('badge rounded-pill hard-color-badge count-cat-item')
-          .attr('data-cat-name', categoria)
+          .attr('data-cat-name', categoria) // Guarda o nome original para o contador
           .text('0');
       
       $a.append($spanIcone).append($spanBadge);
@@ -403,7 +421,7 @@ $(document).ready(function() {
     });
   }
 
-  // Executa a filtragem do estoque conforme a categoria escolhida no dropdown
+  // Executa a filtragem do estoque conforme a categoria agrupada
   $('#menuDinamicoCategoriaEstoque').on('click', '.dropdown-item-categoria', function(e) {
     e.preventDefault();
     const categoriaSelecionada = $(this).data('categoria');
@@ -415,29 +433,37 @@ $(document).ready(function() {
     $('#textoCategoriaPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + textoLimpoOpcao);
     
     $('#tabelaEstoque').data('categoria-ativa', categoriaSelecionada);
-    tabelaEstoque.draw(); 
+    tabelaEstoque.draw(); // Aciona o filtro global e redesenha a tabela
   });
 
-  // Atualiza os contadores numéricos de produtos vinculados a cada categoria
+  // Atualiza os contadores numéricos AGRUPANDO os acentos na contagem
   function atualizarContadoresEstoque() {
     $('#countEstoqueTodos').text(tabelaEstoque.rows().count());
+    
     let contadores = {}; 
     tabelaEstoque.rows().every(function() {
       let cellContent = this.data()[1]; 
       if (cellContent) {
         let catTexto = $('<div>').html(cellContent).text().trim();
-        contadores[catTexto] = (contadores[catTexto] || 0) + 1;
+        let normalizado = normalizarCategoria(catTexto);
+        contadores[normalizado] = (contadores[normalizado] || 0) + 1;
       }
     });
 
     $('.count-cat-item').each(function() {
       let nome = $(this).data('cat-name');
-      $(this).text(contadores[nome] || 0);
+      let normalizado = normalizarCategoria(nome);
+      $(this).text(contadores[normalizado] || 0); // Soma os itens normais com os itens sem acento
     });
 
     const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativa');
-    if (categoriaAtiva && contadores[categoriaAtiva]) {
-      $('#countEstoqueCategoriaAtiva').text(contadores[categoriaAtiva]).removeClass('d-none');
+    if (categoriaAtiva) {
+      let ativaNormalizada = normalizarCategoria(categoriaAtiva);
+      if (contadores[ativaNormalizada]) {
+        $('#countEstoqueCategoriaAtiva').text(contadores[ativaNormalizada]).removeClass('d-none');
+      } else {
+        $('#countEstoqueCategoriaAtiva').addClass('d-none'); 
+      }
     } else {
       $('#countEstoqueCategoriaAtiva').addClass('d-none'); 
     }
