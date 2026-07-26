@@ -8,20 +8,43 @@ public_bp = Blueprint('public', __name__)
 def index():
     """
     Rota da página inicial pública.
-    Busca todas as campanhas que estão atualmente ativas no sistema
-    e as exibe para os visitantes e potenciais doadores.
+    Busca as categorias que possuem campanhas ativas no sistema
+    e a quantidade de campanhas ativas dentro de cada categoria.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Seleciona dados essenciais das campanhas e produtos relacionados (apenas as ativas)
         cursor.execute("""
+            SELECT p.categoria, COUNT(c.id) as total_campanhas
+            FROM campanhas c 
+            JOIN produtos p ON c.id_produto = p.id 
+            WHERE c.ativo = TRUE
+            GROUP BY p.categoria
+            ORDER BY p.categoria ASC;
+        """)
+        categorias = cursor.fetchall()
+            
+    return render_template("index.html", categorias=categorias, categoria_ativa=None)
+
+@public_bp.route("/categoria/<path:nome_categoria>")
+def ver_categoria(nome_categoria):
+    """
+    Rota para listar as campanhas ativas pertencentes a uma categoria específica.
+    """
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("""
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.ativo = TRUE;
-        """)
+            WHERE c.ativo = TRUE AND p.categoria = %s;
+        """, (nome_categoria,))
         lista_campanhas = cursor.fetchall()
-            
-    return render_template("index.html", produtos=lista_campanhas)
+        
+        # Caso a categoria não exista ou não tenha mais campanhas ativas
+        if not lista_campanhas:
+            flash("Nenhuma campanha ativa encontrada para esta categoria.", "warning")
+            return redirect(url_for('public.index'))
+
+    return render_template("index.html", produtos=lista_campanhas, categoria_ativa=nome_categoria)
 
 @public_bp.route("/sobre")
 def quem_somos():
@@ -45,10 +68,8 @@ def doar(id_campanha):
         try:
             # Tenta converter obrigatoriamente para inteiro numérico
             quantidade_doada = int(quantidade_raw)
-            
             if quantidade_doada <= 0:
                 raise ValueError("Quantidade negativa ou zero.")
-                
         except (ValueError, TypeError):
             flash("Quantidade informada inválida. Insira apenas números positivos!", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
