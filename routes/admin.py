@@ -277,9 +277,15 @@ def editar_item(id_campanha):
     alterar_nome = request.form.get("alterar_nome")
     
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Localiza o ID do produto associado à campanha atual
-        cursor.execute("SELECT id_produto FROM campanhas WHERE id = %s", (id_campanha,))
-        id_do_produto = cursor.fetchone()[0]
+        # Garante que a campanha existe e está ativa (Bloqueia Soft Delete Bypass)
+        cursor.execute("SELECT id_produto FROM campanhas WHERE id = %s AND ativo = TRUE;", (id_campanha,))
+        resultado_campanha = cursor.fetchone()
+
+        if not resultado_campanha:
+            flash("Campanha inexistente ou arquivada!", "danger")
+            return redirect(url_for('admin.painel'))
+        
+        id_do_produto = resultado_campanha[0]
         
         # Constrói o novo nome apenas se o checkbox correspondente foi marcado no front-end
         if alterar_nome == 'on':
@@ -386,11 +392,12 @@ def ajustar_estoque(id_produto):
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s", (id_produto,))
+        # Busca o produto garantindo estritamente que ele está ativo (Bloqueia Soft Delete Bypass)
+        cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s AND ativo = TRUE;", (id_produto,))
         item_info = cursor.fetchone()
         
         if not item_info:
-            flash("Item não encontrado no estoque!", "danger")
+            flash("Produto inexistente ou arquivado!", "danger")
             return redirect(url_for('admin.painel'))
             
         nome_item, estoque_atual = item_info
@@ -401,14 +408,25 @@ def ajustar_estoque(id_produto):
             descricao_legivel = f"Adicionou {quantidade}x '{nome_item}' ao estoque. Motivo: {motivo}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
             flash(f"Entrada de {quantidade} unidade(s) de {nome_item} registrada!", "success")
-            
-        # Executa decréscimo de estoque (Saída) com checagem de saldo negativo
+
+        # Executa decréscimo de estoque (Saída) com Proteção Atômica contra Race Conditions (TOCTOU)
         elif tipo_ajuste == "saida":
             if quantidade > estoque_atual:
-                flash(f"Erro: Não pode retirar {quantidade}. O estoque possui apenas {estoque_atual}.", "danger")
+                flash(f"Você não pode retirar {quantidade}. O estoque possui apenas {estoque_atual}!", "danger")
                 return redirect(url_for('admin.painel'))
                 
-            cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico - %s WHERE id = %s", (quantidade, id_produto))
+            # Tenta atualizar o estoque fisicamente apenas se o saldo atual no banco for suficiente no momento exato do UPDATE
+            cursor.execute("""
+                UPDATE produtos 
+                SET estoque_fisico = estoque_fisico - %s 
+                WHERE id = %s AND estoque_fisico >= %s
+            """, (quantidade, id_produto, quantidade))
+            
+            # Se rowcount for 0, significa que entre o nosso SELECT lá em cima e este UPDATE, outra requisição consumiu o estoque!
+            if cursor.rowcount == 0:
+                flash("Estoque já alterado por outra operação. Saldo insuficiente!", "danger")
+                return redirect(url_for('admin.painel'))
+
             descricao_legivel = f"Retirou {quantidade}x '{nome_item}' do estoque. Motivo: {motivo}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
             flash(f"Saída de {quantidade} unidade(s) de {nome_item} registrada!", "success")
