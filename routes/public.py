@@ -8,18 +8,19 @@ public_bp = Blueprint('public', __name__)
 def index():
     """
     Rota da página inicial pública.
-    Busca as categorias que possuem campanhas ativas no sistema
-    e a quantidade de campanhas ativas dentro de cada categoria.
+    Busca as categorias unificando variações de acentuação/caixa do texto.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Seleciona dados essenciais das campanhas e produtos relacionados (apenas as ativas)
+        # Usa TRANSLATE para remover acentos e INITCAP/LOWER para padronizar maiúsculas/minúsculas
         cursor.execute("""
-            SELECT p.categoria, COUNT(c.id) as total_campanhas
+            SELECT 
+                INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc')) as categoria_limpa, 
+                COUNT(c.id) as total_campanhas
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
             WHERE c.ativo = TRUE
-            GROUP BY p.categoria
-            ORDER BY p.categoria ASC;
+            GROUP BY categoria_limpa
+            ORDER BY categoria_limpa ASC;
         """)
         categorias = cursor.fetchall()
             
@@ -31,15 +32,16 @@ def ver_categoria(nome_categoria):
     Rota para listar as campanhas ativas pertencentes a uma categoria específica.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
+        # Aplica a mesma regra no WHERE para encontrar produtos acentuados e não acentuados
         cursor.execute("""
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.ativo = TRUE AND p.categoria = %s;
+            WHERE c.ativo = TRUE 
+            AND INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc')) = %s;
         """, (nome_categoria,))
         lista_campanhas = cursor.fetchall()
         
-        # Caso a categoria não exista ou não tenha mais campanhas ativas
         if not lista_campanhas:
             flash("Nenhuma campanha ativa encontrada para esta categoria.", "warning")
             return redirect(url_for('public.index'))
