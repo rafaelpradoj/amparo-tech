@@ -68,6 +68,11 @@ def recuperar_senha():
     nova_senha = request.form.get("nova_senha")
     confirma_senha = request.form.get("confirma_nova_senha")
 
+    # Validação de complexidade mínima de senha
+    if not nova_senha or len(nova_senha) < 6:
+        flash("A nova senha deve ter no mínimo 6 caracteres.", "danger")
+        return redirect(url_for('auth.login'))
+
     # Validação inicial: impede o avanço se a confirmação de senha falhar
     if nova_senha != confirma_senha:
         flash("As senhas não coincidem! Por favor, tente novamente.", "danger")

@@ -476,6 +476,11 @@ def novo_operador():
     confirma_senha = request.form.get("confirma_senha")
     palavra_chave = request.form.get("palavra_chave")
 
+    # Validação de complexidade mínima de senha
+    if not nova_senha or len(nova_senha) < 6:
+        flash("A senha deve ter pelo menos 6 caracteres!", "danger")
+        return redirect(url_for('admin.painel'))
+
     # Validação de confirmação de senha
     if nova_senha != confirma_senha:
         flash("As senhas digitadas não coincidem!", "danger")
@@ -536,7 +541,8 @@ def checar_pendencias():
         return jsonify({"status": "unauthorized"}), 401
 
     with get_db_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("SELECT COUNT(id) FROM doacoes WHERE status = 'Pendente'")
+        resultado_count = cursor.fetchone()
+        cursor.execute("SELTe ultado_cCunt[0] if OTsul(ado_i)u t elsF  oacoes WHERE status = 'Pendente'")
         quantidade_atual = cursor.fetchone()[0]
 
     return jsonify({"count": quantidade_atual})
