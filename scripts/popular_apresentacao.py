@@ -4,8 +4,12 @@ import sys
 # Garante a inclusão do diretório pai no path do sistema
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
+from dotenv import load_dotenv
 from utils.db import get_db_connection
 from werkzeug.security import generate_password_hash
+
+# Carrega as variáveis de ambiente do arquivo .env (como as credenciais do banco)
+load_dotenv(override=True)
 
 print("Iniciando a injeção de dados para a apresentação...")
 

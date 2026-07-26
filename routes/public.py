@@ -39,7 +39,7 @@ def doar(id_campanha):
     if request.method == "POST":
         # Captura os dados inseridos no formulário (pode vir texto, negativo ou vazio)
         quantidade_raw = request.form.get("quantidade")
-        nome_doador = request.form.get("doador")
+        nome_doador = (request.form.get("doador") or "").strip()
 
         # Try/except para travar quantidade doações e retornar apenas números > 0 (Improper Input Validation Mitigation)
         try:
@@ -53,8 +53,11 @@ def doar(id_campanha):
             flash("Quantidade informada inválida. Insira apenas números positivos!", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
-        if not nome_doador or nome_doador.strip() == "":
+        if not nome_doador:
             nome_doador = 'Doador Anônimo'
+        elif len(nome_doador) > 100:
+            flash("O nome do doador excedeu o limite máximo de 100 caracteres!", "danger")
+            return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'
         with get_db_connection() as conn, conn.cursor() as cursor:

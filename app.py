@@ -22,11 +22,17 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
-app.secret_key = os.getenv("SECRET_KEY")
+secret_key = os.getenv("SECRET_KEY")
+if not secret_key:
+    raise RuntimeError("SECRET_KEY não configurada. Defina a variável de ambiente SECRET_KEY antes de iniciar a aplicação.")
+
+app.secret_key = secret_key
+
+is_dev = os.getenv("FLASK_DEBUG") == "1" or os.getenv("FLASK_ENV") == "development" or os.getenv("DEBUG") == "1"
 
 app.config.update(
     # Exige que o cookie só seja transmitido em conexões HTTPS (criptografadas)
-    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SECURE=not is_dev,
     # Impede que o cookie seja enviado por requisições originadas de outros sites
     SESSION_COOKIE_SAMESITE='Lax'
 )

@@ -14,8 +14,12 @@ def login():
     """
     if request.method == "POST":
         # Coleta os dados enviados pelo formulário de login
-        usuario_digitado = request.form.get("login")
+        usuario_digitado = (request.form.get("login") or "").strip()
         senha_digitada = request.form.get("senha")
+
+        if not usuario_digitado or not senha_digitada:
+            flash("Usuário ou senha inválidos!", "danger")
+            return render_template("login.html")
         
         with get_db_connection() as conn, conn.cursor() as cursor:
             # Busca apenas operadores que estejam explicitamente com a flag 'ativo = TRUE'
@@ -63,19 +67,23 @@ def recuperar_senha():
     Processa a redefinição de senha baseada na palavra-chave de recuperação.
     Gera um novo hash seguro para a nova senha caso as validações coincidam e registra a alteração.
     """
-    usuario = request.form.get("login_recup")
+    usuario = (request.form.get("login_recup") or "").strip()
     palavra = request.form.get("palavra_recup")
     nova_senha = request.form.get("nova_senha")
     confirma_senha = request.form.get("confirma_nova_senha")
 
+    if not usuario or not palavra:
+        flash("Usuário ou Palavra-Chave incorretos. Tente novamente!", "danger")
+        return redirect(url_for('auth.login'))
+
     # Validação de complexidade mínima de senha
     if not nova_senha or len(nova_senha) < 6:
-        flash("A nova senha deve ter no mínimo 6 caracteres.", "danger")
+        flash("A nova senha deve ter no mínimo 6 caracteres!", "danger")
         return redirect(url_for('auth.login'))
 
     # Validação inicial: impede o avanço se a confirmação de senha falhar
     if nova_senha != confirma_senha:
-        flash("As senhas não coincidem! Por favor, tente novamente.", "danger")
+        flash("As senhas não coincidem. Tente novamente!", "danger")
         return redirect(url_for('auth.login'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:

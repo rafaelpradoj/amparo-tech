@@ -186,8 +186,22 @@ def novo_item():
     especificacao = request.form.get("especificacao", "").strip().title()
     qtd_medida = request.form.get("qtd_medida", "").strip()
     unidade = request.form.get("unidade", "").strip()
-    categoria = request.form.get("categoria")
-    meta = request.form.get("meta")
+    categoria = (request.form.get("categoria") or "").strip()
+    meta_raw = request.form.get("meta", "")
+
+    try:
+        meta = int(meta_raw)
+    except (TypeError, ValueError):
+        flash("A meta informada é inválida. Insira apenas números positivos!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if meta <= 0:
+        flash("A meta deve ser maior que zero!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if not categoria:
+        flash("A categoria é obrigatória!", "danger")
+        return redirect(url_for('admin.painel'))
     
     # Formata o nome padrão comercial do item (Ex: "Arroz Agulhinha - 5kg")
     if especificacao:
@@ -208,7 +222,12 @@ def novo_item():
         if not produto:
             # Caso não exista, realiza a inserção do produto novo
             cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0) RETURNING id", (nome_padronizado, categoria))
-            id_do_produto = cursor.fetchone()[0]
+            id_row = cursor.fetchone()
+            if not id_row:
+                flash("Falha ao criar o produto. Tente novamente.", "danger")
+                return redirect(url_for('admin.painel'))
+
+            id_do_produto = id_row[0]
         else:
             # Caso exista mas esteja oculto/inativo, reativa o produto
             id_do_produto = produto[0]
@@ -239,7 +258,11 @@ def novo_produto_estoque():
     especificacao = request.form.get("especificacao", "").strip().title()
     qtd_medida = request.form.get("qtd_medida", "").strip()
     unidade = request.form.get("unidade", "").strip()
-    categoria = request.form.get("categoria")
+    categoria = (request.form.get("categoria") or "").strip()
+
+    if not categoria:
+        flash("A categoria é obrigatória!", "danger")
+        return redirect(url_for('admin.painel'))
     
     if especificacao:
         nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
@@ -310,11 +333,26 @@ def editar_item(id_campanha):
             flash(f"O nome do produto excedeu o limite máximo de 150 caracteres!", "danger")
             return redirect(url_for('admin.painel'))
 
-        nova_categoria = request.form.get("categoria")
-        nova_meta = request.form.get("meta")
+        nova_categoria = (request.form.get("categoria") or "").strip()
+        nova_meta_raw = request.form.get("meta", "")
+
+        try:
+            nova_meta = int(nova_meta_raw)
+        except (TypeError, ValueError):
+            flash("A meta informada é inválida. Insira apenas números positivos!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        if nova_meta <= 0:
+            flash("A meta deve ser maior que zero!", "danger")
+            return redirect(url_for('admin.painel'))
         
         cursor.execute("SELECT nome FROM produtos WHERE id = %s", (id_do_produto,))
-        nome_antigo = cursor.fetchone()[0]
+        nome_antigo_row = cursor.fetchone()
+        if not nome_antigo_row:
+            flash("Falha de integridade: produto associado não foi encontrado!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        nome_antigo = nome_antigo_row[0]
 
         # Trava de segurança: Verifica a existência de histórico de doações na campanha
         cursor.execute("SELECT id FROM doacoes WHERE id_campanha = %s LIMIT 1", (id_campanha,))
@@ -327,6 +365,10 @@ def editar_item(id_campanha):
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
             flash("Meta atualizada! Atenção: o nome não pode ser alterado por já existirem doações registadas.", "success")
         else:
+            if not nova_categoria:
+                flash("A categoria é obrigatória!", "danger")
+                return redirect(url_for('admin.painel'))
+
             # Caso não tenha doações: Altera livremente nome, categoria e meta
             cursor.execute("UPDATE produtos SET nome = %s, categoria = %s WHERE id = %s", (novo_nome, nova_categoria, id_do_produto))
             cursor.execute("UPDATE campanhas SET meta = %s WHERE id = %s", (nova_meta, id_campanha))
@@ -354,7 +396,12 @@ def excluir_item(id_campanha):
         cursor.execute("""
             SELECT p.nome FROM campanhas c JOIN produtos p ON c.id_produto = p.id WHERE c.id = %s
         """, (id_campanha,))
-        nome_item = cursor.fetchone()[0]
+        nome_item_row = cursor.fetchone()
+        if not nome_item_row:
+            flash("Campanha inexistente!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        nome_item = nome_item_row[0]
 
         # Executa o soft delete da campanha
         cursor.execute("UPDATE campanhas SET ativo = FALSE WHERE id = %s", (id_campanha,))
@@ -446,17 +493,18 @@ def excluir_estoque(id_produto):
         cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s", (id_produto,))
         item_info = cursor.fetchone()
         
-        if item_info:
-            nome_item, estoque_atual = item_info
-            
-            # Desativa o produto e zera o inventário físico
-            cursor.execute("UPDATE produtos SET ativo = FALSE, estoque_fisico = 0 WHERE id = %s", (id_produto,))
-            # Desativa as campanhas atreladas ao produto desativado
-            cursor.execute("UPDATE campanhas SET ativo = FALSE WHERE id_produto = %s", (id_produto,))
-            
-            descricao = f"Apagou '{nome_item}' do estoque (Limpou {estoque_atual} unidades)."
-            cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (descricao, session['operador_id']))
-            
+        if not item_info:
+            flash("Produto inexistente!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        nome_item, estoque_atual = item_info
+
+        cursor.execute("UPDATE produtos SET ativo = FALSE, estoque_fisico = 0 WHERE id = %s", (id_produto,))
+        cursor.execute("UPDATE campanhas SET ativo = FALSE WHERE id_produto = %s", (id_produto,))
+
+        descricao = f"Apagou '{nome_item}' do estoque (Limpou {estoque_atual} unidades)."
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (descricao, session['operador_id']))
+
         conn.commit()
         
     flash(f"'{nome_item}' removido definitivamente do sistema!", "success")
@@ -471,10 +519,18 @@ def novo_operador():
     Gera criptografia hash segura para a senha e para a palavra-chave de recuperação.
     Protegido pelo decorator @master_required.
     """
-    novo_login = request.form.get("login")
+    novo_login = (request.form.get("login") or "").strip()
     nova_senha = request.form.get("senha")
     confirma_senha = request.form.get("confirma_senha")
     palavra_chave = request.form.get("palavra_chave")
+
+    if not novo_login:
+        flash("O login do operador não pode estar vazio!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if not palavra_chave:
+        flash("A palavra-chave de recuperação é obrigatória!", "danger")
+        return redirect(url_for('admin.painel'))
 
     # Validação de complexidade mínima de senha
     if not nova_senha or len(nova_senha) < 6:
@@ -541,9 +597,9 @@ def checar_pendencias():
         return jsonify({"status": "unauthorized"}), 401
 
     with get_db_connection() as conn, conn.cursor() as cursor:
-        resultado_count = cursor.fetchone()
-        cursor.execute("SELTe ultado_cCunt[0] if OTsul(ado_i)u t elsF  oacoes WHERE status = 'Pendente'")
-        quantidade_atual = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM doacoes WHERE status = 'Pendente'")
+        quantidade_atual_row = cursor.fetchone()
+        quantidade_atual = quantidade_atual_row[0] if quantidade_atual_row else 0
 
     return jsonify({"count": quantidade_atual})
 
