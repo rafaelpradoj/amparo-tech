@@ -21,6 +21,8 @@ O **AmparoTech** é uma plataforma web desenvolvida para conectar a solidariedad
 * **Prevenção de CSRF:** Proteção global contra *Cross-Site Request Forgery* via tokens criptográficos dinâmicos exigidos em todas as mutações de estado (POST).
 * **Mitigação de Race Conditions:** Travas de concorrência atômicas executadas nativamente no banco de dados (`UPDATE ... AND status = 'Pendente'`) para impedir duplicação de saldo por *exploits* automatizados.
 * **Rate Limiting:** Regras rígidas de limite de requisições por IP implementadas para bloquear tentativas de ataques de Força Bruta no login e *Spam* de formulários no banco de dados (Prevenção de DoS).
+* **Bloqueio de Soft Delete Bypass:** Validação estrita de estado (`ativo = TRUE`) injetada diretamente nas queries de alteração, impedindo que requisições forçadas via API manipulem produtos ou campanhas já arquivadas.
+* **Política de Complexidade e Acesso:** Trava lógica para tamanho mínimo de credenciais na criação e recuperação de senhas, somada à exigência do método POST para encerramento de sessões (Prevenção contra *Logout CSRF*).
 
 ## 🛠️ Tecnologias Utilizadas
 
