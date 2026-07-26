@@ -12,7 +12,7 @@ from routes.auth import auth_bp
 from routes.admin import admin_bp
 
 # Carrega as variáveis de ambiente globais a partir do arquivo .env (ex: SECRET_KEY, DATABASE_URL)
-load_dotenv()
+load_dotenv(override=True)
 
 # Inicializa a instância principal da aplicação Flask
 app = Flask(__name__)

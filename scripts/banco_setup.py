@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from utils.db import get_db_connection
 
 # Carrega as variáveis de ambiente do arquivo .env (como as credenciais do banco)
-load_dotenv()
+load_dotenv(override=True)
 
 print("A tentar conectar à base de dados...")
 
