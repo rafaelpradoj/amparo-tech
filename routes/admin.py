@@ -191,9 +191,9 @@ def novo_item():
     
     # Formata o nome padrão comercial do item (Ex: "Arroz Agulhinha - 5kg")
     if especificacao:
-        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida}{unidade}"
+        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
     else:
-        nome_padronizado = f"{produto_base} - {qtd_medida}{unidade}"
+        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
 
     # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
     if len(nome_padronizado) > 150:
@@ -242,9 +242,9 @@ def novo_produto_estoque():
     categoria = request.form.get("categoria")
     
     if especificacao:
-        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida}{unidade}"
+        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
     else:
-        nome_padronizado = f"{produto_base} - {qtd_medida}{unidade}"
+        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
 
     # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
     if len(nome_padronizado) > 150:
