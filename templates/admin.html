@@ -75,11 +75,11 @@
             </button>
           </div>
         </div>
-
         <table id="tabelaPendencias" class="table table-dark table-striped table-hover mb-0 text-center w-100">
           <thead>
             <tr>
               <th class="text-center">Data</th>
+              <th class="text-center">Status</th>
               <th class="text-center">Item Prometido</th>
               <th class="text-center">Quantidade</th>
               <th class="text-center">Doador</th>
@@ -89,18 +89,18 @@
           <tbody>
             {% for pendencia in pendencias %}
             <tr class="text-center">
-              <td>
+              <td class="align-middle py-3 font-numeric">{{ pendencia[3].strftime('%d/%m/%Y %H:%M') }}</td>
+              <td class="align-middle py-3">
                 {% if pendencia[5] %}
-                <span class="badge bg-danger mb-1">Expirado (> 7 dias)</span>
+                <span class="badge bg-danger p-2">Expirado</span>
                 {% else %}
-                <span class="badge bg-success mb-1">No Prazo</span>
+                <span class="badge bg-success p-2">No Prazo</span>
                 {% endif %}
-                <br /><span class="font-numeric">{{ pendencia[3].strftime('%d/%m/%Y %H:%M') }}</span>
               </td>
-              <td class="align-middle"><strong>{{ pendencia[1] }}</strong></td>
-              <td class="align-middle"><span class="font-numeric">{{ pendencia[2] }}</span> unidades</td>
-              <td class="align-middle">{{ pendencia[4] }}</td>
-              <td class="align-middle">
+              <td class="align-middle py-3"><strong>{{ pendencia[1] }}</strong></td>
+              <td class="align-middle py-3"><span class="font-numeric">{{ pendencia[2] }}</span> unidades</td>
+              <td class="align-middle py-3">{{ pendencia[4] }}</td>
+              <td class="align-middle py-3">
                 {% if not pendencia[5] %}
                 <button type="button" class="btn btn-sm btn-success mx-2" data-bs-toggle="modal" data-bs-target="#modalAprovar{{ pendencia[0] }}">
                   Aprovar

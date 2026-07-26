@@ -461,7 +461,7 @@ $(document).ready(function() {
     pageLength: 10,
     lengthMenu: [5, 10, 25, 50],
     order: [], // Mantém a ordenação cronológica definida nativamente no backend (ORDER BY d.data ASC)
-    columnDefs: [ { type: 'sem-acentos', targets: [1, 3] }, { orderable: false, targets: 4 } ],
+    columnDefs: [ { type: 'sem-acentos', targets: [2, 4] }, { orderable: false, targets: 5 } ],
     layout: {
       topStart: {
         buttons: [{
@@ -469,7 +469,7 @@ $(document).ready(function() {
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
           title: 'Relatorio_Pendencias_AmparoTech',
-          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3] }
+          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
       topEnd: 'search'
@@ -487,9 +487,10 @@ $(document).ready(function() {
   function atualizarContadoresPilulas() {
     let noPrazo = 0, expirados = 0;
     tabelaPendencias.rows().every(function() {
-      let dadosColunaData = this.data()[0]; 
-      if (dadosColunaData.includes('No Prazo')) noPrazo++;
-      if (dadosColunaData.includes('Expirado')) expirados++;
+      // Agora o Status está no índice 1 da tabela
+      let dadosColunaStatus = this.data()[1]; 
+      if (dadosColunaStatus.includes('No Prazo')) noPrazo++;
+      if (dadosColunaStatus.includes('Expirado')) expirados++;
     });
     $('#countTodos').text(tabelaPendencias.rows().count());
     $('#countNoPrazo').text(noPrazo);
@@ -502,18 +503,18 @@ $(document).ready(function() {
   $('#pillTodos').on('click', function() {
     $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
     $(this).addClass('ativa');
-    tabelaPendencias.column(0).search('').draw();
+    tabelaPendencias.column(1).search('').draw();
   });
 
   $('#pillNoPrazo').on('click', function() {
     $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
     $(this).addClass('ativa');
-    tabelaPendencias.column(0).search('No Prazo').draw();
+    tabelaPendencias.column(1).search('No Prazo').draw();
   });
 
   $('#pillExpirado').on('click', function() {
     $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
     $(this).addClass('ativa');
-    tabelaPendencias.column(0).search('Expirado').draw();
+    tabelaPendencias.column(1).search('Expirado').draw();
   });
 });
