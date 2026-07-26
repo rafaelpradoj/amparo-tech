@@ -54,9 +54,13 @@
               >
             </li>
             <li class="nav-item ms-2">
-              <a class="nav-link text-danger" href="/logout"
-                ><i class="bi bi-box-arrow-right"></i> Sair</a
-              >
+              <form action="{{ url_for('auth.logout') }}" method="POST" class="m-0 d-inline">
+                <!-- Token CSRF dinâmico gerado pelo servidor para blindar o encerramento de sessão -->
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button type="submit" class="nav-link text-danger">
+                  <i class="bi bi-box-arrow-right"></i> Sair
+                </button>
+              </form>
             </li>
             {% else %}
             <li class="nav-item">
