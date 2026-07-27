@@ -102,6 +102,11 @@ def adicionar_cabecalhos_seguranca(response):
 
 # Verifica se o script está sendo executado diretamente pelo terminal
 if __name__ == "__main__":
-    # Inicia o servidor de desenvolvimento local com o modo de depuração (debug) ativo.
-    # O debug=True reinicia o servidor automaticamente a cada alteração salva no código.
-    app.run(debug=True)
+    '''Inicia o servidor de desenvolvimento local com o modo de depuração (debug) ativo.
+     
+     O debug=True reinicia o servidor automaticamente a cada alteração salva no código.
+     
+     host='0.0.0.0' torna o app acessível em todas as interfaces de rede, não só localhost.
+     
+     port=5000 define a porta padrão onde o servidor irá escutar por requisições.'''
+    app.run(host='0.0.0.0', port=5000, debug=True)

@@ -1,0 +1,46 @@
+services:
+  # Serviço principal da aplicação web (Flask)
+  web:
+    # Constrói a imagem do serviço a partir do Dockerfile no diretório atual
+    build: .
+
+    # Mapeia a porta 5000 do host para a porta 5000 do container (acesso à aplicação)
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app # Mapeia o projeto local para o /app do container, refletindo alterações no código instantaneamente sem precisar reconstruir a imagem
+
+    # Define variáveis de ambiente específicas do ambiente de desenvolvimento
+    environment:
+      - FLASK_ENV=development
+
+    # Carrega variáveis de ambiente adicionais do arquivo .env na raiz do projeto
+    env_file:
+      - .env
+
+    # Garante que o serviço de banco de dados (db) seja iniciado antes do serviço web
+    depends_on:
+      - db
+
+  # Serviço de banco de dados PostgreSQL
+  db:
+    # Utiliza a imagem oficial do PostgreSQL na versão 15 do Docker Hub
+    image: postgres:15
+
+    # Define credenciais e nome do banco de dados a serem criados na inicialização
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+
+    # Mapeia a porta 5433 do host para a porta 5432 do container (acesso externo ao banco)
+    ports:
+      - "5433:5432"
+      
+    # Volume nomeado para persistir os dados do banco de dados mesmo que o container seja removido
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+# Volumes nomeados criados pelo Docker para armazenamento persistente
+volumes:
+  postgres_data:
