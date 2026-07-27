@@ -42,11 +42,14 @@ app.config.update(
 # Inicializa a proteção global contra CSRF blindando todas as rotas
 csrf = CSRFProtect(app)
 
+# Tenta ler a variável do Redis Cloud (Produção); se ausente, usa memória (Local)
+redis_url = os.getenv("REDIS_URL", "memory://")
+
 # Inicializa o Rate Limiter (Limita requisições abusivas por IP)
 limiter = Limiter(
     get_remote_address,
     app=app,
-    storage_uri="memory://", # Armazena a contagem na memória do servidor
+    storage_uri=redis_url, # Usa Redis em produção; memória como fallback local
     default_limits=["1000 per day", "200 per hour"] # Limite global grande para não atrapalhar o uso normal
 )
 
