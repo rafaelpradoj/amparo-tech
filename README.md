@@ -33,7 +33,7 @@ O **AmparoTech** é uma plataforma web desenvolvida para conectar a solidariedad
   * Flask-WTF (Prevenção contra falsificação de requisições).
   * Flask-Limiter integrado ao **Redis** (Controle global e barreira de requisições abusivas distribuídas em múltiplos workers).
 * **Frontend:** Bootstrap 5 (Tema Escuro), DataTables (com plugins para ordenação alfabética sem acentos e exportação integrada para planilhas Excel) e Chart.js.
-* **Hospedagem / Infraestrutura:** Deploy nativo no Heroku (PaaS), com banco de dados Heroku Postgres e servidor WSGI Gunicorn.
+* **Hospedagem / Infraestrutura:** Deploy nativo no Heroku (PaaS), com banco de dados Heroku Postgres, provedor Redis Cloud e servidor WSGI Gunicorn.
 
 ## 📂 Estrutura de Diretórios Recomendada
 
