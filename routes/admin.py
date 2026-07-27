@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash
 from markupsafe import escape
+import unicodedata # <-- Adicione esta linha
 from utils.db import get_db_connection
 from utils.decorators import login_required, master_required
 
@@ -608,17 +609,22 @@ def nova_categoria():
     Cadastra uma nova categoria de agrupamento de produtos. 
     Aplica formatação Title Case e evita termos duplicados.
     """
-    # Transforma scripts maliciosos em texto puro.
     nome_cru = request.form.get("nome", "").strip().title()
-    nome = escape(nome_cru)
+
+    # Remove os acentos da palavra (Ex: 'Construção' vira 'Construcao')
+    nome_normalizado = ''.join(c for c in unicodedata.normalize('NFD', nome_cru) if unicodedata.category(c) != 'Mn')
+
+    # Transforma scripts maliciosos em texto puro.
+    nome = escape(nome_normalizado)
     
     if not nome:
         flash("O nome da categoria não pode estar vazio!", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Evita a colisão/duplicação de nomes de categorias
+        # Evita a colisão/duplicação comparando as versões normalizadas sem acento
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (nome,))
+        
         if cursor.fetchone():
             flash(f"A categoria '{nome}' já existe!", "warning")
         else:
