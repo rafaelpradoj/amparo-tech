@@ -38,7 +38,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     # Popula o banco inicialmente com as categorias padrão do sistema
     cursor.execute("""
         INSERT INTO categorias (nome) 
-        VALUES ('Alimentos'), ('Higiene'), ('Material Escolar'), ('Geral');
+        VALUES ('Alimentos'), ('Geral');
     """)
 
     # --- TABELA: OPERADORES ---

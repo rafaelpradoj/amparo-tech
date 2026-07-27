@@ -28,7 +28,7 @@ def master_required(f):
     def decorated_function(*args, **kwargs):
         # Verifica se a flag 'is_master' avalia como Falsa ou não existe na sessão
         if not session.get('is_master'):
-            flash("Acesso negado: restrito a administradores master!", "danger")
+            flash("Acesso negado! Apenas administradores master podem acessar.", "danger")
             return redirect(url_for('admin.painel'))
         
         # Concede o acesso e executa a função da rota se o privilégio for confirmado

@@ -40,7 +40,7 @@ def login():
                 """, (operador[0],))
                 conn.commit()
                 
-                flash(f"Olá, {usuario_digitado}. Vamos gerenciar as doações de hoje?", "success")
+                flash(f"Login realizado com sucesso, {usuario_digitado}.", "success")
                 return redirect(url_for('admin.painel'))
             else:
                 # Retorna erro genérico caso o usuário não exista ou o hash não bata (boa prática de segurança)
@@ -58,7 +58,7 @@ def logout():
     session.pop('operador_login', None)
     session.pop('is_master', None)
     
-    flash("Você saiu do sistema com segurança!", "success")
+    flash("Você saiu do sistema.", "success")
     return redirect(url_for('auth.login'))
 
 @auth_bp.route("/recuperar_senha", methods=["POST"])
@@ -106,9 +106,9 @@ def recuperar_senha():
             """, (operador[0],))
             
             conn.commit()
-            flash("Senha redefinida com sucesso! Você já pode realizar o login.", "success")
+            flash("Senha redefinida com sucesso! Faça login para acessar.", "success")
         else:
             # Mensagem de erro caso o login ou a palavra-chave estejam incorretos
-            flash("Usuário ou Palavra-Chave incorretos! Verifique o termo e tente novamente.", "danger")
+            flash("Usuário ou Palavra-Chave incorretos. Tente novamente!", "danger")
 
     return redirect(url_for('auth.login'))
