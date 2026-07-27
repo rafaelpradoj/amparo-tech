@@ -96,7 +96,7 @@ Crie uma cópia do arquivo `.env.example` nomeando-a como `.env`
 ```bash
 cp .env.example .env
 ```
-Ajuste as credenciais no arquivo `.env` de acordo com a sua preferência local.
+💡 Sobre a `SECRET_KEY`: o arquivo `.env` já vem com valores padrão para facilitar a configuração em ambiente local. Se nenhuma chave for informada, a aplicação gera automaticamente uma `SECRET_KEY` segura. Se necessário, você também pode alterar as demais credenciais no arquivo `.env`.
 
 ### 4. Executar a Aplicação com Docker
 Para construir a imagem e subir os containers (Aplicação Web + Banco de Dados PostgreSQL), execute:

@@ -1,4 +1,5 @@
 import os
+import secrets
 from flask import Flask, render_template
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -22,9 +23,10 @@ app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
+# Se a chave não existir ou for a string padrão do .env.example, gera uma chave segura em tempo de execução
 secret_key = os.getenv("SECRET_KEY")
-if not secret_key:
-    raise RuntimeError("SECRET_KEY não configurada. Defina a variável de ambiente SECRET_KEY antes de iniciar a aplicação.")
+if not secret_key or secret_key == "sua_chave_super_secreta_aqui":    
+    secret_key = secrets.token_hex(32)
 
 app.secret_key = secret_key
 
