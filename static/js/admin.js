@@ -114,7 +114,7 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio_Campanhas_AmparoTech',
+          title: 'Relatorio de Campanhas',
           exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3, 4] } // Exporta apenas colunas de dados
         }]
       },
@@ -288,7 +288,7 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio_Auditoria_AmparoTech',
+          title: 'Relatorio de Auditoria',
           exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3] }
         }]
       },
@@ -480,7 +480,7 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Posicao_Estoque_AmparoTech',
+          title: 'Estoque Atual',
           exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2] }
         }]
       },
@@ -603,7 +603,7 @@ $(document).ready(function() {
   // --- ABA PENDÊNCIAS ---
   const tabelaPendencias = $('#tabelaPendencias').DataTable({
     language: configuracaoIdioma,
-    pageLength: 10,
+    pageLength: 5,
     lengthMenu: [5, 10, 25, 50],
     order: [], // Mantém a ordenação cronológica definida nativamente no backend (ORDER BY d.data ASC)
     columnDefs: [ { type: 'sem-acentos', targets: [2, 4] }, { orderable: false, targets: 5 } ],
@@ -613,7 +613,7 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio_Pendencias_AmparoTech',
+          title: 'Relatorio de Pendencias',
           exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
