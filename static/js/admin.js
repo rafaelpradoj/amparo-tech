@@ -78,7 +78,30 @@ $(document).ready(function() {
       return dados.replace(/<[^>]*>/g, '').normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   };
 
+  // Função auxiliar para normalizar categorias (ignora acentos e letras maiúsculas)
+  const normalizarCategoria = (str) => str ? String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+
   // --- ABA CAMPANHAS ---
+  // Injeção de lógica customizada de busca global para filtros combinados (Status + Categoria) na aba Campanhas
+  $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
+      if (settings.nTable.id !== 'tabelaInventario') return true;
+      
+      const statusAtivo = $('#tabelaInventario').data('status-ativo');
+      const categoriaAtiva = $('#tabelaInventario').data('categoria-ativa');
+      if (!statusAtivo && !categoriaAtiva) return true; 
+
+      const textoCategoriaLinha = $('<div>').html(data[1]).text().trim(); 
+      const textoStatusLinha = $('<div>').html(data[2]).text().trim();     
+      
+      let matchStatus = true;
+      let matchCategoria = true;
+
+      if (statusAtivo) matchStatus = textoStatusLinha.includes(statusAtivo);
+      if (categoriaAtiva) matchCategoria = (normalizarCategoria(textoCategoriaLinha) === normalizarCategoria(categoriaAtiva));
+
+      return matchStatus && matchCategoria;
+  });
+
   const tabelaInventario = $('#tabelaInventario').DataTable({
     language: configuracaoIdioma,
     pageLength: 10,
@@ -103,36 +126,135 @@ $(document).ready(function() {
       tabelaInventario.buttons().container().appendTo('#containerExcelCampanhas');
       $('#tabelaInventario_wrapper').find('.dt-search').appendTo('#containerPesquisaCampanhas');
       $linhaOriginal.hide(); // Oculta a linha de layout padrão vazia
+      construirDropdownCategoriaCampanhasDinamicamente();
       atualizarContadoresCampanhas();
     }
   });
 
-  // Atualiza os badges numéricos das pílulas de filtro de campanhas
-  function atualizarContadoresCampanhas() {
-    let ativas = 0;
+  // Monta as opções do dropdown AGRUPANDO categorias existentes na tabela de campanhas
+  function construirDropdownCategoriaCampanhasDinamicamente() {
+    let categoriasMap = new Map();
+
     tabelaInventario.rows().every(function() {
-      if (this.data()[2].includes('Ativo')) ativas++;
+      let textoCat = $('<div>').html(this.data()[1]).text().trim();
+      if (textoCat) {
+        let normalizado = normalizarCategoria(textoCat);
+        if (!categoriasMap.has(normalizado)) {
+          categoriasMap.set(normalizado, textoCat);
+        }
+      }
     });
+
+    let $menu = $('#menuDinamicoCategoriaCampanhas');
+    $menu.empty(); 
+    
+    let categoriasUnicas = Array.from(categoriasMap.values()).sort((a, b) => a.localeCompare(b, 'pt-BR'));
+
+    categoriasUnicas.forEach(function(categoria) {
+      let icone = 'bi-tag-fill'; let cor = 'text-light';
+      let $li = $('<li>');
+      
+      let $a = $('<a>')
+          .addClass('dropdown-item dropdown-item-categoria-campanha py-2 fw-semibold d-flex justify-content-between align-items-center')
+          .attr('href', '#')
+          .attr('data-categoria', categoria);
+      
+      let $spanIcone = $('<span>')
+          .html('<i class="bi ' + icone + ' ' + cor + ' me-2"></i> ')
+          .append(document.createTextNode(categoria)); 
+          
+      let $spanBadge = $('<span>')
+          .addClass('badge rounded-pill hard-color-badge count-cat-campanha-item')
+          .attr('data-cat-name', categoria)
+          .text('0');
+      
+      $a.append($spanIcone).append($spanBadge);
+      $li.append($a);
+      $menu.append($li);
+    });
+  }
+
+  // Executa a filtragem de campanhas conforme a categoria selecionada
+  $('#menuDinamicoCategoriaCampanhas').on('click', '.dropdown-item-categoria-campanha', function(e) {
+    e.preventDefault();
+    const categoriaSelecionada = $(this).data('categoria');
+    const textoLimpoOpcao = $(this).find('span').first().text().trim();
+
+    $('#pillCampanhasCategoriaDropdown').addClass('ativa');
+    $('#textoCampanhasCategoriaPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + textoLimpoOpcao);
+    
+    $('#tabelaInventario').data('categoria-ativa', categoriaSelecionada);
+    tabelaInventario.draw();
+  });
+
+  // Recalcula dinamicamente os quantitativos e badges considerando os filtros aplicados (Cross-Filtering)
+  function atualizarContadoresCampanhas() {
     $('#countCampanhasTodas').text(tabelaInventario.rows().count());
-    $('#countCampanhasAtivas').text(ativas);
+    
+    const statusAtivo = $('#tabelaInventario').data('status-ativo');
+    const categoriaAtiva = $('#tabelaInventario').data('categoria-ativa');
+
+    let ativasCount = 0;
+    let contadoresCat = {};
+
+    tabelaInventario.rows().every(function() {
+      let cellCategoria = this.data()[1];
+      let cellStatus = this.data()[2];
+
+      let textoCat = cellCategoria ? $('<div>').html(cellCategoria).text().trim() : '';
+      let textoStatus = cellStatus ? $('<div>').html(cellStatus).text().trim() : '';
+      let catNorm = normalizarCategoria(textoCat);
+
+      if (textoStatus.includes('Ativo') && (!categoriaAtiva || catNorm === normalizarCategoria(categoriaAtiva))) {
+        ativasCount++;
+      }
+
+      if (textoCat && (!statusAtivo || textoStatus.includes(statusAtivo))) {
+        contadoresCat[catNorm] = (contadoresCat[catNorm] || 0) + 1;
+      }
+    });
+
+    $('#countCampanhasAtivas').text(ativasCount);
+
+    $('.count-cat-campanha-item').each(function() {
+      let nome = $(this).data('cat-name');
+      let catNorm = normalizarCategoria(nome);
+      $(this).text(contadoresCat[catNorm] || 0);
+    });
+
+    if (categoriaAtiva) {
+      let catNormAtiva = normalizarCategoria(categoriaAtiva);
+      if (contadoresCat[catNormAtiva]) {
+        $('#countCampanhasCategoriaAtiva').text(contadoresCat[catNormAtiva]).removeClass('d-none');
+      } else {
+        $('#countCampanhasCategoriaAtiva').addClass('d-none');
+      }
+    } else {
+      $('#countCampanhasCategoriaAtiva').addClass('d-none');
+    }
   }
 
   tabelaInventario.on('draw', atualizarContadoresCampanhas);
 
   // Filtros rápidos via cliques nas pílulas (Todas vs Ativas)
   $('#pillCampanhasTodas').on('click', function() {
-    $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
+    $('#pillCampanhasAtivas').removeClass('ativa');
     $(this).addClass('ativa');
-    tabelaInventario.column(2).search('').draw(); 
+    $('#pillCampanhasCategoriaDropdown').removeClass('ativa');
+    $('#textoCampanhasCategoriaPill').text('Categoria');
+    $('#tabelaInventario').data('status-ativo', null);
+    $('#tabelaInventario').data('categoria-ativa', null);
+    tabelaInventario.draw();
   });
 
   $('#pillCampanhasAtivas').on('click', function() {
-    $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
+    $('#pillCampanhasTodas').removeClass('ativa');
     $(this).addClass('ativa');
-    tabelaInventario.column(2).search('Ativo').draw(); 
+    $('#tabelaInventario').data('status-ativo', 'Ativo');
+    tabelaInventario.draw();
   });
-  
- // --- ABA AUDITORIA ---
+
+  // --- ABA AUDITORIA ---
   // Injeção de lógica customizada de busca global para filtros combinados (Operador + Ação)
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaAuditoria') return true;
@@ -334,9 +456,6 @@ $(document).ready(function() {
 
   // --- ABA ESTOQUE ---
   
-  // Função auxiliar para normalizar categorias (ignora acentos e letras maiúsculas)
-  const normalizarCategoria = (str) => str ? String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
-
   // Injeção de lógica customizada de busca global para filtro por Categorias no Estoque Físico
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaEstoque') return true;

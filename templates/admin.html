@@ -250,13 +250,23 @@
         <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-3 mb-4">
           <div id="containerExcelCampanhas" class="flex-shrink-0"></div>
           <div id="containerPesquisaCampanhas" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
-          <div class="pilulas-container flex-shrink-0">
+          
+          <!-- Filtro Duplo: Status (Todos/Ativos) + Dropdown de Categoria -->
+          <div class="pilulas-container flex-shrink-0" style="overflow: visible !important;">
             <button type="button" id="pillCampanhasTodas" class="btn-pilula ativa">
               Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countCampanhasTodas" style="font-size: 0.75rem;">0</span>
             </button>
             <button type="button" id="pillCampanhasAtivas" class="btn-pilula">
               Ativos <span class="badge rounded-pill bg-success font-numeric ms-1" id="countCampanhasAtivas" style="font-size: 0.75rem;">0</span>
             </button>
+            <div class="dropdown d-inline-block">
+              <button type="button" id="pillCampanhasCategoriaDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="textoCampanhasCategoriaPill">Categoria</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countCampanhasCategoriaAtiva" style="font-size: 0.75rem;">0</span>
+              </button>
+              <ul id="menuDinamicoCategoriaCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 230px;">
+              </ul>
+            </div>
           </div>
         </div>
         <table id="tabelaInventario" class="table table-dark table-striped table-hover mb-0 w-100">
@@ -340,21 +350,14 @@
                                 <div class="col-md-6 mb-3">
                                   <label class="form-label text-light">Unidade:</label>
                                   <select class="form-select bg-secondary text-light border-secondary" name="unidade" required>
-                                    <!-- Massa / Peso -->
                                     <option value="kg">Quilogramas (kg)</option>
                                     <option value="g">Gramas (g)</option>
-                                    
-                                    <!-- Volume / Líquidos -->
                                     <option value="L">Litros (L)</option>
                                     <option value="ml">Mililitros (ml)</option>
-                                    
-                                    <!-- Comprimento e Construção -->
                                     <option value="cm">Centímetros (cm)</option>
                                     <option value="Metro(s)">Metros (m)</option>
                                     <option value="m²">Metros Quadrados (m²)</option>
                                     <option value="m³">Metros Cúbicos (m³)</option>
-                                    
-                                    <!-- Contagem Física / Embalagens -->
                                     <option value="Unidade(s)">Unidade(s)</option>
                                     <option value="Par(es)">Par(es)</option>
                                     <option value="Peça(s)">Peça(s)</option>
@@ -363,8 +366,6 @@
                                     <option value="Fardo(s)">Fardo(s)</option>
                                     <option value="Lata(s)">Lata(s)</option>
                                     <option value="Rolo(s)">Rolo(s)</option>
-                                    
-                                    <!-- Agrupamentos -->
                                     <option value="Kit(s)">Kit(s)</option>
                                     <option value="Cesta(s)">Cesta(s)</option>
                                   </select>
