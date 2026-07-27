@@ -43,7 +43,7 @@ app.config.update(
 csrf = CSRFProtect(app)
 
 # Tenta ler a variável do Redis Cloud (Produção); se ausente, usa memória (Local)
-redis_url = os.getenv("REDIS_URL", "memory://")
+redis_url = os.getenv("REDISCLOUD_URL", "memory://")
 
 # Inicializa o Rate Limiter (Limita requisições abusivas por IP)
 limiter = Limiter(
