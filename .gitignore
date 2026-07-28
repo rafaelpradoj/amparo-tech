@@ -11,3 +11,9 @@ __pycache__/
 Thumbs.db
 
 .idea/
+
+#Testes de software
+ARCHITECTURE.md
+BUG_REPORT.md
+SECURITY_AUDIT.md
+.kilo
