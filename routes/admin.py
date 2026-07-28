@@ -115,7 +115,8 @@ def aprovar_doacao(id_doacao):
 
         # Se passou da trava acima, temos garantia absoluta de que esta é a única thread processando a aprovação.
         cursor.execute("""
-            SELECT d.id_campanha, d.quantidade, p.nome, d.doador, c.id_produto 
+            SELECT d.id_campanha, d.quantidade, p.nome, d.doador, c.id_produto,
+                   c.ativo AS campanha_ativa, p.ativo AS produto_ativo
             FROM doacoes d 
             JOIN campanhas c ON d.id_campanha = c.id 
             JOIN produtos p ON c.id_produto = p.id 
@@ -124,14 +125,19 @@ def aprovar_doacao(id_doacao):
         info = cursor.fetchone()
         
         if info:
-            id_da_campanha, quantidade_doada, nome_item, doador, id_do_produto = info
+            id_da_campanha, quantidade_doada, nome_item, doador, id_do_produto, campanha_ativa, produto_ativo = info
             
-            # Atualiza o progresso da campanha e o estoque físico do produto
-            cursor.execute("UPDATE campanhas SET arrecadado = arrecadado + %s WHERE id = %s", (quantidade_doada, id_da_campanha))
+            # Atualiza o estoque físico do produto (produto recebido, mesmo que campanha encerrada)
             cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico + %s WHERE id = %s", (quantidade_doada, id_do_produto))
+            
+            # Atualiza o arrecadado apenas se a campanha ainda estiver ativa (preserva integridade histórica)
+            if campanha_ativa:
+                cursor.execute("UPDATE campanhas SET arrecadado = arrecadado + %s WHERE id = %s", (quantidade_doada, id_da_campanha))
             
             # Registra o log detalhado da operação na tabela de auditoria
             descricao_legivel = f"Aprovou a entrada de {quantidade_doada}x '{nome_item}' doados por {doador}"
+            if not campanha_ativa or not produto_ativo:
+                descricao_legivel += " [ALERTA: aprovação realizada com campanha e/ou produto inativo]"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Aprovação', %s, %s)", (descricao_legivel, session['operador_id']))
         conn.commit()
         
