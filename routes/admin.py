@@ -489,7 +489,7 @@ def excluir_estoque(id_produto):
     e inativa de forma cascateada quaisquer campanhas abertas que dependam deste produto.
     """
     with get_db_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s", (id_produto,))
+        cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s AND ativo = TRUE", (id_produto,))
         item_info = cursor.fetchone()
         
         if not item_info:
