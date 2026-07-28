@@ -477,20 +477,17 @@
                 <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
                 <td class="align-middle text-nowrap text-center">
                   <button type="button" class="btn btn-sm btn-outline-success mx-1" data-bs-toggle="modal" data-bs-target="#modalEntrada{{ item[0] }}" title="Adicionar ao Estoque">
-                    <i class="bi bi-plus-lg"></i> Entrada
+                    <i class="bi bi-plus-lg"></i>
                   </button>
-                  <button type="button" class="btn btn-sm btn-outline-warning mx-1" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Retirar do Estoque">
-                    <i class="bi bi-dash-lg"></i> Saída
-                  </button>
-                  <button type="button" class="btn btn-sm btn-outline-danger mx-1" data-bs-toggle="modal" data-bs-target="#modalExcluirEstoque{{ item[0] }}" title="Remover Produto Definitivamente">
-                    <i class="bi bi-trash"></i>
+                  <button type="button" class="btn btn-sm btn-outline-danger mx-1" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Remover do Estoque">
+                    <i class="bi bi-dash-lg"></i>
                   </button>
 
                   <div class="modal fade" id="modalEntrada{{ item[0] }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog text-start text-wrap">
                       <div class="modal-content bg-dark text-light border-secondary">
                         <div class="modal-header border-success">
-                          <h2 class="modal-title text-success fs-5"><i class="bi bi-box-arrow-in-down"></i> Entrada Manual</h2>
+                          <h2 class="modal-title text-success fs-5"><i class="bi bi-box-arrow-in-down"></i> Adicionar ao Estoque</h2>
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <form action="/admin/estoque/ajustar/{{ item[0] }}" method="POST" class="m-0">
@@ -498,7 +495,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="entrada">
                           <div class="modal-body">
-                            <p><strong class="text-body-secondary">Adicionar ao estoque</strong><br><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
+                            <p><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a adicionar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" required />
@@ -520,8 +517,8 @@
                   <div class="modal fade" id="modalSaida{{ item[0] }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog text-start text-wrap">
                       <div class="modal-content bg-dark text-light border-secondary">
-                        <div class="modal-header border-warning">
-                          <h2 class="modal-title text-warning fs-5"><i class="bi bi-box-arrow-up"></i> Saída</h2>
+                        <div class="modal-header border-danger">
+                          <h2 class="modal-title text-danger fs-5"><i class="bi bi-box-arrow-up"></i> Remover do Estoque</h2>
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <form action="/admin/estoque/ajustar/{{ item[0] }}" method="POST" class="m-0">
@@ -529,7 +526,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
-                            <p><strong class="text-body-secondary">Remover do estoque</strong><br><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
+                            <p><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a retirar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" max="{{ item[3] }}" required />
@@ -541,40 +538,12 @@
                           </div>
                           <div class="modal-footer border-secondary">
                             <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
-                            <button type="submit" class="btn btn-warning fw-bold text-dark mx-2">Confirmar Saída</button>
+                            <button type="submit" class="btn btn-danger fw-bold text-light mx-2">Confirmar Saída</button>
                           </div>
                         </form>
                       </div>
                     </div>
                   </div>
-
-                  <div class="modal fade" id="modalExcluirEstoque{{ item[0] }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog text-start text-wrap">
-                      <div class="modal-content bg-dark text-light border-secondary">
-                        <div class="modal-header border-danger">
-                          <h2 class="modal-title text-danger fs-5"><i class="bi bi-exclamation-triangle-fill"></i> Atenção!</h2>
-                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                          <p class="text-body-secondary">Tem <strong class="text-light">certeza absoluta</strong> que deseja remover o produto <span class="text-light font-numeric">{{ item[1]|title }}</span> do sistema?</p>
-                          {% if item[3] > 0 %}
-                          <div class="alert-warning p-2 mb-0 mt-4 border rounded border-warning bg-transparent text-warning">
-                            <i class="bi bi-info-circle"></i> <strong>Atenção:</strong> Este item possui <strong>{{ item[3] }}</strong> unidade(s) em estoque. Recomendamos fazer a "Saída" deste valor antes de excluir.
-                          </div>
-                          {% endif %}
-                        </div>
-                        <div class="modal-footer border-secondary">
-                          <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
-                          <form action="/admin/estoque/excluir_definitivo/{{ item[0] }}" method="POST" class="m-0">
-                            <!-- Token CSRF dinâmico gerado pelo servidor -->
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                            <button type="submit" class="btn btn-danger fw-bold mx-2">Remover Produto</button>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
                 </td>
               </tr>
               {% endif %}

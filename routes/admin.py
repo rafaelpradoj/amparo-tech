@@ -512,34 +512,6 @@ def ajustar_estoque(id_produto):
 
     return redirect(url_for('admin.painel'))
 
-@admin_bp.route("/admin/estoque/excluir_definitivo/<int:id_produto>", methods=["POST"])
-@login_required
-def excluir_estoque(id_produto):
-    """
-    Executa a exclusão lógica total de um produto do estoque (limpa a quantidade para 0 e ativa = FALSE)
-    e inativa de forma cascateada quaisquer campanhas abertas que dependam deste produto.
-    """
-    with get_db_connection() as conn, conn.cursor() as cursor:
-        cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s AND ativo = TRUE", (id_produto,))
-        item_info = cursor.fetchone()
-        
-        if not item_info:
-            flash("Produto inexistente!", "danger")
-            return redirect(url_for('admin.painel'))
-
-        nome_item, estoque_atual = item_info
-
-        cursor.execute("UPDATE produtos SET ativo = FALSE, estoque_fisico = 0 WHERE id = %s", (id_produto,))
-        cursor.execute("UPDATE campanhas SET ativo = FALSE WHERE id_produto = %s", (id_produto,))
-
-        descricao = f"Apagou '{nome_item}' do estoque (Limpou {estoque_atual} unidades)."
-        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (descricao, session['operador_id']))
-
-        conn.commit()
-        
-    flash(f"'{nome_item}' removido definitivamente do sistema!", "success")
-    return redirect(url_for('admin.painel'))
-
 @admin_bp.route("/admin/operador/novo", methods=["POST"])
 @login_required
 @master_required
