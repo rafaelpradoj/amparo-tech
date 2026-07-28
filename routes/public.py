@@ -84,8 +84,13 @@ def doar(id_campanha):
 
         # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'
         with get_db_connection() as conn, conn.cursor() as cursor:
-            # Verifica se a campanha existe e está ATIVA antes de aceitar a doação (IDOR Mitigation)
-            cursor.execute("SELECT ativo FROM campanhas WHERE id = %s", (id_campanha,))
+            # Verifica se a campanha existe, está ATIVA e o produto vinculado também está ATIVO antes de aceitar a doação (IDOR Mitigation)
+            cursor.execute("""
+                SELECT c.ativo 
+                FROM campanhas c 
+                JOIN produtos p ON c.id_produto = p.id 
+                WHERE c.id = %s AND p.ativo = TRUE
+            """, (id_campanha,))
             campanha_status = cursor.fetchone()
             
             if not campanha_status or not campanha_status[0]:
