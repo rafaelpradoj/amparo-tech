@@ -476,6 +476,9 @@ def ajustar_estoque(id_produto):
             descricao_legivel = f"Retirou {quantidade}x '{nome_item}' do estoque. Motivo: {motivo}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
             flash(f"Saída de {quantidade} unidade(s) de {nome_item} registrada!", "success")
+        else:
+            flash("Tipo de ajuste inválido!", "danger")
+            return redirect(url_for('admin.painel'))
 
         conn.commit()
 
