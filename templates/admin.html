@@ -283,7 +283,7 @@
           <tbody>
             {% for item in inventario %}
             <tr>
-              <td class="align-middle"><strong>{{ item[1] }}</strong></td>
+                            <td class="align-middle"><strong>{{ item[1]|title }}</strong></td>
               <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
               <td class="align-middle text-center">
                 {% if item[5] %}
@@ -323,8 +323,8 @@
                         <div class="modal-body">
                           <div class="mb-3">
                             <label class="form-label">Nome Atual da Campanha:</label>
-                            <input type="text" class="form-control bg-dark text-body-secondary border-secondary" value="{{ item[1] }}" readonly />
-                            <input type="hidden" name="nome_atual" value="{{ item[1] }}" />
+                            <input type="text" class="form-control bg-dark text-body-secondary border-secondary" value="{{ item[1]|title }}" readonly />
+                            <input type="hidden" name="nome_atual" value="{{ item[1]|title }}" />
                           </div>
                           <div class="form-check form-switch mb-3">
                             <input class="form-check-input bg-secondary border-secondary" type="checkbox" role="switch" id="switchNome{{ item[0] }}" name="alterar_nome" data-bs-toggle="collapse" data-bs-target="#collapseNome{{ item[0] }}">
@@ -404,7 +404,7 @@
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                       </div>
                       <div class="modal-body text-body-secondary">
-                        Deseja <strong class="text-light">arquivar</strong> a campanha <span class="text-light font-numeric">{{ item[1] }}</span>? Ela será oculta do público, mas todos os relatórios permanecerão preservados.
+                        Deseja <strong class="text-light">arquivar</strong> a campanha <span class="text-light font-numeric">{{ item[1]|title }}</span>? Ela será oculta do público, mas todos os relatórios permanecerão preservados.
                       </div>
                       <div class="modal-footer border-secondary">
                         <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
@@ -472,7 +472,7 @@
             {% for item in produtos %}
               {% if item[5] or item[3] > 0 %}
               <tr>
-                <td class="align-middle text-center"><strong>{{ item[1] }}</strong></td>
+                <td class="align-middle text-center"><strong>{{ item[1]|title }}</strong></td>
                 <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
                 <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
                 <td class="align-middle text-nowrap text-center">
@@ -498,7 +498,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="entrada">
                           <div class="modal-body">
-                            <p><strong class="text-body-secondary">Adicionar ao estoque</strong><br><span class="font-numeric">{{ item[1] }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
+                            <p><strong class="text-body-secondary">Adicionar ao estoque</strong><br><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a adicionar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" required />
@@ -529,7 +529,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
-                            <p><strong class="text-body-secondary">Remover do estoque</strong><br><span class="font-numeric">{{ item[1] }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
+                            <p><strong class="text-body-secondary">Remover do estoque</strong><br><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-body-secondary">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a retirar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" max="{{ item[3] }}" required />
@@ -556,7 +556,7 @@
                           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                          <p class="text-body-secondary">Tem <strong class="text-light">certeza absoluta</strong> que deseja remover o produto <span class="text-light font-numeric">{{ item[1] }}</span> do sistema?</p>
+                          <p class="text-body-secondary">Tem <strong class="text-light">certeza absoluta</strong> que deseja remover o produto <span class="text-light font-numeric">{{ item[1]|title }}</span> do sistema?</p>
                           {% if item[3] > 0 %}
                           <div class="alert-warning p-2 mb-0 mt-4 border rounded border-warning bg-transparent text-warning">
                             <i class="bi bi-info-circle"></i> <strong>Atenção:</strong> Este item possui <strong>{{ item[3] }}</strong> unidade(s) em estoque. Recomendamos fazer a "Saída" deste valor antes de excluir.

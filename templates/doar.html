@@ -1,5 +1,5 @@
 {% extends "base.html" %} 
-{% block title %}Doar - {{ item[1] }}{% endblock %} 
+{% block title %}Doar - {{ item[1]|title }}{% endblock %} 
 
 {% block content %}
 <div class="row justify-content-center">
@@ -14,7 +14,7 @@
       </div>
       
       <div class="card-body">
-        <h2 class="card-title fs-5">{{ item[1] }}</h2>
+        <h2 class="card-title fs-5">{{ item[1]|title }}</h2>
         <p class="card-text text-body-secondary small"><span class="badge bg-secondary">{{ item[2] }}</span></p>
 
         <div class="mb-4 mt-4">
@@ -89,7 +89,7 @@
                   ></button>
                 </div>
                 <div class="modal-body">
-                  <p>Você está prestes a registrar sua intenção de doação para <strong class="text-success">{{ item[1] }}</strong>.</p>
+                  <p>Você está prestes a registrar sua intenção de doação para <strong class="text-success">{{ item[1]|title }}</strong>.</p>
                   <p class="mb-0 text-body-secondary small">A ONG ficará aguardando a entrega deste item nas instalações. Deseja prosseguir?</p>
                 </div>
                 <div class="modal-footer border-secondary">

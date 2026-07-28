@@ -1,12 +1,26 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
 from werkzeug.security import generate_password_hash
 from markupsafe import escape
-import unicodedata # <-- Adicione esta linha
+import unicodedata
 from utils.db import get_db_connection
 from utils.decorators import login_required, master_required
 
 # Inicialização do Blueprint para as rotas de administração
 admin_bp = Blueprint('admin', __name__)
+
+def normalizar_nome(nome):
+    """
+    Padroniza o nome para comparação e armazenamento:
+    - Remove acentos
+    - Minúsculas
+    - Remove espaços em volta
+    - Colapsa múltiplos espaços internos em um único
+    """
+    if not nome:
+        return ""
+    nfkd = unicodedata.normalize('NFKD', nome)
+    sem_acentos = ''.join(c for c in nfkd if not unicodedata.combining(c))
+    return ' '.join(sem_acentos.lower().strip().split())
 
 @admin_bp.route("/admin")
 @login_required
@@ -188,9 +202,9 @@ def novo_item():
     Cria uma nova campanha de arrecadação. Se o produto base correspondente não existir,
     ele é cadastrado automaticamente. Se já existir uma campanha ativa para o item, bloqueia a criação.
     """
-    # Coleta e padroniza os dados do formulário (Capitaliza as iniciais)
-    produto_base = request.form.get("produto", "").strip().title()
-    especificacao = request.form.get("especificacao", "").strip().title()
+    # Coleta e padroniza os dados do formulário
+    produto_base = request.form.get("produto", "").strip()
+    especificacao = request.form.get("especificacao", "").strip()
     qtd_medida = request.form.get("qtd_medida", "").strip()
     unidade = request.form.get("unidade", "").strip()
     categoria = (request.form.get("categoria") or "").strip()
@@ -216,19 +230,21 @@ def novo_item():
     else:
         nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
 
+    nome_normalizado = normalizar_nome(nome_padronizado)
+
     # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
-    if len(nome_padronizado) > 150:
+    if len(nome_normalizado) > 150:
         flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
         return redirect(url_for('admin.painel'))
     
     with get_db_connection() as conn, conn.cursor() as cursor:
-        # Verifica se o produto com esse nome padronizado já existe no sistema
-        cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_padronizado,))
+        # Verifica se o produto com esse nome normalizado já existe no sistema
+        cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_normalizado,))
         produto = cursor.fetchone()
         
         if not produto:
             # Caso não exista, realiza a inserção do produto novo
-            cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0) RETURNING id", (nome_padronizado, categoria))
+            cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0) RETURNING id", (nome_normalizado, categoria))
             id_row = cursor.fetchone()
             if not id_row:
                 flash("Erro ao criar produto. Tente novamente!", "danger")
@@ -243,7 +259,7 @@ def novo_item():
         # Impede a criação de duplicatas de campanhas ativas para o mesmo produto
         cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_do_produto,))
         if cursor.fetchone():
-            flash(f"Já existe uma campanha ativa para '{nome_padronizado}'!", "warning")
+            flash(f"Já existe uma campanha ativa para '{nome_padronizado}'", "warning")
             return redirect(url_for('admin.painel'))
         
         # Insere a nova campanha associada ao ID do produto
@@ -261,8 +277,8 @@ def novo_produto_estoque():
     Cadastra um produto diretamente no estoque físico (interno), sem necessariamente 
     abrir uma campanha pública de arrecadação para ele.
     """
-    produto_base = request.form.get("produto", "").strip().title()
-    especificacao = request.form.get("especificacao", "").strip().title()
+    produto_base = request.form.get("produto", "").strip()
+    especificacao = request.form.get("especificacao", "").strip()
     qtd_medida = request.form.get("qtd_medida", "").strip()
     unidade = request.form.get("unidade", "").strip()
     categoria = (request.form.get("categoria") or "").strip()
@@ -276,20 +292,22 @@ def novo_produto_estoque():
     else:
         nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
 
+    nome_normalizado = normalizar_nome(nome_padronizado)
+
     # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
-    if len(nome_padronizado) > 150:
+    if len(nome_normalizado) > 150:
         flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
         return redirect(url_for('admin.painel'))
         
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Impede o cadastro de produtos com nomes idênticos no estoque
-        cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_padronizado,))
+        cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_normalizado,))
         if cursor.fetchone():
             flash(f"Produto '{nome_padronizado}' já cadastrado no estoque!", "warning")
             return redirect(url_for('admin.painel'))
             
         # Registra o novo item com estoque zerado
-        cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0)", (nome_padronizado, categoria))
+        cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0)", (nome_normalizado, categoria))
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou '{nome_padronizado}' no estoque interno", session['operador_id']))
         conn.commit()
         
@@ -319,8 +337,8 @@ def editar_item(id_campanha):
         
         # Constrói o novo nome apenas se o checkbox correspondente foi marcado no front-end
         if alterar_nome == 'on':
-            produto_base = request.form.get("produto", "").strip().title()
-            especificacao = request.form.get("especificacao", "").strip().title()
+            produto_base = request.form.get("produto", "").strip()
+            especificacao = request.form.get("especificacao", "").strip()
             qtd_medida = request.form.get("qtd_medida", "").strip()
             unidade = request.form.get("unidade", "").strip()
             
@@ -334,6 +352,10 @@ def editar_item(id_campanha):
                 novo_nome = f"{produto_base} - {qtd_medida}{unidade}"
         else:
             novo_nome = request.form.get("nome_atual")
+            
+        # Normaliza o nome para comparação e armazenamento consistentes
+        if alterar_nome == 'on' and novo_nome:
+            novo_nome = normalizar_nome(novo_nome)
             
         # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
         if novo_nome and len(novo_nome) > 150:
