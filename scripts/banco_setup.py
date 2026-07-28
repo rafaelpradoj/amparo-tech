@@ -22,7 +22,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     cursor.execute("DROP TABLE IF EXISTS auditoria CASCADE;")
     cursor.execute("DROP TABLE IF EXISTS campanhas CASCADE;")
     cursor.execute("DROP TABLE IF EXISTS produtos CASCADE;")
-    cursor.execute("DROP TABLE IF EXISTS itens CASCADE;") 
     cursor.execute("DROP TABLE IF EXISTS categorias CASCADE;")
     cursor.execute("DROP TABLE IF EXISTS operadores CASCADE;")
 
