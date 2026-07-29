@@ -18,8 +18,8 @@ def index():
                 COUNT(c.id) as total_campanhas
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.ativo = TRUE
-            GROUP BY categoria_limpa
+            WHERE c.ativo = TRUE AND c.pausada = FALSE
+            GROUP BY INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc'))
             ORDER BY categoria_limpa ASC;
         """)
         categorias = cursor.fetchall()
@@ -37,8 +37,7 @@ def ver_categoria(nome_categoria):
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.ativo = TRUE 
-            AND p.ativo = TRUE
+            WHERE c.ativo = TRUE AND c.pausada = FALSE
             AND INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc')) = INITCAP(TRANSLATE(LOWER(%s), 'áéíóúâêôãõç', 'aeiouaeoaoc'));
         """, (nome_categoria,))
         lista_campanhas = cursor.fetchall()
@@ -85,17 +84,17 @@ def doar(id_campanha):
 
         # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'
         with get_db_connection() as conn, conn.cursor() as cursor:
-            # Verifica se a campanha existe, está ATIVA e o produto vinculado também está ATIVO antes de aceitar a doação (IDOR Mitigation)
+            # Verifica se a campanha existe, está ATIVA, PAUSADA=FALSE e o produto vinculado também está ATIVO antes de aceitar a doação (IDOR Mitigation)
             cursor.execute("""
-                SELECT c.ativo 
+                SELECT c.ativo, c.pausada 
                 FROM campanhas c 
                 JOIN produtos p ON c.id_produto = p.id 
                 WHERE c.id = %s AND p.ativo = TRUE
             """, (id_campanha,))
             campanha_status = cursor.fetchone()
             
-            if not campanha_status or not campanha_status[0]:
-                flash("Esta campanha foi encerrada e não aceita mais doações.", "danger")
+            if not campanha_status or not campanha_status[0] or campanha_status[1]:
+                flash("Esta campanha foi encerrada e não aceita mais doações!", "danger")
                 return redirect(url_for('public.index'))
 
             cursor.execute("""
@@ -114,7 +113,7 @@ def doar(id_campanha):
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.id = %s AND c.ativo = TRUE
+            WHERE c.id = %s AND c.ativo = TRUE AND c.pausada = FALSE
         """, (id_campanha,))
         campanha = cursor.fetchone()
         

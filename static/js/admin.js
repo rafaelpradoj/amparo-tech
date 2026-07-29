@@ -187,6 +187,20 @@ $(document).ready(function() {
     tabelaInventario.draw();
   });
 
+  // Ativação do filtro por Status selecionado no dropdown
+  $('#menuStatusCampanhas').on('click', '.dropdown-item-status-campanha', function(e) {
+    e.preventDefault();
+    const statusSelecionado = $(this).data('status');
+    const texto = $(this).find('span').first().text().trim();
+    
+    $('#pillCampanhasTodas').removeClass('ativa');
+    $('#pillCampanhasStatusDropdown').addClass('ativa');
+    $('#textoCampanhasStatusPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + texto);
+    
+    $('#tabelaInventario').data('status-ativo', statusSelecionado);
+    tabelaInventario.draw(); 
+  });
+
   // Recalcula dinamicamente os quantitativos e badges considerando os filtros aplicados (Cross-Filtering)
   function atualizarContadoresCampanhas() {
     $('#countCampanhasTodas').text(tabelaInventario.rows().count());
@@ -196,6 +210,7 @@ $(document).ready(function() {
 
     let ativasCount = 0;
     let contadoresCat = {};
+    let contadoresStatus = { 'Ativa': 0, 'Pausada': 0, 'Arquivada': 0 };
 
     tabelaInventario.rows().every(function() {
       let cellCategoria = this.data()[1];
@@ -205,13 +220,17 @@ $(document).ready(function() {
       let textoStatus = cellStatus ? $('<div>').html(cellStatus).text().trim() : '';
       let catNorm = normalizarCategoria(textoCat);
 
-      if (textoStatus.includes('Ativo') && (!categoriaAtiva || catNorm === normalizarCategoria(categoriaAtiva))) {
+      if (textoStatus === 'Ativa' && (!categoriaAtiva || catNorm === normalizarCategoria(categoriaAtiva))) {
         ativasCount++;
       }
 
-      if (textoCat && (!statusAtivo || textoStatus.includes(statusAtivo))) {
+      if (textoCat && (!statusAtivo || textoStatus === statusAtivo)) {
         contadoresCat[catNorm] = (contadoresCat[catNorm] || 0) + 1;
       }
+      
+      if (textoStatus === 'Ativa') contadoresStatus['Ativa']++;
+      if (textoStatus === 'Pausada') contadoresStatus['Pausada']++;
+      if (textoStatus === 'Arquivada') contadoresStatus['Arquivada']++;
     });
 
     $('#countCampanhasAtivas').text(ativasCount);
@@ -232,25 +251,33 @@ $(document).ready(function() {
     } else {
       $('#countCampanhasCategoriaAtiva').addClass('d-none');
     }
+    
+    // Atualiza contadores de status dentro do dropdown
+    $('.count-status-campanha-item').each(function() {
+      let statusName = $(this).data('status-name');
+      $(this).text(contadoresStatus[statusName] || 0);
+    });
+    
+    const statusSelecionadoTexto = $('#textoCampanhasStatusPill').text().trim();
+    if (statusSelecionadoTexto && statusSelecionadoTexto !== 'Status' && contadoresStatus[statusSelecionadoTexto] !== undefined) {
+      $('#countCampanhasStatusAtiva').text(contadoresStatus[statusSelecionadoTexto]).removeClass('d-none');
+    } else {
+      $('#countCampanhasStatusAtiva').addClass('d-none');
+    }
   }
 
   tabelaInventario.on('draw', atualizarContadoresCampanhas);
 
-  // Filtros rápidos via cliques nas pílulas (Todas vs Ativas)
+  // Reseta completamente todos os filtros de cruzamento da aba de campanhas
   $('#pillCampanhasTodas').on('click', function() {
-    $('#pillCampanhasAtivas').removeClass('ativa');
+    $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
     $(this).addClass('ativa');
+    $('#pillCampanhasStatusDropdown').removeClass('ativa');
+    $('#textoCampanhasStatusPill').text('Status');
     $('#pillCampanhasCategoriaDropdown').removeClass('ativa');
     $('#textoCampanhasCategoriaPill').text('Categoria');
     $('#tabelaInventario').data('status-ativo', null);
     $('#tabelaInventario').data('categoria-ativa', null);
-    tabelaInventario.draw();
-  });
-
-  $('#pillCampanhasAtivas').on('click', function() {
-    $('#pillCampanhasTodas').removeClass('ativa');
-    $(this).addClass('ativa');
-    $('#tabelaInventario').data('status-ativo', 'Ativo');
     tabelaInventario.draw();
   });
 
@@ -599,7 +626,7 @@ $(document).ready(function() {
     const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativo');
     const statusAtivo = $('#tabelaEstoque').data('status-ativo');
     let contadores = {}; 
-    let contadoresStatus = { 'Ativa': 0, 'Sem campanha': 0 };
+    let contadoresStatus = { 'Ativa': 0, 'Pausada': 0, 'Sem campanha': 0 };
     
     tabelaEstoque.rows().every(function() {
       let cellContent = this.data()[1]; 
@@ -617,6 +644,7 @@ $(document).ready(function() {
       // Contagem de status respeitando filtro de categoria
       if (!categoriaAtiva || (cellContent && normalizarCategoria($('<div>').html(cellContent).text().trim()) === normalizarCategoria(categoriaAtiva))) {
         if (statusTexto === 'Ativa') contadoresStatus['Ativa']++;
+        if (statusTexto === 'Pausada') contadoresStatus['Pausada']++;
         if (statusTexto === 'Sem campanha') contadoresStatus['Sem campanha']++;
       }
     });
@@ -640,6 +668,8 @@ $(document).ready(function() {
     
     if (statusAtivo === 'Ativa') {
       $('#countStatusCampanhaAtiva').text(contadoresStatus['Ativa']).removeClass('d-none');
+    } else if (statusAtivo === 'Pausada') {
+      $('#countStatusCampanhaAtiva').text(contadoresStatus['Pausada']).removeClass('d-none');
     } else if (statusAtivo === 'Sem campanha') {
       $('#countStatusCampanhaAtiva').text(contadoresStatus['Sem campanha']).removeClass('d-none');
     } else {

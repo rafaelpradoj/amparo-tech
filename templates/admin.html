@@ -251,14 +251,22 @@
           <div id="containerExcelCampanhas" class="flex-shrink-0"></div>
           <div id="containerPesquisaCampanhas" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
           
-          <!-- Filtro Duplo: Status (Todos/Ativos) + Dropdown de Categoria -->
+          <!-- Filtro Duplo: Status (Todos/Ativo/Pausado/Arquivado) + Dropdown de Categoria -->
           <div class="pilulas-container flex-shrink-0" style="overflow: visible !important;">
             <button type="button" id="pillCampanhasTodas" class="btn-pilula ativa">
               Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countCampanhasTodas" style="font-size: 0.75rem;">0</span>
             </button>
-            <button type="button" id="pillCampanhasAtivas" class="btn-pilula">
-              Ativos <span class="badge rounded-pill bg-success font-numeric ms-1" id="countCampanhasAtivas" style="font-size: 0.75rem;">0</span>
-            </button>
+            <div class="dropdown d-inline-block">
+              <button type="button" id="pillCampanhasStatusDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <span id="textoCampanhasStatusPill">Status</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countCampanhasStatusAtiva" style="font-size: 0.75rem;">0</span>
+              </button>
+              <ul id="menuStatusCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 180px;">
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Ativa" style="font-size: 0.75rem;">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Pausada" style="font-size: 0.75rem;">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Arquivada"><span><i class="bi bi-archive text-danger me-2"></i> Arquivada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Arquivada" style="font-size: 0.75rem;">0</span></a></li>
+              </ul>
+            </div>
             <div class="dropdown d-inline-block">
               <button type="button" id="pillCampanhasCategoriaDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoCampanhasCategoriaPill">Categoria</span>
@@ -287,9 +295,13 @@
               <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
               <td class="align-middle text-center">
                 {% if item[5] %}
-                <span class="badge bg-success">Ativo</span>
+                  {% if item[6] %}
+                  <span class="badge bg-warning text-dark">Pausada</span>
+                  {% else %}
+                  <span class="badge bg-success">Ativa</span>
+                  {% endif %}
                 {% else %}
-                <span class="badge bg-danger">Arquivado</span>
+                  <span class="badge bg-danger">Arquivada</span>
                 {% endif %}
               </td>
               <td class="align-middle text-center font-numeric">
@@ -303,6 +315,15 @@
                 <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarItem{{ item[0] }}">
                   <i class="bi bi-pencil"></i>
                 </button>
+                {% if item[6] %}
+                <button type="button" class="btn btn-sm btn-outline-success mx-2" data-bs-toggle="modal" data-bs-target="#modalPausarItem{{ item[0] }}">
+                  <i class="bi bi-play-circle"></i> Reativar
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-sm btn-outline-info mx-2" data-bs-toggle="modal" data-bs-target="#modalPausarItem{{ item[0] }}">
+                  <i class="bi bi-pause-circle"></i> Pausar
+                </button>
+                {% endif %}
                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirItem{{ item[0] }}">
                   <i class="bi bi-archive"></i> Arquivar
                 </button>
@@ -335,6 +356,37 @@
                           <button type="submit" class="btn btn-warning fw-bold text-dark mx-2">Salvar Meta</button>
                         </div>
                       </form>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="modal fade" id="modalPausarItem{{ item[0] }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog text-start text-wrap">
+                    <div class="modal-content bg-dark text-light border-secondary">
+                      <div class="modal-header {% if item[6] %}border-success{% else %}border-info{% endif %}">
+                        <h2 class="modal-title {% if item[6] %}text-success{% else %}text-info{% endif %} fs-5">
+                          <i class="bi {% if item[6] %}bi-play-circle{% else %}bi-pause-circle{% endif %}"></i>
+                          {% if item[6] %}Reativar{% else %}Pausar{% endif %} Campanha
+                        </h2>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                      </div>
+                      <div class="modal-body text-body-secondary">
+                        {% if item[6] %}
+                        Deseja realmente <strong class="text-light">reativar</strong> a campanha <span class="text-light font-numeric">{{ item[1]|title }}</span>? Ela voltará a aparecer na página principal e a contabilizar doações.
+                        {% else %}
+                        Deseja realmente <strong class="text-light">pausar</strong> a campanha <span class="text-light font-numeric">{{ item[1]|title }}</span>? Ela deixará de aparecer na página principal de doações imediatamente.
+                        {% endif %}
+                      </div>
+                      <div class="modal-footer border-secondary">
+                        <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
+                        <form action="/admin/item/pausar/{{ item[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <button type="submit" class="{% if item[6] %}btn btn-success{% else %}btn btn-info{% endif %} mx-2">
+                            {% if item[6] %}Reativar{% else %}Pausar{% endif %}
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -406,6 +458,7 @@
               </button>
               <ul id="menuStatusCampanhaEstoque" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 180px;">
                 <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Ativa" style="font-size: 0.75rem;">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Pausada" style="font-size: 0.75rem;">0</span></a></li>
                 <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Sem campanha"><span><i class="bi bi-x-circle text-danger me-2"></i> Sem campanha</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Sem campanha" style="font-size: 0.75rem;">0</span></a></li>
               </ul>
             </div>
@@ -430,8 +483,10 @@
                 <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
                 <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
                 <td class="align-middle text-center">
-                  {% if item[6] %}
+                  {% if item[6] == 'ativa' %}
                     <span class="badge bg-success">Ativa</span>
+                  {% elif item[6] == 'pausada' %}
+                    <span class="badge bg-warning text-dark">Pausada</span>
                   {% else %}
                     <span class="badge bg-secondary">Sem campanha</span>
                   {% endif %}

@@ -68,6 +68,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     # --- TABELA: CAMPANHAS ---
     # Gerencia as metas públicas de arrecadação. Depende diretamente da tabela de produtos.
     # ON DELETE RESTRICT impede a exclusão de um produto que possua uma campanha vinculada.
+    # 'pausada' permite pausar temporariamente a campanha sem arquivá-la.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS campanhas (
             id SERIAL PRIMARY KEY,
@@ -75,6 +76,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
             meta INTEGER NOT NULL CHECK (meta > 0),
             arrecadado INTEGER DEFAULT 0 CHECK (arrecadado >= 0),
             ativo BOOLEAN DEFAULT TRUE,
+            pausada BOOLEAN DEFAULT FALSE,
             
             CONSTRAINT fk_campanhas_produtos
                 FOREIGN KEY(id_produto) REFERENCES produtos(id) ON DELETE RESTRICT
@@ -109,7 +111,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
         CREATE TABLE IF NOT EXISTS auditoria(
             id SERIAL PRIMARY KEY,
             data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            acao TEXT NOT NULL CHECK (acao IN ('Criação', 'Aprovação', 'Exclusão', 'Edição', 'Login')),
+            acao TEXT NOT NULL CHECK (acao IN ('Criação', 'Aprovação', 'Exclusão', 'Edição', 'Login', 'Pausamento', 'Reativação')),
             descricao TEXT NOT NULL,
             id_operador INTEGER,
 

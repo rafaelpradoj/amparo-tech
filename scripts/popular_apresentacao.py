@@ -24,6 +24,12 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     id_op = cursor.fetchone()[0]
     print("- Operador 'operador_banca' criado.")
 
+    # 1.1 Garantir que todas as categorias usadas no script existam no banco
+    categorias_necessarias = ['Alimentos', 'Vestuário', 'Higiene', 'Eletrônicos']
+    for cat in categorias_necessarias:
+        cursor.execute("INSERT INTO categorias (nome) VALUES (%s) ON CONFLICT (nome) DO NOTHING;", (cat,))
+    print(f"- Categorias garantidas: {', '.join(categorias_necessarias)}")
+
     # 2. Inserção de Produtos variados distribuídos em categorias.
     #    Alguns SEM campanha, para testar o filtro Status Campanha.
     produtos = [
@@ -57,6 +63,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
 
     # 3. Criação de Campanhas Ativas vinculadas aos produtos do estoque.
     #    Nem todos os produtos possuem campanha, para permitir teste do filtro Status Campanha.
+    #    Uma campanha é criada pausada para teste da nova funcionalidade.
     campanhas = [
         # Alimentos
         (ids_produtos["Arroz|Alimentos"], 500, 150),
@@ -77,7 +84,13 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     for c in campanhas:
         cursor.execute("INSERT INTO campanhas (id_produto, meta, arrecadado) VALUES (%s, %s, %s) RETURNING id;", c)
         ids_campanhas.append(cursor.fetchone()[0])
-    print("- 6 Campanhas criadas. Produtos sem campanha mantidos para teste de filtro.")
+    
+    # Cria uma campanha pausada para teste da funcionalidade de pausar/reativar
+    cursor.execute("INSERT INTO campanhas (id_produto, meta, arrecadado, pausada) VALUES (%s, %s, %s, TRUE) RETURNING id;", 
+                   (ids_produtos["Macarrão|Alimentos"], 80, 10))
+    id_campanha_pausada = cursor.fetchone()[0]
+    print("- 6 Campanhas ativas criadas. 1 campanha pausada criada para teste.")
+    print(f"  Campanha pausada: ID {id_campanha_pausada}")
 
     # 4. Injeção de Doações de Exemplo
     
@@ -115,12 +128,14 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', 'Arquivou a campanha de Fralda', %s);", (id_op,))
     cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', 'Editou a Meta da campanha Fone de Ouvido para 150', %s);", (id_op,))
     cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', 'Editou o produto Sabonete de Higiene para Higiene', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Pausamento', 'Pausou a campanha Macarrão', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Reativação', 'Reativou a campanha Macarrão', %s);", (id_op,))
     
     conn.commit()
 
 print("✅ Banco de dados populado com sucesso!")
 print("   - 1 operador comum")
 print("   - 8 produtos em 4 categorias (3 sem campanha para teste de filtro)")
-print("   - 6 campanhas ativas")
+print("   - 6 campanhas ativas + 1 campanha pausada")
 print("   - 4 doações de exemplo (Pendente no prazo, Pendente expirada, Aprovada, Recusada)")
-print("   - 8 registros de auditoria")
+print("   - 10 registros de auditoria (inclui Pausamento e Reativação)")

@@ -61,7 +61,7 @@ def painel():
 
         # 4. Lista geral de campanhas (ativas e inativas) para o gerenciador
         cursor.execute("""
-            SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta, c.ativo 
+            SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta, c.ativo, c.pausada 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
             ORDER BY c.ativo DESC, p.nome ASC;
@@ -77,7 +77,11 @@ def painel():
                 p.estoque_fisico, 
                 0, 
                 p.ativo,
-                CASE WHEN c.id IS NOT NULL THEN TRUE ELSE FALSE END as tem_campanha_ativa
+                CASE 
+                    WHEN c.id IS NULL THEN 'sem'
+                    WHEN c.pausada = TRUE THEN 'pausada'
+                    ELSE 'ativa' 
+                END as status_campanha
             FROM produtos p
             LEFT JOIN campanhas c ON c.id_produto = p.id AND c.ativo = TRUE
             ORDER BY p.ativo DESC, p.nome ASC;
@@ -138,7 +142,7 @@ def aprovar_doacao(id_doacao):
         # Se passou da trava acima, temos garantia absoluta de que esta é a única thread processando a aprovação.
         cursor.execute("""
             SELECT d.id_campanha, d.quantidade, p.nome, d.doador, c.id_produto,
-                   c.ativo AS campanha_ativa, p.ativo AS produto_ativo
+                   c.ativo AS campanha_ativa, p.ativo AS produto_ativo, c.pausada AS campanha_pausada
             FROM doacoes d 
             JOIN campanhas c ON d.id_campanha = c.id 
             JOIN produtos p ON c.id_produto = p.id 
@@ -152,7 +156,7 @@ def aprovar_doacao(id_doacao):
             # Atualiza o estoque físico do produto (produto recebido, mesmo que campanha encerrada)
             cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico + %s WHERE id = %s", (quantidade_doada, id_do_produto))
             
-            # Atualiza o arrecadado apenas se a campanha ainda estiver ativa (preserva integridade histórica)
+            # Atualiza o arrecadado se a campanha ainda estiver ativa (pausada ou não)
             if campanha_ativa:
                 cursor.execute("UPDATE campanhas SET arrecadado = arrecadado + %s WHERE id = %s", (quantidade_doada, id_da_campanha))
             
@@ -227,6 +231,13 @@ def novo_item():
     if not categoria:
         flash("Selecione uma categoria!", "danger")
         return redirect(url_for('admin.painel'))
+    
+    # Valida se a categoria existe no sistema
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
+        if not cursor.fetchone():
+            flash(f"A categoria '{categoria}' não existe no sistema! Cadastre-a primeiro.", "danger")
+            return redirect(url_for('admin.painel'))
 
     nome_normalizado = normalizar_nome(produto_nome)
 
@@ -252,10 +263,17 @@ def novo_item():
             flash(f"A categoria '{categoria}' não corresponde ao produto '{nome_produto}' (categoria correta: {categoria_produto})!", "warning")
             return redirect(url_for('admin.painel'))
 
-        # Impede duplicatas de campanhas ativas para o mesmo produto
-        cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_do_produto,))
-        if cursor.fetchone():
-            flash(f"Já existe uma campanha ativa para '{nome_produto}'!", "warning")
+        # Impede duplicatas de campanhas ativas (inclui pausadas) para o mesmo produto
+        # Campanhas arquivadas (ativo = FALSE) não bloqueiam nova criação
+        cursor.execute("SELECT id, ativo, pausada FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_do_produto,))
+        campanha_existente = cursor.fetchone()
+        
+        if campanha_existente:
+            id_campanha_existente, pausada_existente = campanha_existente
+            if not pausada_existente:
+                flash(f"Já existe uma campanha ativa para '{nome_produto}'!", "warning")
+            else:
+                flash(f"Campanha para '{nome_produto}' já existe e está pausada!", "warning")
             return redirect(url_for('admin.painel'))
 
         # Insere a nova campanha associada ao ID do produto
@@ -282,6 +300,13 @@ def novo_produto_estoque():
     if not categoria:
         flash("Selecione uma categoria!", "danger")
         return redirect(url_for('admin.painel'))
+    
+    # Valida se a categoria existe no sistema
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
+        if not cursor.fetchone():
+            flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
+            return redirect(url_for('admin.painel'))
     
     if especificacao:
         nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
@@ -377,6 +402,13 @@ def editar_produto(id_produto):
     if not categoria:
         flash("Selecione uma categoria!", "danger")
         return redirect(url_for('admin.painel'))
+    
+    # Valida se a categoria existe no sistema
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
+        if not cursor.fetchone():
+            flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
+            return redirect(url_for('admin.painel'))
 
     if especificacao:
         nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
@@ -421,6 +453,45 @@ def editar_produto(id_produto):
         conn.commit()
 
     flash(f"Produto '{nome_padronizado}' atualizado com sucesso!", "success")
+    return redirect(url_for('admin.painel'))
+
+@admin_bp.route("/admin/item/pausar/<int:id_campanha>", methods=["POST"])
+@login_required
+def pausar_campanha(id_campanha):
+    """
+    Pausa ou reativa uma campanha de arrecadação.
+    Pausada: oculta do público, preserva dados e contagem.
+    Reativada: volta a aparecer na página pública e receber doações.
+    """
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        cursor.execute("""
+            SELECT p.nome, c.pausada FROM campanhas c 
+            JOIN produtos p ON c.id_produto = p.id 
+            WHERE c.id = %s
+        """, (id_campanha,))
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            flash("Campanha inexistente!", "danger")
+            return redirect(url_for('admin.painel'))
+        
+        nome_produto, pausada = resultado
+        
+        if pausada:
+            cursor.execute("UPDATE campanhas SET pausada = FALSE WHERE id = %s", (id_campanha,))
+            descricao = f"Reativou a campanha '{nome_produto}'"
+            acao = "Reativação"
+            mensagem = f"Campanha '{nome_produto}' reativada com sucesso!"
+        else:
+            cursor.execute("UPDATE campanhas SET pausada = TRUE WHERE id = %s", (id_campanha,))
+            descricao = f"Pausou a campanha '{nome_produto}'"
+            acao = "Pausamento"
+            mensagem = f"Campanha '{nome_produto}' pausada com sucesso!"
+        
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES (%s, %s, %s)", (acao, descricao, session['operador_id']))
+        conn.commit()
+        
+    flash(mensagem, "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/excluir/<int:id_campanha>", methods=["POST"])
