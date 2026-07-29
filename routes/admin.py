@@ -151,7 +151,7 @@ def aprovar_doacao(id_doacao):
         info = cursor.fetchone()
         
         if info:
-            id_da_campanha, quantidade_doada, nome_item, doador, id_do_produto, campanha_ativa, produto_ativo = info
+            id_da_campanha, quantidade_doada, nome_item, doador, id_do_produto, campanha_ativa, produto_ativo, campanha_pausada = info
             
             # Atualiza o estoque físico do produto (produto recebido, mesmo que campanha encerrada)
             cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico + %s WHERE id = %s", (quantidade_doada, id_do_produto))
