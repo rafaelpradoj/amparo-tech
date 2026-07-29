@@ -199,14 +199,10 @@ def recusar_doacao(id_doacao):
 @login_required
 def novo_item():
     """
-    Cria uma nova campanha de arrecadação. Se o produto base correspondente não existir,
-    ele é cadastrado automaticamente. Se já existir uma campanha ativa para o item, bloqueia a criação.
+    Cria uma nova campanha de arrecadação para um produto EXISTENTE no estoque.
+    O produto é buscado pelo nome normalizado. A categoria é validada contra o produto.
     """
-    # Coleta e padroniza os dados do formulário
-    produto_base = request.form.get("produto", "").strip()
-    especificacao = request.form.get("especificacao", "").strip()
-    qtd_medida = request.form.get("qtd_medida", "").strip()
-    unidade = request.form.get("unidade", "").strip()
+    produto_nome = request.form.get("produto", "").strip()
     categoria = (request.form.get("categoria") or "").strip()
     meta_raw = request.form.get("meta", "")
 
@@ -223,51 +219,43 @@ def novo_item():
     if not categoria:
         flash("Selecione uma categoria!", "danger")
         return redirect(url_for('admin.painel'))
-    
-    # Formata o nome padrão comercial do item (Ex: "Arroz Agulhinha - 5kg")
-    if especificacao:
-        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
-    else:
-        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
 
-    nome_normalizado = normalizar_nome(nome_padronizado)
+    nome_normalizado = normalizar_nome(produto_nome)
 
-    # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
     if len(nome_normalizado) > 150:
         flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
         return redirect(url_for('admin.painel'))
-    
-    with get_db_connection() as conn, conn.cursor() as cursor:
-        # Verifica se o produto com esse nome normalizado já existe no sistema
-        cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_normalizado,))
-        produto = cursor.fetchone()
-        
-        if not produto:
-            # Caso não exista, realiza a inserção do produto novo
-            cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0) RETURNING id", (nome_normalizado, categoria))
-            id_row = cursor.fetchone()
-            if not id_row:
-                flash("Erro ao criar produto. Tente novamente!", "danger")
-                return redirect(url_for('admin.painel'))
 
-            id_do_produto = id_row[0]
-        else:
-            # Caso exista mas esteja oculto/inativo, reativa o produto
-            id_do_produto = produto[0]
-            cursor.execute("UPDATE produtos SET ativo = TRUE WHERE id = %s", (id_do_produto,))
-            
-        # Impede a criação de duplicatas de campanhas ativas para o mesmo produto
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        # Busca o produto existente pelo nome normalizado
+        cursor.execute("SELECT id, nome, categoria FROM produtos WHERE nome = %s AND ativo = TRUE", (nome_normalizado,))
+        produto = cursor.fetchone()
+
+        if not produto:
+            flash(f"Produto '{produto_nome}' não encontrado no estoque!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        id_do_produto = produto[0]
+        nome_produto = produto[1]
+        categoria_produto = produto[2]
+
+        # Validação: categoria informada deve corresponder à do produto
+        if categoria != categoria_produto:
+            flash(f"A categoria '{categoria}' não corresponde ao produto '{nome_produto}' (categoria correta: {categoria_produto})!", "warning")
+            return redirect(url_for('admin.painel'))
+
+        # Impede duplicatas de campanhas ativas para o mesmo produto
         cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_do_produto,))
         if cursor.fetchone():
-            flash(f"Já existe uma campanha ativa para '{nome_padronizado}'", "warning")
+            flash(f"Já existe uma campanha ativa para '{nome_produto}'!", "warning")
             return redirect(url_for('admin.painel'))
-        
+
         # Insere a nova campanha associada ao ID do produto
         cursor.execute("INSERT INTO campanhas (id_produto, meta, arrecadado) VALUES (%s, %s, 0)", (id_do_produto, meta))
-        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou a nova campanha '{nome_padronizado}'", session['operador_id']))
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou nova campanha para '{nome_produto}' com meta {meta}", session['operador_id']))
         conn.commit()
-        
-    flash(f"Campanha para '{nome_padronizado}' criada com sucesso!", "success")
+
+    flash(f"Campanha para '{nome_produto}' criada com sucesso! Meta: {meta}", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/estoque/novo_produto", methods=["POST"])
