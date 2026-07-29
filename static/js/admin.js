@@ -457,23 +457,34 @@ $(document).ready(function() {
   // --- ABA ESTOQUE ---
   
   // Injeção de lógica customizada de busca global para filtro por Categorias no Estoque Físico
+  // Filtros customizados para a tabela de estoque (Categoria + Status) - funcionam em AND
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaEstoque') return true;
       
-      const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativa');
-      if (!categoriaAtiva) return true; 
+      const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativo');
+      const statusAtivo = $('#tabelaEstoque').data('status-ativo');
       
-      const textoCategoriaLinha = $('<div>').html(data[1]).text().trim(); 
+      const textoCategoriaLinha = $('<div>').html(data[1]).text().trim();
+      const textoStatusLinha = $('<div>').html(data[3]).text().trim();
       
-      // Compara a linha e a pílula clicada após remover acentos de ambas
-      return normalizarCategoria(textoCategoriaLinha) === normalizarCategoria(categoriaAtiva);
+      // Filtro de categoria (se ativo)
+      if (categoriaAtiva && normalizarCategoria(textoCategoriaLinha) !== normalizarCategoria(categoriaAtiva)) {
+        return false;
+      }
+      
+      // Filtro de status (se ativo)
+      if (statusAtivo && textoStatusLinha !== statusAtivo) {
+        return false;
+      }
+      
+      return true;
   });
 
   const tabelaEstoque = $('#tabelaEstoque').DataTable({
     language: configuracaoIdioma,
     pageLength: 10,
     order: [[2, 'desc']], // Ordena inicialmente pela maior quantidade em estoque físico
-    columnDefs: [ { type: 'sem-acentos', targets: 0 }, { orderable: false, targets: 3 } ],
+    columnDefs: [ { type: 'sem-acentos', targets: 0 }, { orderable: false, targets: [3, 4] } ],
     layout: {
       topStart: {
         buttons: [{
@@ -494,6 +505,34 @@ $(document).ready(function() {
       construirDropdownCategoriaDinamicamente();
       atualizarContadoresEstoque();
     }
+  });
+
+  // Ativação do filtro por Categoria selecionado no dropdown
+  $('#menuDinamicoCategoriaEstoque').on('click', '.dropdown-item-categoria', function(e) {
+    e.preventDefault();
+    const categoriaSelecionada = $(this).data('categoria');
+    const textoLimpoOpcao = $(this).find('span').first().text().trim();
+
+    $('#pillEstoqueTodos').removeClass('ativa');
+    $('#pillEstoqueCategoriaDropdown').addClass('ativa');
+    $('#textoCategoriaPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + textoLimpoOpcao);
+    
+    $('#tabelaEstoque').data('categoria-ativo', categoriaSelecionada);
+    tabelaEstoque.draw(); 
+  });
+
+  // Ativação do filtro por Status selecionado no dropdown
+  $('#menuStatusCampanhaEstoque').on('click', '.dropdown-item-status', function(e) {
+    e.preventDefault();
+    const statusSelecionado = $(this).data('status');
+    const textoLimpoOpcao = $(this).find('span').first().text().trim()
+    
+    $('#pillEstoqueTodos').removeClass('ativa');
+    $('#pillStatusCampanhaDropdown').addClass('ativa');
+    $('#textoStatusPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + textoLimpoOpcao);
+    
+    $('#tabelaEstoque').data('status-ativo', statusSelecionado);
+    tabelaEstoque.draw(); 
   });
 
   // Monta as opções do dropdown AGRUPANDO categorias que diferem apenas por acento/case
@@ -540,42 +579,54 @@ $(document).ready(function() {
     });
   }
 
-  // Executa a filtragem do estoque conforme a categoria agrupada
+  // Ativação do filtro por Categoria selecionado no dropdown
   $('#menuDinamicoCategoriaEstoque').on('click', '.dropdown-item-categoria', function(e) {
     e.preventDefault();
     const categoriaSelecionada = $(this).data('categoria');
     const textoLimpoOpcao = $(this).find('span').first().text().trim();
 
-    const $container = $(this).closest('.pilulas-container');
-    $container.find('.btn-pilula').removeClass('ativa');
+    $('#pillEstoqueTodos').removeClass('ativa');
     $('#pillEstoqueCategoriaDropdown').addClass('ativa');
     $('#textoCategoriaPill').html('<i class="bi bi-funnel-fill text-info me-1"></i> ' + textoLimpoOpcao);
     
-    $('#tabelaEstoque').data('categoria-ativa', categoriaSelecionada);
-    tabelaEstoque.draw(); // Aciona o filtro global e redesenha a tabela
+    $('#tabelaEstoque').data('categoria-ativo', categoriaSelecionada);
+    tabelaEstoque.draw(); 
   });
 
-  // Atualiza os contadores numéricos AGRUPANDO os acentos na contagem
+  // Recalcula dinamicamente os quantitativos de cada opção de dropdown considerando os filtros aplicados (Cross-Filtering)
   function atualizarContadoresEstoque() {
     $('#countEstoqueTodos').text(tabelaEstoque.rows().count());
-    
+    const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativo');
+    const statusAtivo = $('#tabelaEstoque').data('status-ativo');
     let contadores = {}; 
+    let contadoresStatus = { 'Ativa': 0, 'Sem campanha': 0 };
+    
     tabelaEstoque.rows().every(function() {
       let cellContent = this.data()[1]; 
-      if (cellContent) {
-        let catTexto = $('<div>').html(cellContent).text().trim();
-        let normalizado = normalizarCategoria(catTexto);
-        contadores[normalizado] = (contadores[normalizado] || 0) + 1;
+      let statusTexto = $('<div>').html(this.data()[3]).text().trim();
+      
+      // Contagem de categorias respeitando filtro de status
+      if (!statusAtivo || statusTexto === statusAtivo) {
+        if (cellContent) {
+          let catTexto = $('<div>').html(cellContent).text().trim();
+          let normalizado = normalizarCategoria(catTexto);
+          contadores[normalizado] = (contadores[normalizado] || 0) + 1;
+        }
+      }
+      
+      // Contagem de status respeitando filtro de categoria
+      if (!categoriaAtiva || (cellContent && normalizarCategoria($('<div>').html(cellContent).text().trim()) === normalizarCategoria(categoriaAtiva))) {
+        if (statusTexto === 'Ativa') contadoresStatus['Ativa']++;
+        if (statusTexto === 'Sem campanha') contadoresStatus['Sem campanha']++;
       }
     });
 
     $('.count-cat-item').each(function() {
       let nome = $(this).data('cat-name');
       let normalizado = normalizarCategoria(nome);
-      $(this).text(contadores[normalizado] || 0); // Soma os itens normais com os itens sem acento
+      $(this).text(contadores[normalizado] || 0);
     });
 
-    const categoriaAtiva = $('#tabelaEstoque').data('categoria-ativa');
     if (categoriaAtiva) {
       let ativaNormalizada = normalizarCategoria(categoriaAtiva);
       if (contadores[ativaNormalizada]) {
@@ -586,17 +637,34 @@ $(document).ready(function() {
     } else {
       $('#countEstoqueCategoriaAtiva').addClass('d-none'); 
     }
+    
+    if (statusAtivo === 'Ativa') {
+      $('#countStatusCampanhaAtiva').text(contadoresStatus['Ativa']).removeClass('d-none');
+    } else if (statusAtivo === 'Sem campanha') {
+      $('#countStatusCampanhaAtiva').text(contadoresStatus['Sem campanha']).removeClass('d-none');
+    } else {
+      $('#countStatusCampanhaAtiva').addClass('d-none');
+    }
+    
+    // Atualiza contadores dentro dos dropdowns (cross-filtering)
+    $('.count-status-item').each(function() {
+      let statusName = $(this).data('status-name');
+      $(this).text(contadoresStatus[statusName] || 0);
+    });
   }
   
   tabelaEstoque.on('draw', atualizarContadoresEstoque);
 
-  // Reseta o filtro de categorias da listagem de estoque
+  // Reseta completamente todos os filtros de cruzamento da aba de estoque
   $('#pillEstoqueTodos').on('click', function() {
     $(this).closest('.pilulas-container').find('.btn-pilula').removeClass('ativa');
     $(this).addClass('ativa');
     $('#pillEstoqueCategoriaDropdown').removeClass('ativa');
     $('#textoCategoriaPill').text('Categoria'); 
-    $('#tabelaEstoque').data('categoria-ativa', null); 
+    $('#textoStatusPill').text('Status Campanha');
+    $('#pillStatusCampanhaDropdown').removeClass('ativa');
+    $('#tabelaEstoque').data('categoria-ativo', null); 
+    $('#tabelaEstoque').data('status-ativo', null); 
     tabelaEstoque.draw();
   });
 
