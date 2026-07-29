@@ -408,6 +408,8 @@
               <th class="text-center">Produto Especificado</th>
               <th class="text-center">Categoria</th>
               <th class="text-center">Quantidade Física</th>
+              <th class="text-center">Status Campanha</th>
+
               <th class="text-nowrap text-center">Ajuste Manual</th>
             </tr>
           </thead>
@@ -418,6 +420,13 @@
                 <td class="align-middle text-center"><strong>{{ item[1]|title }}</strong></td>
                 <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
                 <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
+                <td class="align-middle text-center">
+                  {% if item[6] %}
+                    <span class="badge bg-success">Ativa</span>
+                  {% else %}
+                    <span class="badge bg-secondary">Sem campanha</span>
+                  {% endif %}
+                </td>
                 <td class="align-middle text-nowrap text-center">
                   <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarEstoque{{ item[0] }}" title="Editar Produto">
                     <i class="bi bi-pencil"></i>

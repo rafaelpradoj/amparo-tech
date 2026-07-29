@@ -70,9 +70,17 @@ def painel():
 
         # 5. Lista de produtos cadastrados no estoque físico (internos)
         cursor.execute("""
-            SELECT id, nome, categoria, estoque_fisico, 0, ativo 
-            FROM produtos 
-            ORDER BY ativo DESC, nome ASC;
+            SELECT 
+                p.id, 
+                p.nome, 
+                p.categoria, 
+                p.estoque_fisico, 
+                0, 
+                p.ativo,
+                CASE WHEN c.id IS NOT NULL THEN TRUE ELSE FALSE END as tem_campanha_ativa
+            FROM produtos p
+            LEFT JOIN campanhas c ON c.id_produto = p.id AND c.ativo = TRUE
+            ORDER BY p.ativo DESC, p.nome ASC;
         """)
         lista_produtos = cursor.fetchall()
 
