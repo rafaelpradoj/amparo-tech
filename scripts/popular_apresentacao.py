@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash
 # Carrega as variáveis de ambiente do arquivo .env (como as credenciais do banco)
 load_dotenv(override=True)
 
-print("Iniciando a injeção de dados variados para teste de categorias...")
+print("Iniciando a injeção de dados variados para teste do fluxo atual...")
 
 with get_db_connection() as conn, conn.cursor() as cursor:
     
@@ -24,71 +24,60 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     id_op = cursor.fetchone()[0]
     print("- Operador 'operador_banca' criado.")
 
-    # 2. Inserção de Produtos variados distribuídos em todas as categorias
+    # 2. Inserção de Produtos variados distribuídos em categorias.
+    #    Alguns SEM campanha, para testar o filtro Status Campanha.
     produtos = [
-        # Categoria: Alimentos (3 Itens)
-        ("Arroz Tipo 1 - 5kg", "Alimentos", 150),
-        ("Feijão Carioca - 1kg", "Alimentos", 80),
-        ("Óleo de Soja - 900ml", "Alimentos", 40),
-        
-        # Categoria: Geral (2 Itens)
-        ("Cesta Básica Completa", "Geral", 10),
-        ("Lâmpada LED 9W", "Geral", 100),
-        
-        # Categoria: Higiene (2 Itens)
-        ("Sabonete Líquido Neutro - 200ml", "Higiene", 300),
-        ("Fralda Descartável - P", "Higiene", 0),
-        
-        # Categoria: Materiais De Construcao (Sem acento - 1 Item)
-        ("Saco de Cimento 50kg", "Materiais De Construcao", 5),
-        
-        # Categoria: Materiais De Construção (Com acento - 2 Itens)
-        ("Tinta Látex Branca - 18L", "Materiais De Construção", 12),
-        ("Pincel para Pintura 2 polegadas", "Materiais De Construção", 50),
-        
-        # Categoria: Material Escolar (2 Itens)
-        ("Caderno Universitário - 10 Matérias", "Material Escolar", 45),
-        ("Caixa de Lápis de Cor - 12 Cores", "Material Escolar", 60)
+        # Categoria: Alimentos (4 itens)
+        ("Arroz", "Alimentos", 150),
+        ("Feijão", "Alimentos", 80),
+        ("Óleo", "Alimentos", 40),
+        ("Macarrão", "Alimentos", 0),  # Sem campanha, estoque zerado
+
+        # Categoria: Vestuário (2 itens)
+        ("Camiseta", "Vestuário", 50),
+        ("Calça Jeans", "Vestuário", 0),  # Sem campanha
+
+        # Categoria: Higiene (2 itens)
+        ("Sabonete", "Higiene", 300),
+        ("Fralda", "Higiene", 0),
+
+        # Categoria: Eletrônicos (2 itens)
+        ("Fone de Ouvido", "Eletrônicos", 20),
+        ("Carregador", "Eletrônicos", 0),  # Sem campanha
     ]
     
-    ids_produtos = []
-    for p in produtos:
-        cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, %s) RETURNING id;", p)
-        ids_produtos.append(cursor.fetchone()[0])
-    print("- Estoque interno abastecido com 6 categorias.")
+    ids_produtos = {}
+    for nome, categoria, estoque in produtos:
+        cursor.execute(
+            "INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, %s) RETURNING id;",
+            (nome, categoria, estoque)
+        )
+        ids_produtos[f"{nome}|{categoria}"] = cursor.fetchone()[0]
+    print("- Estoque interno populado com 4 categorias e alguns itens sem campanha.")
 
-    # 3. Criação de Campanhas Ativas com metas e arrecadações variadas
+    # 3. Criação de Campanhas Ativas vinculadas aos produtos do estoque.
+    #    Nem todos os produtos possuem campanha, para permitir teste do filtro Status Campanha.
     campanhas = [
         # Alimentos
-        (ids_produtos[0], 500, 150), # Arroz
-        (ids_produtos[1], 300, 80),  # Feijão
-        (ids_produtos[2], 100, 100), # Óleo (Meta Atingida)
+        (ids_produtos["Arroz|Alimentos"], 500, 150),
+        (ids_produtos["Feijão|Alimentos"], 300, 80),
+        (ids_produtos["Óleo|Alimentos"], 100, 100),  # Meta atingida
         
-        # Geral
-        (ids_produtos[3], 50, 12),   # Cesta Básica
-        (ids_produtos[4], 200, 50),  # Lâmpada
+        # Vestuário
+        (ids_produtos["Camiseta|Vestuário"], 50, 12),
         
         # Higiene
-        (ids_produtos[5], 400, 200), # Sabonete
-        (ids_produtos[6], 200, 0),   # Fralda
+        (ids_produtos["Sabonete|Higiene"], 400, 200),
         
-        # Materiais De Construcao (Sem acento)
-        (ids_produtos[7], 30, 5),    # Cimento
-        
-        # Materiais De Construção (Com acento)
-        (ids_produtos[8], 15, 3),    # Tinta
-        (ids_produtos[9], 80, 80),   # Pincel (Meta Atingida)
-        
-        # Material Escolar
-        (ids_produtos[10], 150, 45), # Caderno
-        (ids_produtos[11], 100, 90)  # Lápis de cor
+        # Eletrônicos
+        (ids_produtos["Fone de Ouvido|Eletrônicos"], 150, 45),
     ]
     
     ids_campanhas = []
     for c in campanhas:
         cursor.execute("INSERT INTO campanhas (id_produto, meta, arrecadado) VALUES (%s, %s, %s) RETURNING id;", c)
         ids_campanhas.append(cursor.fetchone()[0])
-    print("- 12 Campanhas vinculadas às categorias.")
+    print("- 6 Campanhas criadas. Produtos sem campanha mantidos para teste de filtro.")
 
     # 4. Injeção de Doações de Exemplo
     
@@ -114,14 +103,24 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     cursor.execute("""
         INSERT INTO doacoes (doador, quantidade, status, data, id_campanha, id_operador) 
         VALUES ('Doador Fake', 999, 'Recusado', CURRENT_TIMESTAMP - INTERVAL '1 days', %s, %s);
-    """, (ids_campanhas[6], id_op))
+    """, (ids_campanhas[4], id_op))
     print("- Doações de teste injetadas.")
 
-    # 5. Preenchimento de Auditoria
-    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', 'Cadastrou a campanha Arroz Tipo 1 - 5kg', %s);", (id_op,))
-    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Aprovação', 'Aprovou a entrada de 100x Arroz Tipo 1 - 5kg doados por Maria Oliveira', %s);", (id_op,))
-    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', 'Recusou a promessa de 999x Fralda Descartável - P de Doador Fake', %s);", (id_op,))
+    # 5. Preenchimento de Auditoria com ações compatíveis com o fluxo atual
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', 'Cadastrou nova campanha para Arroz com meta 500', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', 'Cadastrou nova campanha para Feijão com meta 300', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', 'Cadastrou nova campanha para Óleo com meta 100', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', 'Cadastrou nova campanha para Camiseta com meta 50', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Aprovação', 'Aprovou a entrada de 100x Arroz doados por Maria Oliveira', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', 'Arquivou a campanha de Fralda', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', 'Editou a Meta da campanha Fone de Ouvido para 150', %s);", (id_op,))
+    cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', 'Editou o produto Sabonete de Higiene para Higiene', %s);", (id_op,))
     
     conn.commit()
 
-print("✅ Banco de dados populado com sucesso com 6 categorias e 12 campanhas!")
+print("✅ Banco de dados populado com sucesso!")
+print("   - 1 operador comum")
+print("   - 8 produtos em 4 categorias (3 sem campanha para teste de filtro)")
+print("   - 6 campanhas ativas")
+print("   - 4 doações de exemplo (Pendente no prazo, Pendente expirada, Aprovada, Recusada)")
+print("   - 8 registros de auditoria")
