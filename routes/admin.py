@@ -318,12 +318,22 @@ def novo_produto_estoque():
 @login_required
 def editar_item(id_campanha):
     """
-    Edita os parâmetros de uma campanha (meta, categoria e nome).
-    Regra de Negócio Importante: Se a campanha já possuir qualquer registro de doação vinculado,
-    o sistema bloqueia a alteração do nome por questões de integridade histórica, atualizando apenas a meta.
+    Edita APENAS a meta de uma campanha.
+    A alteração de nome e categoria do produto deve ser feita exclusivamente 
+    pela ficha de edição do estoque.
     """
-    alterar_nome = request.form.get("alterar_nome")
-    
+    nova_meta_raw = request.form.get("meta", "")
+
+    try:
+        nova_meta = int(nova_meta_raw)
+    except (TypeError, ValueError):
+        flash("Meta inválida! Insira apenas números positivos.", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if nova_meta <= 0:
+        flash("Meta deve ser maior que zero!", "danger")
+        return redirect(url_for('admin.painel'))
+
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Garante que a campanha existe e está ativa (Bloqueia Soft Delete Bypass)
         cursor.execute("SELECT id_produto FROM campanhas WHERE id = %s AND ativo = TRUE;", (id_campanha,))
@@ -335,79 +345,18 @@ def editar_item(id_campanha):
         
         id_do_produto = resultado_campanha[0]
         
-        # Constrói o novo nome apenas se o checkbox correspondente foi marcado no front-end
-        if alterar_nome == 'on':
-            produto_base = request.form.get("produto", "").strip()
-            especificacao = request.form.get("especificacao", "").strip()
-            qtd_medida = request.form.get("qtd_medida", "").strip()
-            unidade = request.form.get("unidade", "").strip()
-            
-            if not produto_base or not qtd_medida:
-                flash("Para alterar o nome, preencha pelo menos o Produto Base e o Tamanho!", "danger")
-                return redirect(url_for('admin.painel'))
-                
-            if especificacao:
-                novo_nome = f"{produto_base} {especificacao} - {qtd_medida}{unidade}"
-            else:
-                novo_nome = f"{produto_base} - {qtd_medida}{unidade}"
-        else:
-            novo_nome = request.form.get("nome_atual")
-            
-        # Normaliza o nome para comparação e armazenamento consistentes
-        if alterar_nome == 'on' and novo_nome:
-            novo_nome = normalizar_nome(novo_nome)
-            
-        # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
-        if novo_nome and len(novo_nome) > 150:
-            flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
-            return redirect(url_for('admin.painel'))
-
-        nova_categoria = (request.form.get("categoria") or "").strip()
-        nova_meta_raw = request.form.get("meta", "")
-
-        try:
-            nova_meta = int(nova_meta_raw)
-        except (TypeError, ValueError):
-            flash("Meta inválida! Insira apenas números positivos.", "danger")
-            return redirect(url_for('admin.painel'))
-
-        if nova_meta <= 0:
-            flash("Meta deve ser maior que zero!", "danger")
-            return redirect(url_for('admin.painel'))
-        
+        # Busca nome do produto para descrição de auditoria
         cursor.execute("SELECT nome FROM produtos WHERE id = %s", (id_do_produto,))
-        nome_antigo_row = cursor.fetchone()
-        if not nome_antigo_row:
-            flash("Erro de integridade: produto associado não encontrado!", "danger")
-            return redirect(url_for('admin.painel'))
+        nome_produto_row = cursor.fetchone()
+        nome_produto = nome_produto_row[0] if nome_produto_row else "Desconhecido"
 
-        nome_antigo = nome_antigo_row[0]
-
-        # Trava de segurança: Verifica a existência de histórico de doações na campanha
-        cursor.execute("SELECT id FROM doacoes WHERE id_campanha = %s LIMIT 1", (id_campanha,))
-        tem_doacao = cursor.fetchone()
+        # Atualiza APENAS a meta da campanha
+        cursor.execute("UPDATE campanhas SET meta = %s WHERE id = %s", (nova_meta, id_campanha))
         
-        if tem_doacao:
-            # Caso tenha doações: Altera APENAS a meta da campanha
-            cursor.execute("UPDATE campanhas SET meta = %s WHERE id = %s", (nova_meta, id_campanha))
-            descricao_legivel = f"Editou a Meta da campanha '{nome_antigo}' para {nova_meta}"
-            cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-            flash("Meta atualizada! O nome não pode ser alterado, pois já existem doações registradas.", "warning")
-        else:
-            if not nova_categoria:
-                flash("A categoria é obrigatória!", "danger")
-                return redirect(url_for('admin.painel'))
-
-            # Caso não tenha doações: Altera livremente nome, categoria e meta
-            cursor.execute("UPDATE produtos SET nome = %s, categoria = %s WHERE id = %s", (novo_nome, nova_categoria, id_do_produto))
-            cursor.execute("UPDATE campanhas SET meta = %s WHERE id = %s", (nova_meta, id_campanha))
-            
-            if nome_antigo != novo_nome:
-                descricao_legivel = f"Editou o produto '{nome_antigo}' para '{novo_nome}'"
-            else:
-                descricao_legivel = f"Atualizou os dados da campanha '{nome_antigo}'"
-            cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-            flash("Campanha atualizada com sucesso!", "success")
+        descricao_legivel = f"Editou a Meta da campanha '{nome_produto}' para {nova_meta}"
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
+        
+        flash("Meta da campanha atualizada com sucesso!", "success")
         conn.commit()
         
     return redirect(url_for('admin.painel'))
@@ -655,7 +604,7 @@ def excluir_categoria(id_cat):
             # Verifica se há restrição de chave por produtos que dependem desta categoria
             cursor.execute("SELECT id FROM produtos WHERE categoria = %s LIMIT 1", (nome_categoria,))
             if cursor.fetchone():
-                flash(f"Não é possível excluir '{nome_categoria}': existem produtos vinculados a ela!", "warning")
+                flash(f"Não é possível excluir '{nome_categoria}': existem produtos vinculados a ela!", "danger")
             else:
                 # Remove definitivamente a categoria livre de dependências
                 cursor.execute("DELETE FROM categorias WHERE id = %s", (id_cat,))

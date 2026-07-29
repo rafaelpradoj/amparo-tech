@@ -314,7 +314,7 @@
                   <div class="modal-dialog text-start text-wrap">
                     <div class="modal-content bg-dark text-light border-secondary">
                       <div class="modal-header border-warning">
-                        <h2 class="modal-title text-warning fs-5"><i class="bi bi-pencil"></i> Editar Campanha</h2>
+                        <h2 class="modal-title text-warning fs-5"><i class="bi bi-pencil"></i> Editar Meta da Campanha</h2>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                       </div>
                       <form action="/admin/item/editar/{{ item[0] }}" method="POST" class="m-0">
@@ -322,74 +322,17 @@
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="modal-body">
                           <div class="mb-3">
-                            <label class="form-label">Nome Atual da Campanha:</label>
-                            <input type="text" class="form-control bg-dark text-body-secondary border-secondary" value="{{ item[1]|title }}" readonly />
-                            <input type="hidden" name="nome_atual" value="{{ item[1]|title }}" />
+                            <h3 class="fs-5 text-light">{{ item[1]|title }}</h3>
+                            <p><small class="font-numeric text-warning">Arrecadado: {{ item[3] }}</small></p>
                           </div>
-                          <div class="form-check form-switch mb-3">
-                            <input class="form-check-input bg-secondary border-secondary" type="checkbox" role="switch" id="switchNome{{ item[0] }}" name="alterar_nome" data-bs-toggle="collapse" data-bs-target="#collapseNome{{ item[0] }}">
-                            <label class="form-check-label text-warning" for="switchNome{{ item[0] }}"><i class="bi bi-pencil-square"></i> Corrigir / Refazer nome do produto</label>
-                          </div>
-                          <div class="collapse mb-3" id="collapseNome{{ item[0] }}">
-                            <div class="card card-body bg-dark border-warning p-3">
-                              <div class="row">
-                                <div class="col-md-6 mb-3">
-                                  <label class="form-label text-light">Novo Produto Base:</label>
-                                  <input type="text" class="form-control bg-secondary text-light border-secondary" name="produto" placeholder="Ex: Arroz" maxlength="70"/>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                  <label class="form-label text-light">Especificação:</label>
-                                  <input type="text" class="form-control bg-secondary text-light border-secondary" name="especificacao" placeholder="Ex: Tipo 1" maxlength="70"/>
-                                </div>
-                              </div>
-                              <div class="row">
-                                <div class="col-md-6 mb-3">
-                                  <label class="form-label text-light">Tamanho/Peso:</label>
-                                  <input type="number" min="1" class="form-control bg-secondary text-light border-secondary" name="qtd_medida" placeholder="Ex: 5" />
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                  <label class="form-label text-light">Unidade:</label>
-                                  <select class="form-select bg-secondary text-light border-secondary" name="unidade" required>
-                                    <option value="kg">Quilogramas (kg)</option>
-                                    <option value="g">Gramas (g)</option>
-                                    <option value="L">Litros (L)</option>
-                                    <option value="ml">Mililitros (ml)</option>
-                                    <option value="cm">Centímetros (cm)</option>
-                                    <option value="Metro(s)">Metros (m)</option>
-                                    <option value="m²">Metros Quadrados (m²)</option>
-                                    <option value="m³">Metros Cúbicos (m³)</option>
-                                    <option value="Unidade(s)">Unidade(s)</option>
-                                    <option value="Par(es)">Par(es)</option>
-                                    <option value="Peça(s)">Peça(s)</option>
-                                    <option value="Caixa(s)">Caixa(s)</option>
-                                    <option value="Pacote(s)">Pacote(s)</option>
-                                    <option value="Fardo(s)">Fardo(s)</option>
-                                    <option value="Lata(s)">Lata(s)</option>
-                                    <option value="Rolo(s)">Rolo(s)</option>
-                                    <option value="Kit(s)">Kit(s)</option>
-                                    <option value="Cesta(s)">Cesta(s)</option>
-                                  </select>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <hr class="border-secondary">
-                          <div class="mb-3">
-                            <label class="form-label">Categoria:</label>
-                            <select class="form-select bg-secondary text-light border-secondary" name="categoria" required>
-                              {% for cat in categorias %}
-                              <option value="{{ cat[1] }}" {% if item[2] == cat[1] %}selected{% endif %}>{{ cat[1] }}</option>
-                              {% endfor %}
-                            </select>
-                          </div>
-                          <div class="mb-3">
+                          <div class="mb-1">
                             <label class="form-label">Nova Meta de Arrecadação:</label>
                             <input type="number" class="form-control bg-secondary text-light border-secondary" name="meta" min="1" value="{{ item[4] }}" required />
                           </div>
                         </div>
                         <div class="modal-footer border-secondary">
                           <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
-                          <button type="submit" class="btn btn-warning fw-bold text-dark mx-2">Salvar Alterações</button>
+                          <button type="submit" class="btn btn-warning fw-bold text-dark mx-2">Salvar Meta</button>
                         </div>
                       </form>
                     </div>
@@ -495,7 +438,8 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="entrada">
                           <div class="modal-body">
-                            <p><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-warning">Estoque atual: {{ item[3] }}</small></p>
+                            <h3 class="fs-5 text-warning">{{ item[1]|title }}</h3>
+                            <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a adicionar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" required />
@@ -526,13 +470,14 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
-                            <p><span class="font-numeric">{{ item[1]|title }}</span><br><small class="text-warning">Estoque atual: {{ item[3] }}</small></p>
+                            <h3 class="fs-5 text-warning">{{ item[1]|title }}</h3>
+                            <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a retirar:</label>
                               <input type="number" class="form-control bg-secondary text-light border-secondary" name="quantidade" min="1" max="{{ item[3] }}" required />
                             </div>
                             <div class="mb-1">
-                              <label class="form-label">Destino / Motivo (Obrigatório):</label>
+                              <label class="form-label">Motivo da Saída (Obrigatório):</label>
                               <input type="text" class="form-control bg-secondary text-light border-secondary" name="motivo" placeholder="Ex: Doação para a família Silva" required />
                             </div>
                           </div>
