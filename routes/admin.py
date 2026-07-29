@@ -361,6 +361,72 @@ def editar_item(id_campanha):
         
     return redirect(url_for('admin.painel'))
 
+@admin_bp.route("/admin/estoque/editar/<int:id_produto>", methods=["POST"])
+@login_required
+def editar_produto(id_produto):
+    """
+    Edita os dados de um produto do estoque.
+    Regra: Não permite alterar nome/categoria se houver campanha ATIVA vinculada.
+    """
+    produto_base = request.form.get("produto", "").strip()
+    especificacao = request.form.get("especificacao", "").strip()
+    qtd_medida = request.form.get("qtd_medida", "").strip()
+    unidade = request.form.get("unidade", "").strip()
+    categoria = (request.form.get("categoria") or "").strip()
+
+    if not produto_base or not qtd_medida:
+        flash("Preencha pelo menos o Produto Base e o Tamanho!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if not categoria:
+        flash("Selecione uma categoria!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    if especificacao:
+        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
+    else:
+        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
+
+    nome_normalizado = normalizar_nome(nome_padronizado)
+
+    if len(nome_normalizado) > 150:
+        flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
+        return redirect(url_for('admin.painel'))
+
+    with get_db_connection() as conn, conn.cursor() as cursor:
+        # Verifica se o produto existe e está ativo
+        cursor.execute("SELECT nome, categoria FROM produtos WHERE id = %s AND ativo = TRUE", (id_produto,))
+        produto_atual = cursor.fetchone()
+
+        if not produto_atual:
+            flash("Produto inexistente!", "danger")
+            return redirect(url_for('admin.painel'))
+
+        nome_antigo = produto_atual[0]
+        categoria_antiga = produto_atual[1]
+
+        # Verifica se houve alteração real
+        if nome_normalizado == nome_antigo and categoria == categoria_antiga:
+            flash("Nenhuma alteração de produto detectada!", "warning")
+            return redirect(url_for('admin.painel'))
+
+        # Trava de campanha ativa: impede alteração de nome/categoria
+        cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_produto,))
+        if cursor.fetchone():
+            flash("Produto com campanha ativa não pode ser alterado!.", "danger")
+            return redirect(url_for('admin.painel'))
+
+        # Atualiza o produto
+        cursor.execute("UPDATE produtos SET nome = %s, categoria = %s WHERE id = %s", (nome_normalizado, categoria, id_produto))
+
+        descricao = f"Editou o produto '{nome_antigo}' para '{nome_normalizado}' (categoria: {categoria_antiga} → {categoria})"
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao, session['operador_id']))
+
+        conn.commit()
+
+    flash(f"Produto '{nome_padronizado}' atualizado com sucesso!", "success")
+    return redirect(url_for('admin.painel'))
+
 @admin_bp.route("/admin/item/excluir/<int:id_campanha>", methods=["POST"])
 @login_required
 def excluir_item(id_campanha):
@@ -604,7 +670,7 @@ def excluir_categoria(id_cat):
             # Verifica se há restrição de chave por produtos que dependem desta categoria
             cursor.execute("SELECT id FROM produtos WHERE categoria = %s LIMIT 1", (nome_categoria,))
             if cursor.fetchone():
-                flash(f"Não é possível excluir '{nome_categoria}': existem produtos vinculados a ela!", "danger")
+                flash(f"Categoria '{nome_categoria}' não pode ser excluída: há produtos vinculados!.", "danger")
             else:
                 # Remove definitivamente a categoria livre de dependências
                 cursor.execute("DELETE FROM categorias WHERE id = %s", (id_cat,))

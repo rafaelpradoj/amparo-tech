@@ -300,7 +300,7 @@
               <td class="align-middle text-center font-numeric">{{ item[4] }}</td>
               <td class="align-middle text-nowrap text-center">
                 {% if item[5] %}
-                <button type="button" class="btn btn-sm btn-outline-warning me-2" data-bs-toggle="modal" data-bs-target="#modalEditarItem{{ item[0] }}">
+                <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarItem{{ item[0] }}">
                   <i class="bi bi-pencil"></i>
                 </button>
                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalExcluirItem{{ item[0] }}">
@@ -419,12 +419,83 @@
                 <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
                 <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
                 <td class="align-middle text-nowrap text-center">
-                  <button type="button" class="btn btn-sm btn-outline-success mx-1" data-bs-toggle="modal" data-bs-target="#modalEntrada{{ item[0] }}" title="Adicionar ao Estoque">
+                  <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarEstoque{{ item[0] }}" title="Editar Produto">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline-success mx-2" data-bs-toggle="modal" data-bs-target="#modalEntrada{{ item[0] }}" title="Adicionar ao Estoque">
                     <i class="bi bi-plus-lg"></i>
                   </button>
-                  <button type="button" class="btn btn-sm btn-outline-danger mx-1" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Remover do Estoque">
+                  <button type="button" class="btn btn-sm btn-outline-danger mx-2" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Remover do Estoque">
                     <i class="bi bi-dash-lg"></i>
                   </button>
+                  
+                  <div class="modal fade" id="modalEditarEstoque{{ item[0] }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog text-start text-wrap">
+                      <div class="modal-content bg-dark text-light border-secondary">
+                        <div class="modal-header border-warning">
+                          <h2 class="modal-title text-warning fs-5"><i class="bi bi-pencil"></i> Editar Produto</h2>
+                          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form action="/admin/estoque/editar/{{ item[0] }}" method="POST" class="m-0">
+                          <!-- Token CSRF dinâmico gerado pelo servidor -->
+                          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                          <div class="modal-body">
+                            <div class="row">
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Produto Base:</label>
+                                <input type="text" class="form-control bg-secondary text-light border-secondary" name="produto" placeholder="Ex: Arroz" maxlength="70" required />
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label">Especificação <small class="text-body-secondary">(Opcional)</small>:</label>
+                                <input type="text" class="form-control bg-secondary text-light border-secondary" name="especificacao" placeholder="Ex: Tipo 1" maxlength="70" />
+                              </div>
+                            </div>
+                            <div class="row">
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Tamanho/Peso:</label>
+                                <input type="number" min="1" class="form-control bg-secondary text-light border-secondary" name="qtd_medida" placeholder="Ex: 5" required />
+                              </div>
+                              <div class="col-md-6 mb-3">
+                                <label class="form-label text-light">Unidade:</label>
+                                <select class="form-select bg-secondary text-light border-secondary" name="unidade" required>
+                                  <option value="kg">Quilogramas (kg)</option>
+                                  <option value="g">Gramas (g)</option>
+                                  <option value="L">Litros (L)</option>
+                                  <option value="ml">Mililitros (ml)</option>
+                                  <option value="cm">Centímetros (cm)</option>
+                                  <option value="Metro(s)">Metros (m)</option>
+                                  <option value="m²">Metros Quadrados (m²)</option>
+                                  <option value="m³">Metros Cúbicos (m³)</option>
+                                  <option value="Unidade(s)">Unidade(s)</option>
+                                  <option value="Par(es)">Par(es)</option>
+                                  <option value="Peça(s)">Peça(s)</option>
+                                  <option value="Caixa(s)">Caixa(s)</option>
+                                  <option value="Pacote(s)">Pacote(s)</option>
+                                  <option value="Fardo(s)">Fardo(s)</option>
+                                  <option value="Lata(s)">Lata(s)</option>
+                                  <option value="Rolo(s)">Rolo(s)</option>
+                                  <option value="Kit(s)">Kit(s)</option>
+                                  <option value="Cesta(s)">Cesta(s)</option>
+                                </select>
+                              </div>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Categoria:</label>
+                              <select class="form-select bg-secondary text-light border-secondary" name="categoria" required>
+                                {% for cat in categorias %}
+                                <option value="{{ cat[1] }}" {% if item[2] == cat[1] %}selected{% endif %}>{{ cat[1] }}</option>
+                                {% endfor %}
+                              </select>
+                            </div>
+                          </div>
+                          <div class="modal-footer border-secondary">
+                            <button type="button" class="btn btn-outline-secondary mx-2" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-warning fw-bold text-dark mx-2">Salvar Alterações</button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
 
                   <div class="modal fade" id="modalEntrada{{ item[0] }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog text-start text-wrap">
@@ -438,7 +509,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="entrada">
                           <div class="modal-body">
-                            <h3 class="fs-5 text-warning">{{ item[1]|title }}</h3>
+                            <h3 class="fs-5 text-light">{{ item[1]|title }}</h3>
                             <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a adicionar:</label>
@@ -470,7 +541,7 @@
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
-                            <h3 class="fs-5 text-warning">{{ item[1]|title }}</h3>
+                            <h3 class="fs-5 text-light">{{ item[1]|title }}</h3>
                             <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-3">
                               <label class="form-label">Quantidade a retirar:</label>
