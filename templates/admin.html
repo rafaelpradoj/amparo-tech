@@ -280,7 +280,7 @@
         <table id="tabelaInventario" class="table table-dark table-striped table-hover mb-0 w-100">
           <thead>
             <tr>
-              <th class="text-center">Nome da Campanha</th>
+              <th class="text-center">Campanha</th>
               <th class="text-center">Categoria</th>
               <th class="text-center">Status</th>
               <th class="text-center">Arrecadado</th>
@@ -291,7 +291,7 @@
           <tbody>
             {% for item in inventario %}
             <tr>
-                            <td class="align-middle"><strong>{{ item[1]|title }}</strong></td>
+              <td class="align-middle"><strong>{{ item[1]|title }}</strong></td>
               <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
               <td class="align-middle text-center">
                 {% if item[5] %}

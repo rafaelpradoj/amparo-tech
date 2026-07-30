@@ -4,7 +4,7 @@
 
 {% block content %}
   <div class="mb-5 pb-5 pt-3 px-2">
-    <div class="mb-4 d-flex justify-content-between align-items-end flex-wrap gap-3">
+    <div class="mb-5 d-flex justify-content-between align-items-end flex-wrap gap-3">
       <div>
         <span class="text-success text-uppercase d-block mb-1 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">
           {% if categoria_ativa %}
@@ -17,17 +17,17 @@
           {% if categoria_ativa %}
             {{ categoria_ativa }}
           {% else %}
-            <h1 class="text-info fw-bold">
+            <h1 class="text-info fw-bold mb-2">
               <i class="bi bi-buildings-fill"></i> {{ nome_ong }}
             </h1> 
-            <p class="text-body-secondary small mt-2 opacity-75">Confira abaixo as necessidades da nossa comunidade.</p>
+            <p class="text-body-secondary small opacity-75">Confira abaixo as necessidades da nossa comunidade.</p>
           {% endif %}
         </h1>
       </div>
 
       {% if categoria_ativa %}
         <div>
-          <a href="{{ url_for('public.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-medium">
+          <a href="{{ url_for('public.index') }}" class="btn btn-outline-secondary text-warning btn-sm rounded-pill px-3 fw-medium">
             <i class="bi bi-arrow-left me-1"></i> Voltar para Necessidades
           </a>
         </div>
@@ -49,9 +49,9 @@
           <div class="p-4 border border-secondary border-opacity-25 rounded-3 bg-dark bg-opacity-50 text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all" style="background: rgba(255, 255, 255, 0.03);">
             <div>
               {# Aplica a cor dinâmica no título da categoria #}
-              <h2 class="fs-5 fw-bold {{ cor_categoria }} mb-1">{{ cat[0] }}</h2>
+              <h2 class="fs-5 fw-bold {{ cor_categoria }} mb-2">{{ cat[0] }}</h2>
               <span class="text-body-emphasys small font-monospace">
-                {{ cat[1] }} {% if cat[1] == 1 %}causa precisando de apoio{% else %}causas precisando de apoio{% endif %}
+                <span class="text-warning font-numeric">{{ cat[1] }}</span> {% if cat[1] == 1 %}causa precisando de apoio{% else %}causas precisando de apoio{% endif %}
               </span>
             </div>
             <div class="{{ cor_categoria }} fs-4">
@@ -72,16 +72,16 @@
                style="--bs-table-bg: transparent; --bs-table-striped-bg: rgba(255, 255, 255, 0.05); --bs-table-hover-bg: rgba(255, 255, 255, 0.08);">
           <thead class="border-bottom border-light border-opacity-75">
             <tr>
-              <th class="text-uppercase fw-semibold border-0 text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em; padding-left: 1rem;">Item Requisitado</th>
-              <th class="text-center text-uppercase fw-semibold border-0 text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em;">Arrecadação Atual</th>
-              <th class="text-center text-uppercase fw-semibold border-0 text-body-secondary" style="width: 20%; font-size: 0.75rem; letter-spacing: 0.1em; padding-right: 1rem;">Ação</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em;">Campanha</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em;">Arrecadado</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 20%; font-size: 0.75rem; letter-spacing: 0.1em;">Ação</th>
             </tr>
           </thead>
           <tbody class="border-top-0">
             {% for produto in produtos %}
               <tr class="border-bottom border-secondary border-opacity-25">
                 
-                <td class="py-3 fw-medium" style="padding-left: 1rem;">{{ produto[1] }}</td>
+                <td class="text-center fw-medium">{{ produto[1] }}</td>
                 
                 
                 <td class="py-3">
@@ -107,7 +107,7 @@
                   {% else %}
                     <a href="/doar/{{ produto[0] }}" class="btn btn-sm btn-success rounded-pill px-4 py-1 fw-semibold shadow-sm text-nowrap">
                       <i class="bi bi-heart-fill me-1 small"></i> Doar
-                    </a>
+                    </a>     
                   {% endif %}
                 </td>
                 
@@ -120,8 +120,7 @@
       {# Card Mobile #}
       <div class="d-block d-md-none mt-2">
         {% for produto in produtos %}
-          <div class="py-4 border-bottom border-secondary border-opacity-25 px-2">
-            
+          <div class="px-2 py-4 border-top border-light">            
             <span class="text-success small font-monospace d-block mb-1">Item:</span>
             <div class="fs-6 fw-medium text-info mb-3">{{ produto[1] }}</div>
             
@@ -155,9 +154,9 @@
       </div>
     
     {% else %}
-      <div class="text-start py-5 border-top border-bottom border-secondary border-opacity-25 my-4">
-        <h2 class="text-success fw-light mb-2 fs-3">Estoque Abastecido!</h2>
-        <p class="text-body-secondary small mb-0">Todas as nossas campanhas de arrecadação foram supridas e não temos necessidades ativas no momento.</p>
+      <div class="px-2 py-4 border-top border-light">
+        <h2 class="text-success mb-2">Estoque Abastecido!</h2>
+        <p class="text-body-secondary small opacity-75">Sem campanhas ativas no momento. Agradecemos sua colaboração!</p>
       </div>
     {% endif %}
   </div>
