@@ -15,13 +15,13 @@
         </a>
       </div>
       <div class="card-body">
-        <span class="text-success text-uppercase d-block mb-1 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">// Categoria: {{ item[2] }}</span>
-        <h2 class="card-title text-info fs-1">{{ item[1]|title }}</h2>
+        <span class="text-success text-uppercase d-block mb-3 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">// Campanha: <span class="text-info">{{ item[2] }}</span></span>
+        <h2 class="card-title text-info fs-3">{{ item[1]|title }}</h2>
         
 
-        <div class="mb-4 mt-4">
+        <div class="my-4">
           <div class="d-flex justify-content-between align-items-center mb-1">
-            <small class="text-body-secondary">Progresso da ONG:</small>
+            <small class="text-body-secondary">Progresso:</small>
             <small class="text-success fw-bold font-numeric">{{ (item[3] / item[4] * 100) | round | int }}%</small>
           </div>
           
@@ -29,9 +29,14 @@
             <div class="progress-bar progress-bar-striped progress-bar-animated bg-success rounded-pill" role="progressbar" style="width: {{ (item[3] / item[4] * 100) | round | int }}%;" aria-valuenow="{{ item[3] }}" aria-valuemin="0" aria-valuemax="{{ item[4] }}"></div>
           </div>
           
-          <small class="text-body-secondary">
-            <strong class="text-warning font-numeric">{{ item[3] }}</strong> arrecadados de uma meta de <span class="text-light font-numeric">{{ item[4] }}</span>
-          </small>
+          <p class="text-body-secondary">
+            {% set cor_arrecadado = 'text-success' if item[3] >= item[4] else 'text-warning' %}
+            {% set cor_meta = 'text-success' if item[3] >= item[4] else 'text-danger' %}
+
+            <strong class="font-numeric {{ cor_arrecadado }}">{{ item[3] }}</strong> 
+            arrecadados de uma meta de 
+            <span class="font-numeric {{ cor_meta }}">{{ item[4] }}</span>
+          </p>
         </div>
 
         <hr class="border-secondary opacity-25">
@@ -48,20 +53,23 @@
               name="doador"
               placeholder="Deixar em branco, se anônimo"
               pattern="[A-Za-zÀ-ÿ\s]+" 
-              title="Por favor, insira apenas letras."
+              title="Insira apenas letras e espaços. Deixar em branco, se anônimo."
               oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '')"
             />
           </div>
 
-          <div class="mb-4">
+          <div class="mb-5">
             <label for="quantidade" class="form-label text-info fw-medium">Quantidade:</label>
             <input
               type="number"
-              class="form-control bg-secondary bg-opacity-10 text-light border-secondary font-numeric"
+              class="form-control bg-secondary bg-opacity-10 text-light border-secondary"
               id="quantidade"
               name="quantidade"
+              title="Quantidade a ser doada"
               min="1"
-              value="1"
+              placeholder="Digite a quantidade a ser doada"
+              oninvalid="this.setCustomValidity('Por favor, insira um valor mínimo de 1!')"
+              oninput="this.setCustomValidity('')"
               required
             />
           </div>
@@ -89,13 +97,13 @@
                   ></button>
                 </div>
                 <div class="modal-body">
-                  <p>Você está prestes a registrar sua intenção de doação para <strong class="text-success">{{ item[1]|title }}</strong>.</p>
-                  <p class="mb-0 text-body-secondary small">A ONG ficará aguardando a entrega deste item nas instalações. Deseja prosseguir?</p>
+                  <p>Promessa de doação: <strong class="text-info">{{ item[1]|title }}</strong></p>
+                  <p class="mb-0 text-body-secondary small">A comunidade aguardará a entrega da sua promessa. Deseja prosseguir?</p>
                 </div>
                 <div class="modal-footer border-secondary">
                   <button
                     type="button"
-                    class="btn btn-outline-secondary mx-2"
+                    class="btn btn-outline-secondary text-light mx-2"
                     data-bs-dismiss="modal"
                   >
                     Revisar

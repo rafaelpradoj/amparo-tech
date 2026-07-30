@@ -52,11 +52,11 @@
 
       <div class="my-3 col-12 col-md-6 col-lg-4">
         <a href="{{ url_for('public.ver_categoria', nome_categoria=cat[0]) }}" class="text-decoration-none">
-          <div class="p-4 border border-secondary border-opacity-25 rounded-3 bg-dark bg-opacity-50 text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all" style="background: rgba(255, 255, 255, 0.03);">
+          <div class="p-4 border border-secondary border-opacity-50 rounded-3 bg-dark text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all">
             <div>
               {# Aplica a cor dinâmica no título da categoria #}
               <h2 class="fs-5 fw-bold {{ cor_categoria }} mb-2">{{ cat[0] }}</h2>
-              <span class="text-body-emphasys small font-monospace">
+              <span class="text-body-secondary font-monospace">
                 <span class="text-warning font-numeric">{{ cat[1] }}</span> {% if cat[1] == 1 %}causa precisando de apoio{% else %}causas precisando de apoio{% endif %}
               </span>
             </div>
@@ -91,9 +91,12 @@
                 
                 
                 <td class="py-3">
-                  <div class="d-flex justify-content-between align-items-center mb-2 small text-body-secondary">
+                  <div class="d-flex justify-content-between align-items-center mb-2  text-body-secondary">
                     <span>
-                      <strong class="text-warning font-numeric">{{ produto[3] }}</strong> de <span class="text-light font-numeric">{{ produto[4] }}</span> unidades
+                      {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
+                      {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                      
+                      <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
                     </span>
                     <span class="font-numeric text-success fw-semibold">
                       {{ (produto[3] / produto[4] * 100) | round | int }}%
@@ -129,9 +132,11 @@
           <div class="px-2 py-4 border-top border-light">            
             <div class="fs-6 fw-medium text-info mb-3">{{ produto[1] }}</div>
             
-            <div class="d-flex justify-content-between align-items-center mb-2 small text-body-secondary">
+            <div class="d-flex justify-content-between align-items-center mb-2 text-body-secondary">
               <span>
-                <strong class="text-warning font-numeric">{{ produto[3] }}</strong> de <span class="text-light font-numeric">{{ produto[4] }}</span> unidades
+                {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
+                {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
               </span>
               <span class="font-numeric text-success fw-semibold">
                 {{ (produto[3] / produto[4] * 100) | round | int }}%
