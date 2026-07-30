@@ -14,15 +14,17 @@
         <div class="col-12 d-block d-md-none mb-5 text-center">
             <h2 class="text-success fw-bold mb-0 fs-2"><i class="bi bi-heart-fill"></i> AmparoTech</h2>
             <span class="text-secondary fw-light fs-3 lh-1 my-1 d-block">+</span>
-            <h2 class="text-info fw-bold fs-3 mb-4">
-              <a href="{{ instagram }}" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                class="text-decoration-none text-reset">
-                <i class="bi bi-buildings-fill"></i> {{ nome_ong }}
-              </a>
+            <h2 class="text-info fs-3 mb-3">
+              <i class="bi bi-buildings-fill"></i> {{ nome_ong }}
             </h2>
-            <div class="text-success text-uppercase mt-2 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.15em;">Tecnologia que impacta</div>
+            <div class="text-success text-uppercase fw-semibold mb-3" style="font-size: 0.7rem; letter-spacing: 0.15em;">Tecnologia que impacta</div>
+            <div class="d-block d-md-none text-center">
+              <div class="d-flex justify-content-center gap-4">
+                <a href="{{ instagram }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="Instagram"><i class="bi bi-instagram fs-5" style="color: #E1306C;"></i></a>
+                <a href="{{ facebook }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="Facebook"><i class="bi bi-facebook fs-5" style="color: #1877F2;"></i></a>
+                <a href="{{ whatsapp }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="WhatsApp"><i class="bi bi-whatsapp fs-5" style="color: #25D366;"></i></a>
+              </div>
+            </div>
         </div>
 
         <div class="mb-5 text-start">
@@ -47,9 +49,9 @@
           style="max-width: 320px; cursor: pointer;" 
           title="Copiar Chave"
           onclick="navigator.clipboard.writeText('{{ pix }}'); const status = this.querySelector('.copy-status'); status.innerHTML = '<span class=\'small px-1\'>Copiado!</span>'; setTimeout(() => status.innerHTML = '<i class=\'bi bi-clipboard px-1\'></i>', 2000);">
-            <code class="text-success fw-bold font-numeric small ms-1">{{ pix }}</code>
-            <span class="btn btn-sm btn-outline-success border-0 p-1 copy-status">
-              <i class="bi bi-clipboard px-1"></i>
+            <code class="text-success fw-bold font-numeric small">{{ pix }}</code>
+            <span class="btn btn-sm btn-outline-success copy-status">
+              <i class="bi bi-clipboard"></i>
             </span>
           </div>
         </div>
@@ -63,16 +65,20 @@
         
         <div class="pt-4 border-top border-secondary border-opacity-25" style="max-width: 500px;">
           <span class="text-success text-uppercase d-block mb-3 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">// Aliança Tecnológica</span>
-          <h2 class="text-success fw-bold fs-2 mb-4 d-flex align-items-center lh-sm">
-            <i class="bi bi-heart-fill me-2"></i> AmparoTech
-            <span class="text-success font-monospace mx-2 fs-4">+</span>
+         <h2 class="text-success fw-bold fs-2 mb-4 d-flex flex-column flex-lg-row justify-content-center justify-content-lg-start align-items-center lh-sm">
+          
+            <div class="d-flex align-items-center">
+              <i class="bi bi-heart-fill me-2"></i> AmparoTech
+            </div>
+            <div class="text-secondary fw-light mx-0 mx-lg-2 my-1 my-lg-0 fs-4">+</div>
+            
             <span class="text-info fw-bold fs-3 align-self-center">
-            <a href="{{ instagram }}" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="text-decoration-none text-reset">
-              <i class="bi bi-buildings-fill"></i> {{ nome_ong }}
-            </a>
+              <a href="{{ instagram }}" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                class="text-decoration-none text-reset">
+                <i class="bi bi-buildings-fill"></i> {{ nome_ong }}
+              </a>
             </span>
           </h2>
           <p class="text-body-secondary small mb-0 lh-base opacity-75" style="margin-top: 0.5rem;">
@@ -96,19 +102,20 @@
             </span>
           </p>
         </div>
+        
       </div>
 
     <hr class="my-4 border-secondary opacity-25">
 
     <div class="row align-items-center g-3 text-start">
-      <div class="col-12 col-md-4 order-2 order-md-1 text-center text-md-start">
+      <div class="col-12 col-md-4 order-2 order-md-1 text-center text-md-start d-none d-md-block">
         <div class="d-flex justify-content-center justify-content-md-start gap-4">
           <a href="{{ instagram }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="Instagram"><i class="bi bi-instagram fs-5" style="color: #E1306C;"></i></a>
           <a href="{{ facebook }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="Facebook"><i class="bi bi-facebook fs-5" style="color: #1877F2;"></i></a>
           <a href="{{ whatsapp }}" target="_blank" rel="noopener noreferrer" class="text-light opacity-75 social-link-editorial" title="WhatsApp"><i class="bi bi-whatsapp fs-5" style="color: #25D366;"></i></a>
         </div>
       </div>
-      
+
       <div class="col-12 col-md-8 order-1 order-md-2 text-center text-md-end">
         <p class="text-body-secondary mb-0 small">
           © 2026 <strong class="text-success">AmparoTech</strong>. Todos os direitos reservados.
