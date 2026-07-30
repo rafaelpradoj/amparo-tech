@@ -119,7 +119,7 @@ def doar(id_campanha):
         
         # Se o atacante tentar forçar o link de uma campanha oculta, ele é barrado aqui
         if not campanha:
-            flash("Campanha não encontrada ou arquivada!", "danger")
+            flash("Campanha não encontrada!", "danger")
             return redirect(url_for('public.index'))
             
     return render_template("doar.html", item=campanha)

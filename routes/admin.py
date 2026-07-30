@@ -269,11 +269,13 @@ def novo_item():
         campanha_existente = cursor.fetchone()
         
         if campanha_existente:
-            id_campanha_existente, pausada_existente = campanha_existente
+            id_campanha_existente, ativo_existente, pausada_existente = campanha_existente
+
             if not pausada_existente:
-                flash(f"Já existe uma campanha ativa para '{nome_produto}'!", "warning")
+                flash(f"Já existe campanha ATIVA para '{nome_produto}'", "warning")
             else:
-                flash(f"Campanha para '{nome_produto}' já existe e está pausada!", "warning")
+                flash(f"Já existe campanha PAUSADA para '{nome_produto}'", "warning")
+                
             return redirect(url_for('admin.painel'))
 
         # Insere a nova campanha associada ao ID do produto
