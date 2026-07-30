@@ -56,8 +56,8 @@ limiter = Limiter(
 # Permite apenas 5 tentativas por minuto nas rotas de Login e Recuperação de Senha (Rate Limiter)
 limiter.limit("5 per minute")(auth_bp)
 
-# Permite apenas 10 ações por minuto nas rotas públicas (Impede o Spam de doações falsas)
-limiter.limit("10 per minute")(public_bp)
+# Permite apenas 30 ações por minuto nas rotas públicas (Impede o Spam de doações falsas)
+limiter.limit("30 per minute")(public_bp)
 
 # Registra os componentes de rotas (Blueprints) no núcleo do ecossistema do app
 app.register_blueprint(public_bp)
