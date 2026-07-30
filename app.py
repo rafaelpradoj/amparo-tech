@@ -64,6 +64,31 @@ app.register_blueprint(public_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 
+# --- INÍCIO DO CONTEXT PROCESSOR ---
+@app.context_processor
+def inject_global_vars():
+    """
+    Disponibiliza as variáveis institucionais do .env em todos os templates HTML.
+    Permite reutilização do projeto sem modificar os layouts.
+    """
+    return {
+        'rua': os.getenv('RUA', 'Rua Exemplo'),
+        'numero': os.getenv('NUMERO', '123'),
+        'bairro': os.getenv('BAIRRO', 'Centro'),
+        'cidade': os.getenv('CIDADE', 'São Paulo'),
+        'estado': os.getenv('ESTADO', 'SP'),
+        'cep': os.getenv('CEP', '00000-000'),
+        'telefone': os.getenv('TELEFONE', '(11) 99999-9999'),
+        'pix': os.getenv('PIX', 'pix@exemplo.com'),
+        'instagram': os.getenv('INSTAGRAM', '@sua_ong'),
+        'facebook': os.getenv('FACEBOOK', 'sua_ong'),
+        'whatsapp': os.getenv('WHATSAPP', 'seu_whatsap_aqui'),
+        'nome_ong': os.getenv('NOME_ONG', 'AmparoTech'),
+        'paroquia_url': os.getenv('PAROQUIA_URL', 'AmparoTech'),
+        'diocese_url': os.getenv('DIOCESE_URL', 'AmparoTech'),
+    }
+# --- FIM DO CONTEXT PROCESSOR ---
+
 # Captura o erro 429 globalmente e exibe uma página customizada
 @app.errorhandler(429)
 def ratelimit_handler(e):
