@@ -64,7 +64,7 @@ def doar(id_campanha):
     if request.method == "POST":
         # Captura os dados inseridos no formulário (pode vir texto, negativo ou vazio)
         quantidade_raw = request.form.get("quantidade")
-        nome_doador = (request.form.get("doador") or "").strip().capitalize()
+        nome_doador = (request.form.get("doador") or "").strip().title()
 
         # Try/except para travar quantidade doações e retornar apenas números > 0 (Improper Input Validation Mitigation)
         try:
