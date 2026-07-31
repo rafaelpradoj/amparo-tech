@@ -62,3 +62,27 @@ function togglePassword(botao) {
     icone.classList.replace("bi-eye-slash", "bi-eye"); // Retorna para o ícone de olho aberto
   }
 }
+
+// =========================================================================
+// 4. BOTÃO "VOLTAR AO TOPO" (Scroll to Top)
+// =========================================================================
+document.addEventListener("DOMContentLoaded", function() {
+  const btnTopo = document.getElementById("btnVoltarAoTopo");
+  // Só executa o código se o botão existir na página
+  if (btnTopo) {
+    window.addEventListener("scroll", function() {
+      if (window.scrollY > 200) {
+        btnTopo.classList.add("mostrar");
+      } else {
+        btnTopo.classList.remove("mostrar");
+      }
+    });
+
+    btnTopo.addEventListener("click", function() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  }
+});
