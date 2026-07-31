@@ -87,14 +87,14 @@
             {% for produto in produtos %}
               <tr class="border-bottom border-secondary border-opacity-25">
                 
-                <td class="text-center fw-medium">{{ produto[1] }}</td>
+                <td class="text-center text-info fw-medium">{{ produto[1]|title }}</td>
                 
                 
                 <td class="py-3">
                   <div class="d-flex justify-content-between align-items-center mb-2  text-body-secondary">
                     <span>
-                      {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
-                      {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                      {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                      {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
                       
                       <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
                     </span>
@@ -130,12 +130,12 @@
       <div class="d-block d-md-none mt-2">
         {% for produto in produtos %}
           <div class="px-2 py-4 border-top border-light">            
-            <div class="fs-6 fw-medium text-info mb-3">{{ produto[1] }}</div>
+            <div class="fs-6 fw-medium text-info mb-3">{{ produto[1]|title }}</div>
             
             <div class="d-flex justify-content-between align-items-center mb-2 text-body-secondary">
               <span>
-                {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
-                {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
+                {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
                 <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
               </span>
               <span class="font-numeric text-success fw-semibold">

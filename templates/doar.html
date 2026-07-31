@@ -51,10 +51,12 @@
               class="form-control bg-secondary bg-opacity-10 text-light border-secondary"
               id="doador"
               name="doador"
-              placeholder="Deixar em branco, se anônimo"
+              placeholder="Seu nome ou apelido"
               pattern="[A-Za-zÀ-ÿ\s]+" 
-              title="Insira apenas letras e espaços. Deixar em branco, se anônimo."
-              oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, '')"
+              title="Insira apenas letras e espaços"
+              oninvalid="this.setCustomValidity('Insira um nome primeiro!')"
+              oninput="this.value = this.value.replace(/[^A-Za-zÀ-ÿ\s]/g, ''); this.setCustomValidity('')"
+              required
             />
           </div>
 
@@ -68,7 +70,7 @@
               title="Quantidade a ser doada"
               min="1"
               placeholder="Digite a quantidade a ser doada"
-              oninvalid="this.setCustomValidity('Por favor, insira um valor mínimo de 1!')"
+              oninvalid="this.setCustomValidity('Insira uma quantidade válida!')"
               oninput="this.setCustomValidity('')"
               required
             />

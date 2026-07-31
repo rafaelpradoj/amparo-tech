@@ -64,7 +64,7 @@ def doar(id_campanha):
     if request.method == "POST":
         # Captura os dados inseridos no formulário (pode vir texto, negativo ou vazio)
         quantidade_raw = request.form.get("quantidade")
-        nome_doador = (request.form.get("doador") or "").strip()
+        nome_doador = (request.form.get("doador") or "").strip().capitalize()
 
         # Try/except para travar quantidade doações e retornar apenas números > 0 (Improper Input Validation Mitigation)
         try:
@@ -77,7 +77,8 @@ def doar(id_campanha):
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         if not nome_doador:
-            nome_doador = 'Doador Anônimo'
+            flash("Você precisa inserir um nome!", "danger")
+            return redirect(url_for('public.doar', id_campanha=id_campanha))
         elif len(nome_doador) > 100:
             flash("Nome do doador não pode ultrapassar 100 caracteres!", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
