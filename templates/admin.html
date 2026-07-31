@@ -513,44 +513,19 @@
                           <!-- Token CSRF dinâmico gerado pelo servidor -->
                           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                           <div class="modal-body">
-                            <div class="row">
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label text-light">Produto Base:</label>
-                                <input type="text" class="form-control bg-secondary text-light border-secondary" name="produto" placeholder="Ex: Arroz" maxlength="70" required />
-                              </div>
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label">Especificação <small class="text-body-secondary">(Opcional)</small>:</label>
-                                <input type="text" class="form-control bg-secondary text-light border-secondary" name="especificacao" placeholder="Ex: Tipo 1" maxlength="70" />
-                              </div>
-                            </div>
-                            <div class="row">
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label text-light">Tamanho/Peso:</label>
-                                <input type="number" min="1" class="form-control bg-secondary text-light border-secondary" name="qtd_medida" placeholder="Ex: 5" required />
-                              </div>
-                              <div class="col-md-6 mb-3">
-                                <label class="form-label text-light">Unidade:</label>
-                                <select class="form-select bg-secondary text-light border-secondary" name="unidade" required>
-                                  <option value="kg">Quilogramas (kg)</option>
-                                  <option value="g">Gramas (g)</option>
-                                  <option value="L">Litros (L)</option>
-                                  <option value="ml">Mililitros (ml)</option>
-                                  <option value="cm">Centímetros (cm)</option>
-                                  <option value="Metro(s)">Metros (m)</option>
-                                  <option value="m²">Metros Quadrados (m²)</option>
-                                  <option value="m³">Metros Cúbicos (m³)</option>
-                                  <option value="Unidade(s)">Unidade(s)</option>
-                                  <option value="Par(es)">Par(es)</option>
-                                  <option value="Peça(s)">Peça(s)</option>
-                                  <option value="Caixa(s)">Caixa(s)</option>
-                                  <option value="Pacote(s)">Pacote(s)</option>
-                                  <option value="Fardo(s)">Fardo(s)</option>
-                                  <option value="Lata(s)">Lata(s)</option>
-                                  <option value="Rolo(s)">Rolo(s)</option>
-                                  <option value="Kit(s)">Kit(s)</option>
-                                  <option value="Cesta(s)">Cesta(s)</option>
-                                </select>
-                              </div>
+                            <div class="mb-3">
+                              <h3 class="fs-5 text-light">{{ item[1]|title }}</h3>
+                              <label class="form-label text-light">Nome do Produto:</label>
+                              <!-- Preenche com o nome completo (ex: Arroz Tipo 1 - 5 kg) -->
+                              <input 
+                              type="text" 
+                              class="form-control bg-secondary text-light border-secondary" 
+                              name="produto" 
+                              value="{{ item[1] }}" 
+                              maxlength="150" 
+                              oninvalid="this.setCustomValidity('Insira um nome válido (máximo de 150 caracteres)')"
+                              oninput="this.setCustomValidity('')"
+                              required />
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Categoria:</label>
@@ -810,55 +785,10 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="modal-body">
           <p class="text-body-secondary small mb-4">Utilize este formulário para adicionar itens físicos que a ONG já possui ou comprou. <strong class="text-light">Isto não criará uma campanha na página inicial.</strong></p>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Produto Base:</label>
-              <input type="text" class="form-control bg-secondary text-light border-secondary" name="produto" placeholder="Ex: Fralda" maxlength="70" required />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Especificação <small class="text-body-secondary">(Opcional)</small>:</label>
-              <input type="text" class="form-control bg-secondary text-light border-secondary" name="especificacao" placeholder="Ex: Tamanho M" maxlength="70" />
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Nome Completo do Produto:</label>
+            <input type="text" class="form-control bg-secondary text-light border-secondary" name="produto" placeholder="Ex: Fralda Tamanho M - 5 Pacotes" maxlength="150" required />
           </div>
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Tamanho/Peso:</label>
-              <input type="number" min="1" class="form-control bg-secondary text-light border-secondary" name="qtd_medida" placeholder="Ex: 5" required />
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label">Unidade:</label>
-              <select class="form-select bg-secondary text-light border-secondary" name="unidade" required>
-                <!-- Massa / Peso -->
-                <option value="kg">Quilogramas (kg)</option>
-                <option value="g">Gramas (g)</option>
-                
-                <!-- Volume / Líquidos -->
-                <option value="L">Litros (L)</option>
-                <option value="ml">Mililitros (ml)</option>
-                
-                <!-- Comprimento e Construção -->
-                <option value="cm">Centímetros (cm)</option>
-                <option value="Metro(s)">Metros (m)</option>
-                <option value="m²">Metros Quadrados (m²)</option>
-                <option value="m³">Metros Cúbicos (m³)</option>
-                
-                <!-- Contagem Física / Embalagens -->
-                <option value="Unidade(s)">Unidade(s)</option>
-                <option value="Par(es)">Par(es)</option>
-                <option value="Peça(s)">Peça(s)</option>
-                <option value="Caixa(s)">Caixa(s)</option>
-                <option value="Pacote(s)">Pacote(s)</option>
-                <option value="Fardo(s)">Fardo(s)</option>
-                <option value="Lata(s)">Lata(s)</option>
-                <option value="Rolo(s)">Rolo(s)</option>
-                
-                <!-- Agrupamentos -->
-                <option value="Kit(s)">Kit(s)</option>
-                <option value="Cesta(s)">Cesta(s)</option>
-              </select>
-            </div>
-          </div>
-          <hr class="border-secondary" />
           <div class="mb-3">
             <label class="form-label">Categoria:</label>
             <select class="form-select bg-secondary text-light border-secondary" name="categoria" required>
@@ -877,6 +807,26 @@
     </div>
   </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div class="modal fade" id="modalGerenciarCategorias" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog text-start">

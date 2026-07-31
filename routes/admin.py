@@ -290,14 +290,14 @@ def novo_item():
 @login_required
 def novo_produto_estoque():
     """
-    Cadastra um produto diretamente no estoque físico (interno), sem necessariamente 
-    abrir uma campanha pública de arrecadação para ele.
+    Cadastra um produto diretamente no estoque físico (interno)
     """
     produto_base = request.form.get("produto", "").strip()
-    especificacao = request.form.get("especificacao", "").strip()
-    qtd_medida = request.form.get("qtd_medida", "").strip()
-    unidade = request.form.get("unidade", "").strip()
     categoria = (request.form.get("categoria") or "").strip()
+
+    if not produto_base:
+        flash("O nome do produto é obrigatório!", "danger")
+        return redirect(url_for('admin.painel'))
 
     if not categoria:
         flash("Selecione uma categoria!", "danger")
@@ -310,14 +310,10 @@ def novo_produto_estoque():
             flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
             return redirect(url_for('admin.painel'))
     
-    if especificacao:
-        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
-    else:
-        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
+    # O nome já é o texto completo fornecido pelo usuário
+    nome_normalizado = normalizar_nome(produto_base)
 
-    nome_normalizado = normalizar_nome(nome_padronizado)
-
-    # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
+# Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
     if len(nome_normalizado) > 150:
         flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
         return redirect(url_for('admin.painel'))
@@ -326,15 +322,15 @@ def novo_produto_estoque():
         # Impede o cadastro de produtos com nomes idênticos no estoque
         cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_normalizado,))
         if cursor.fetchone():
-            flash(f"Produto '{nome_padronizado}' já cadastrado no estoque!", "warning")
+            flash(f"Produto '{produto_base}' já cadastrado no estoque!", "warning")
             return redirect(url_for('admin.painel'))
             
-        # Registra o novo item com estoque zerado
+        # Registra o novo item
         cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0)", (nome_normalizado, categoria))
-        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou '{nome_padronizado}' no estoque interno", session['operador_id']))
+        cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou '{produto_base}' no estoque interno", session['operador_id']))
         conn.commit()
         
-    flash(f"Produto '{nome_padronizado}' adicionado com sucesso!", "success")
+    flash(f"Produto '{produto_base}' adicionado com sucesso!", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/editar/<int:id_campanha>", methods=["POST"])
@@ -392,32 +388,23 @@ def editar_produto(id_produto):
     Regra: Não permite alterar nome/categoria se houver campanha ATIVA vinculada.
     """
     produto_base = request.form.get("produto", "").strip()
-    especificacao = request.form.get("especificacao", "").strip()
-    qtd_medida = request.form.get("qtd_medida", "").strip()
-    unidade = request.form.get("unidade", "").strip()
     categoria = (request.form.get("categoria") or "").strip()
 
-    if not produto_base or not qtd_medida:
-        flash("Preencha pelo menos o Produto Base e o Tamanho!", "danger")
+    if not produto_base:
+        flash("O nome do produto é obrigatório!", "danger")
         return redirect(url_for('admin.painel'))
 
     if not categoria:
         flash("Selecione uma categoria!", "danger")
         return redirect(url_for('admin.painel'))
-    
-    # Valida se a categoria existe no sistema
+    # Valida se a categoria existe no sistema    
     with get_db_connection() as conn, conn.cursor() as cursor:
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
         if not cursor.fetchone():
             flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
             return redirect(url_for('admin.painel'))
 
-    if especificacao:
-        nome_padronizado = f"{produto_base} {especificacao} - {qtd_medida} {unidade}"
-    else:
-        nome_padronizado = f"{produto_base} - {qtd_medida} {unidade}"
-
-    nome_normalizado = normalizar_nome(nome_padronizado)
+    nome_normalizado = normalizar_nome(produto_base)
 
     if len(nome_normalizado) > 150:
         flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
@@ -439,22 +426,19 @@ def editar_produto(id_produto):
         if nome_normalizado == nome_antigo and categoria == categoria_antiga:
             flash("Nenhuma alteração de produto detectada!", "warning")
             return redirect(url_for('admin.painel'))
-
         # Trava de campanha ativa: impede alteração de nome/categoria
         cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_produto,))
         if cursor.fetchone():
-            flash("Produto com campanha ativa não pode ser alterado!.", "danger")
+            flash("Produto com campanha ativa não pode ser alterado!", "danger")
             return redirect(url_for('admin.painel'))
-
         # Atualiza o produto
         cursor.execute("UPDATE produtos SET nome = %s, categoria = %s WHERE id = %s", (nome_normalizado, categoria, id_produto))
 
         descricao = f"Editou o produto '{nome_antigo}' para '{nome_normalizado}' (categoria: {categoria_antiga} → {categoria})"
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao, session['operador_id']))
-
         conn.commit()
 
-    flash(f"Produto '{nome_padronizado}' atualizado com sucesso!", "success")
+    flash(f"Produto '{produto_base}' atualizado com sucesso!", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/pausar/<int:id_campanha>", methods=["POST"])
