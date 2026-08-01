@@ -1,3 +1,15 @@
+:root {
+    --dark: rgba(33, 37, 41, 1);
+    --warning: rgba(255, 193, 7, 1);
+    --success: rgba(25, 135, 84, 1);
+    --danger: rgba(220, 53, 69, 1);
+    --info: rgba(13, 202, 240, 1);
+    --secondary: rgba(108, 117, 125, 1);
+    --opacity-20: 0.25rem;
+    --opacity-50: 0.5rem;
+    --opacity-70: 0.75rem;
+}
+
 /* =========================================================================
    1. DATATABLES - CUSTOMIZAÇÃO DE BOTÕES E GRADIENTES
    ========================================================================= */
@@ -145,4 +157,93 @@ table.dataTable thead th.dt-ordering-asc::before,
 table.dataTable thead th.dt-ordering-desc::after {
     color: #ffc107 !important; 
     opacity: 1 !important; /* Garante visibilidade total sem a opacidade padrão atenuada da biblioteca */
+}
+
+/* =========================================================================
+   5. CHOICES.JS - CUSTOMIZAÇÃO PARA O DARK MODE (AmparoTech)
+   ========================================================================= */
+
+/* Define o estilo base do seletor principal do Choices.js */
+.choices[data-type*="select-one"] .choices__inner {
+    background-color: rgba(108, 117, 125, 0.5) !important;
+    border: 1px solid #6c757d !important;
+    color: white !important;
+    border-radius: 0.375rem;
+    min-height: 38px;
+    padding-bottom: 0px;
+    font-size: 1rem;
+}
+/* Define o estilo do menu suspenso (dropdown) do Choices.js */
+.choices__list--dropdown {
+    background-color: var(--dark) !important;
+    border: 1px solid var(--secondary) !important;
+    color: rgba(243, 241, 241, 0.863) !important;
+}
+/* Destaca a opção selecionável quando está em foco (hover) */
+.choices__list--dropdown .choices__item--selectable.is-highlighted {
+    background-color: rgba(25, 135, 84, 0.5) !important;
+    color: white !important;
+}
+
+
+/* Cor do item ATIVO na lista com a mesma cor geral do dropdown */
+.choices__list--dropdown .choices__item--selectable.is-selected {
+    background-color: var(--dark) !important;
+    color: rgba(243, 241, 241, 0.863) !important;
+    font-weight: normal;
+    text-transform: none;
+}
+/* Estiliza o input de busca do Choices.js */
+.choices__input {
+    background-color: #2b3035 !important;
+    color: var(--warning) !important;
+    
+}
+/* Define a cor do placeholder do campo de busca */
+.choices__input::placeholder { 
+    color: var(--warning) !important;
+    font-weight: 500;
+}
+
+/* Estiliza o item de aviso quando não há resultados encontrados no dropdown */
+.choices__list--dropdown .choices__item.has-no-results {
+    color: rgba(220, 53, 69, 0.75) !important;
+    background-color: var(--dark) !important;
+    font-weight: 500;
+}
+
+/* Ajusta a seta do select fechado */
+.choices[data-type*="select-one"]::after { 
+    border-color: var(--warning) transparent transparent transparent !important; 
+    border-width: 9px 8px 0 8px !important;
+}
+/* Ajusta a seta do select aberto */
+.choices[data-type*="select-one"].is-open::after { 
+    border-color: transparent transparent var(--warning) transparent !important; 
+    border-width: 0 8px 9px 8px !important;
+}
+
+/* =========================================================================
+   6. CORREÇÃO DA VALIDAÇÃO NATIVA (REQUIRED) NO CHOICES.JS
+   ========================================================================= */
+/* O container pai precisa ser relativo */
+.choices {
+    position: relative !important;
+}
+
+/* Força TODOS os selects originais a "existirem" fisicamente na tela, 
+   mas esconde atrás do novo componente. Assim o navegador consegue exibir
+   o balãozinho de erro do required sem quebrar o layout */
+select[data-choice="active"] {
+    display: block !important;
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
 }

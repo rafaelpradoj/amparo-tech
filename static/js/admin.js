@@ -482,7 +482,6 @@ $(document).ready(function() {
   });
 
   // --- ABA ESTOQUE ---
-  
   // Injeção de lógica customizada de busca global para filtro por Categorias no Estoque Físico
   // Filtros customizados para a tabela de estoque (Categoria + Status) - funcionam em AND
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
@@ -760,4 +759,166 @@ $(document).ready(function() {
     $(this).addClass('ativa');
     tabelaPendencias.column(1).search('Expirado').draw();
   });
+});
+
+// =========================================================================
+// 4. CHOICES.JS E RESET GLOBAL DE MODAIS
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+  const dadosProdutosEl = document.getElementById('dados-produtos-choices');
+  let produtos = [];
+  if (dadosProdutosEl) {
+      try { produtos = JSON.parse(dadosProdutosEl.textContent); } catch (e) {}
+  }
+
+  // 1. Inicializa selects básicos
+  const selectsBasicos = document.querySelectorAll('.choices-basico');
+  selectsBasicos.forEach(select => {
+    select.choicesInstance = new Choices(select, {
+      allowHTML: true,
+      searchEnabled: true,
+      itemSelectText: '', 
+      noResultsText: 'Nenhum resultado encontrado!',
+      searchPlaceholderValue: 'Buscar...',
+      searchFuzzy: false,
+      fuseOptions: {
+        threshold: 0.0
+      }
+    });
+  });
+
+  // 2. Select em cascata da modal NOVA CAMPANHA
+  const categoriaEl = document.getElementById('selectCategoria');
+  const produtoEl = document.getElementById('selectItem');
+  let choicesProduto;
+  
+  if (categoriaEl && produtoEl) {
+    choicesProduto = new Choices(produtoEl, {
+      allowHTML: true,
+      searchEnabled: true,
+      itemSelectText: '',
+      noResultsText: 'Nenhum produto encontrado!',
+      searchPlaceholderValue: 'Buscar produto...',
+      searchFuzzy: false,
+      fuseOptions: {
+        threshold: 0.0
+      }
+    });
+
+    categoriaEl.addEventListener('change', function() {
+      const categoriaSelecionada = this.value;
+      
+      // CORREÇÃO DO BUG 2: Remove o item que já estava selecionado na caixinha
+      choicesProduto.removeActiveItems();
+      
+      // Limpa os dados da lista suspensa
+      choicesProduto.clearChoices();
+      
+      if (categoriaSelecionada) {
+        const produtosFiltrados = produtos.filter(p => p[2] === categoriaSelecionada && p[5] === true);
+        
+        if (produtosFiltrados.length > 0) {
+          const opcoesChoices = produtosFiltrados.map(p => ({
+            value: p[1], label: p[1]
+          }));
+          choicesProduto.setChoices(opcoesChoices, 'value', 'label', true);
+          choicesProduto.enable();
+        } else {
+          choicesProduto.setChoices([{
+            value: '', 
+            label: '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Nenhum produto cadastrado nesta categoria!</span>',
+            selected: true, 
+            disabled: true
+          }], 'value', 'label', true);
+          choicesProduto.disable();
+        }
+      } else {
+        choicesProduto.setChoices([{
+          value: '', 
+          label: '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Selecione uma categoria primeiro!</span>', 
+          selected: true, 
+          disabled: true
+        }], 'value', 'label', true);
+        choicesProduto.disable();
+      }
+    });
+  }
+
+  // 3. Reset Automático (O Anjo da Guarda das Modais)
+  const todasAsModais = document.querySelectorAll('.modal');
+  todasAsModais.forEach(modal => {
+    modal.addEventListener('hidden.bs.modal', function () {
+      const formulario = modal.querySelector('form');
+      if (formulario) {
+        formulario.reset(); 
+
+        const selects = formulario.querySelectorAll('.choices-basico');
+        selects.forEach(s => {
+          if (s.choicesInstance) {
+            s.choicesInstance.setChoiceByValue(''); 
+          }
+        });
+
+        if (modal.id === 'modalNovoItem' && choicesProduto) {
+          choicesProduto.removeActiveItems(); 
+          choicesProduto.clearChoices();
+          choicesProduto.setChoices([{
+            value: '', 
+            label: '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Selecione uma categoria primeiro!</span>', 
+            selected: true, 
+            disabled: true
+          }], 'value', 'label', true);
+          choicesProduto.disable();
+        }
+      }
+    });
+  });
+});
+
+// =========================================================================
+// 5. FILTRO DE PESQUISA - MODAL DE GERENCIAR CATEGORIAS
+// =========================================================================
+document.addEventListener('DOMContentLoaded', function() {
+  const inputPesquisa = document.getElementById('inputPesquisaCategoria');
+  const itensCategoria = document.querySelectorAll('#listaCategoriasUl .item-categoria');
+  const ulLista = document.getElementById('listaCategoriasUl');
+
+  // 1. Criamos a mensagem de erro (invisível por padrão) injetada via JS
+  let msgNaoEncontrado = document.createElement('li');
+  msgNaoEncontrado.id = 'msgSemResultado';
+  msgNaoEncontrado.className = 'list-group-item bg-dark text-warning text-center small d-none py-4';
+  msgNaoEncontrado.innerHTML = '<i class="bi bi-search"></i> Nenhuma categoria encontrada.';
+  
+  if (ulLista) {
+      ulLista.appendChild(msgNaoEncontrado);
+  }
+
+  if (inputPesquisa) {
+    inputPesquisa.addEventListener('input', function() {
+      // Pega o que usuário digitou, tira os acentos e joga pra minúsculo
+      const termo = this.value.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      let qtdVisiveis = 0; // Contador de matches
+
+      itensCategoria.forEach(function(item) {
+        const textoCat = item.querySelector('.nome-da-categoria').textContent.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        
+        // Se bater, mostra e soma 1 no contador
+        if (textoCat.includes(termo)) {
+          item.classList.remove('d-none');
+          item.classList.add('d-flex');
+          qtdVisiveis++; 
+        } else {
+          item.classList.remove('d-flex');
+          item.classList.add('d-none');
+        }
+      });
+
+      // 2. Se a contagem for zero E existirem categorias cadastradas, mostra a mensagem
+      if (qtdVisiveis === 0 && itensCategoria.length > 0) {
+        msgNaoEncontrado.classList.remove('d-none');
+      } else {
+        msgNaoEncontrado.classList.add('d-none');
+      }
+    });
+  }
 });
