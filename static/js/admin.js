@@ -81,7 +81,10 @@ $(document).ready(function() {
   // Função auxiliar para normalizar categorias (ignora acentos e letras maiúsculas)
   const normalizarCategoria = (str) => str ? String(str).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
 
-  // --- ABA CAMPANHAS ---
+
+// =========================================================================
+// 3.1 DATATABLES - ABA CAMPANHAS
+// =========================================================================
   // Injeção de lógica customizada de busca global para filtros combinados (Status + Categoria) na aba Campanhas
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaInventario') return true;
@@ -114,8 +117,8 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio de Campanhas',
-          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3, 4] } // Exporta apenas colunas de dados
+          title: 'Campanhas',
+          exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
       topEnd: 'search'
@@ -281,7 +284,10 @@ $(document).ready(function() {
     tabelaInventario.draw();
   });
 
-  // --- ABA AUDITORIA ---
+
+// =========================================================================
+// 3.2 DATATABLES - ABA AUDITORIA
+// =========================================================================
   // Injeção de lógica customizada de busca global para filtros combinados (Operador + Ação)
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
       if (settings.nTable.id !== 'tabelaAuditoria') return true;
@@ -315,8 +321,8 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio de Auditoria',
-          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3] }
+          title: 'Registro de Auditoria',
+          exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3] }
         }]
       },
       topEnd: 'search'
@@ -481,7 +487,9 @@ $(document).ready(function() {
     tabelaAuditoria.draw();
   });
 
-  // --- ABA ESTOQUE ---
+// =========================================================================
+// 3.3 DATATABLES - ABA ESTOQUE
+// =========================================================================
   // Injeção de lógica customizada de busca global para filtro por Categorias no Estoque Físico
   // Filtros customizados para a tabela de estoque (Categoria + Status) - funcionam em AND
   $.fn.dataTable.ext.search.push(function(settings, data, dataIndex) {
@@ -518,7 +526,7 @@ $(document).ready(function() {
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
           title: 'Estoque Atual',
-          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2] }
+          exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2] }
         }]
       },
       topEnd: 'search'
@@ -697,7 +705,9 @@ $(document).ready(function() {
     tabelaEstoque.draw();
   });
 
-  // --- ABA PENDÊNCIAS ---
+// =========================================================================
+// 3.4 DATATABLES - ABA PENDÊNCIAS
+// =========================================================================
   const tabelaPendencias = $('#tabelaPendencias').DataTable({
     language: configuracaoIdioma,
     pageLength: 5,
@@ -710,8 +720,8 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Relatorio de Pendencias',
-          exportOptions: { modifier: { search: 'applied' }, columns: [0, 1, 2, 3, 4] }
+          title: 'Doações Pendentes',
+          exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
       topEnd: 'search'
