@@ -1,6 +1,6 @@
 import os
 import secrets
-from flask import Flask, render_template
+from flask import Flask, render_template, g
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
@@ -66,14 +66,19 @@ app.register_blueprint(public_bp)
 app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 
-# --- INÍCIO DO CONTEXT PROCESSOR ---
+# Gera um nonce criptográfico único por requisição para uso na CSP
+def get_csp_nonce():
+    """Gera o nonce sob demanda para evitar falhas com interceptadores como o Limiter"""
+    if not hasattr(g, 'csp_nonce'):
+        g.csp_nonce = secrets.token_urlsafe(16)
+    return g.csp_nonce
+
+# Disponibiliza o nonce e as variáveis globais para os templates
 @app.context_processor
-def inject_global_vars():
-    """
-    Disponibiliza as variáveis institucionais do .env em todos os templates HTML.
-    Permite reutilização do projeto sem modificar os layouts.
-    """
+def inject_global_context():
     return {
+        # Variável CSP
+        'csp_nonce': get_csp_nonce(), # Chamada segura sob demanda
         'rua': os.getenv('RUA', 'Rua Exemplo'),
         'numero': os.getenv('NUMERO', '123'),
         'bairro': os.getenv('BAIRRO', 'Centro'),
@@ -87,14 +92,16 @@ def inject_global_vars():
         'whatsapp': os.getenv('WHATSAPP', 'seu_whatsap_aqui'),
         'nome_ong': os.getenv('NOME_ONG', 'AmparoTech'),
         'paroquia_url': os.getenv('PAROQUIA_URL', 'AmparoTech'),
-        'diocese_url': os.getenv('DIOCESE_URL', 'AmparoTech'),
+        'diocese_url': os.getenv('DIOCESE_URL', 'AmparoTech'),       
     }
-# --- FIM DO CONTEXT PROCESSOR ---
+
 
 # Captura o erro 429 globalmente e exibe uma página customizada
 @app.errorhandler(429)
 def ratelimit_handler(e):
     return render_template("429.html"), 429
+
+
 
 # Security Headers HTTP
 @app.after_request
@@ -103,6 +110,7 @@ def adicionar_cabecalhos_seguranca(response):
     Injeta cabeçalhos HTTP de segurança em todas as respostas do servidor.
     Mitigações exigidas por auditorias SAST/DAST modernas.
     """
+
     # Previne Clickjacking
     response.headers['X-Frame-Options'] = 'SAMEORIGIN'
     
@@ -114,21 +122,20 @@ def adicionar_cabecalhos_seguranca(response):
     
     # Permissions Policy 
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
-    
-    # Content-Security-Policy (CSP) - A última linha de defesa contra XSS
+
+    # Resgata o nonce de forma segura garantindo sua existência
+    nonce = get_csp_nonce()
+    nonce_directive = f"'nonce-{nonce}'"
+
     csp = (
-        "default-src 'self'; "
-        "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net https://cdnjs.cloudflare.com; "
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdn.datatables.net; "
-        "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; "
-        "img-src 'self' data:;"
+        f"default-src 'self'; "
+        f"script-src 'self' {nonce_directive} https://cdn.jsdelivr.net https://code.jquery.com https://cdn.datatables.net https://cdnjs.cloudflare.com; "
+        f"style-src 'self' {nonce_directive} https://cdn.jsdelivr.net https://fonts.googleapis.com https://cdn.datatables.net; "
+        f"font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net data:; "
+        f"img-src 'self' data:;"
     )
 
-
-
-
-    response.headers['Content-Security-Policy'] = csp
-    
+    response.headers['Content-Security-Policy'] = csp    
     return response
 
 

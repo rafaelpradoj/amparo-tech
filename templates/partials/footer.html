@@ -45,10 +45,9 @@
           
           <p class="text-body-secondary small mb-2">Contribua diretamente via PIX:</p>
           <div 
-          class="p-2 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-50 d-flex align-items-center justify-content-between" 
-          style="max-width: 320px; cursor: pointer;" 
-          title="Copiar Chave"
-          onclick="navigator.clipboard.writeText('{{ pix }}'); const status = this.querySelector('.copy-status'); status.innerHTML = '<span class=\'small px-1\'>Copiado!</span>'; setTimeout(() => status.innerHTML = '<i class=\'bi bi-clipboard px-1\'></i>', 2000);">
+           class="p-2 bg-secondary bg-opacity-10 rounded border border-secondary border-opacity-50 d-flex align-items-center justify-content-between js-copy-pix"
+           style="max-width: 320px; cursor: pointer;"
+           title="Copiar Chave">
             <code class="text-success fw-bold font-numeric small">{{ pix }}</code>
             <span class="btn btn-sm btn-outline-success copy-status">
               <i class="bi bi-clipboard"></i>

@@ -26,18 +26,21 @@
               Liberando o acesso em: <span id="contador" class="fs-5 text-light">60</span> segundos...
             </p>
           </div>
-          <div id="area-voltar" class="mt-4" style="display: none;">
+          
+          <div id="area-voltar" class="mt-4 d-none">
             <p class="text-success fw-bold mb-3 fs-5"><i class="bi bi-check-circle-fill"></i> Tudo pronto!</p>
             <a href="/" id="btn-redirecionar" class="btn btn-success btn-lg rounded-pill fw-bold shadow-lg d-block d-sm-inline-block px-sm-5 py-3 text-wrap">
                Voltar ao menu
             </a>
           </div>
-
         </div>
       </div>
     </div>
-    <script>
+
+    
+    <script nonce="{{ csp_nonce }}">
       let tempoRestante = 60; 
+      
       
       const elContador = document.getElementById('contador');
       const elCarregamento = document.getElementById('area-carregamento');
@@ -49,16 +52,11 @@
 
         if (tempoRestante <= 0) {
           clearInterval(timer);
-          elCarregamento.style.display = 'none';
-          elVoltar.style.display = 'block';
+          // Substituindo a manipulação direta do style por manipulação de classes CSS (Melhor prática CSP)
+          elCarregamento.classList.add('d-none');
+          elVoltar.classList.remove('d-none');
         }
       }, 1000);
     </script>
-    <button 
-      id="btnVoltarAoTopo" 
-      class="btn btn-success opacity-75 rounded-circle shadow-lg btn-scroll-to-top" 
-      title="Voltar ao topo">
-      ↑
-    </button>
   </body>
 </html>

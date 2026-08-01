@@ -42,33 +42,45 @@ document.addEventListener("DOMContentLoaded", function () {
       }
     });
   });
-});
 
-// =========================================================================
-// 3. ALTERNAR VISUALIZAÇÃO DE SENHA NOS INPUTS
-// =========================================================================
-// Função chamada no clique do botão de "olho" nos formulários de credenciais
-function togglePassword(botao) {
-  // Localiza o input de texto/senha que está posicionado imediatamente antes do botão no HTML
-  const input = botao.previousElementSibling;
-  const icone = botao.querySelector("i");
+  // =========================================================================
+  // 3. ALTERNAR VISUALIZAÇÃO DE SENHA NOS INPUTS (Event delegation)
+  // =========================================================================
+  // Usa event delegation para lidar com todos os botões de toggle de senha
+  document.addEventListener("click", function(e) {
+    const toggleBtn = e.target.closest(".js-toggle-password");
+    if (toggleBtn) {
+      e.preventDefault();
+      togglePassword(toggleBtn);
+    }
+  });
 
-  // Alterna o atributo 'type' do input e substitui as classes do Bootstrap Icons correspondentes
-  if (input.type === "password") {
-    input.type = "text";
-    icone.classList.replace("bi-eye", "bi-eye-slash"); // Muda para o ícone de olho cortado
-  } else {
-    input.type = "password";
-    icone.classList.replace("bi-eye-slash", "bi-eye"); // Retorna para o ícone de olho aberto
-  }
-}
+  // =========================================================================
+  // 4. COPIAR CHAVE PIX (Event delegation)
+  // =========================================================================
+  // Usa event delegation para o botão de copiar PIX no footer
+  document.addEventListener("click", function(e) {
+    const copyBtn = e.target.closest(".js-copy-pix");
+    if (copyBtn) {
+      e.preventDefault();
+      const pixValue = copyBtn.querySelector("code")?.textContent; // Uso de Optional Chaining (?.) para evitar erro de runtime caso a tag code não exista
+      if (!pixValue) return;
 
-// =========================================================================
-// 4. BOTÃO "VOLTAR AO TOPO" (Scroll to Top)
-// =========================================================================
-document.addEventListener("DOMContentLoaded", function() {
+      navigator.clipboard.writeText(pixValue);
+      const status = copyBtn.querySelector(".copy-status");
+      if (status) {
+        status.innerHTML = '<span class="small px-1">Copiado!</span>';
+        setTimeout(() => {
+          status.innerHTML = '<i class="bi bi-clipboard px-1"></i>';
+        }, 2000);
+      }
+    }
+  });
+
+  // =========================================================================
+  // 5. BOTÃO "VOLTAR AO TOPO" (Scroll to Top)
+  // =========================================================================
   const btnTopo = document.getElementById("btnVoltarAoTopo");
-  // Só executa o código se o botão existir na página
   if (btnTopo) {
     window.addEventListener("scroll", function() {
       if (window.scrollY > 200) {
@@ -86,3 +98,19 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
+
+// =========================================================================
+// 6. ALTERNAR VISUALIZAÇÃO DE SENHA (Função utilitária)
+// =========================================================================
+function togglePassword(botao) {
+  const input = botao.previousElementSibling;
+  const icone = botao.querySelector("i");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icone.classList.replace("bi-eye", "bi-eye-slash");
+  } else {
+    input.type = "password";
+    icone.classList.replace("bi-eye-slash", "bi-eye");
+  }
+}
