@@ -35,6 +35,8 @@ is_dev = os.getenv("FLASK_DEBUG") == "1" or os.getenv("FLASK_ENV") == "developme
 app.config.update(
     # Exige que o cookie só seja transmitido em conexões HTTPS (criptografadas)
     SESSION_COOKIE_SECURE=not is_dev,
+    # Impede que o cookie seja acessível via JavaScript (mitigação de XSS/sequestro de sessão)
+    SESSION_COOKIE_HTTPONLY=True,
     # Impede que o cookie seja enviado por requisições originadas de outros sites
     SESSION_COOKIE_SAMESITE='Lax'
 )
@@ -132,11 +134,12 @@ def adicionar_cabecalhos_seguranca(response):
 
 # Verifica se o script está sendo executado diretamente pelo terminal
 if __name__ == "__main__":
-    '''Inicia o servidor de desenvolvimento local com o modo de depuração (debug) ativo.
+    '''Inicia o servidor de desenvolvimento local.
      
-     O debug=True reinicia o servidor automaticamente a cada alteração salva no código.
+     O modo debug é ativado apenas quando FLASK_DEBUG=1 ou FLASK_ENV=development,
+     conforme a variável is_dev definida acima.
      
      host='0.0.0.0' torna o app acessível em todas as interfaces de rede, não só localhost.
      
      port=5000 define a porta padrão onde o servidor irá escutar por requisições.'''
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=is_dev)
