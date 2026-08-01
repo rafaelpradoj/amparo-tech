@@ -3,7 +3,11 @@
 
 {% block content %}
 <!-- Estilo da página de administração -->
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}
+">
+<!-- Estilo canivete suiço (criação própria)-->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/adapt.css') }}
+">
 <!-- Choices.js CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/choices.js/public/assets/styles/choices.min.css" integrity="sha384-uLFsUvpIOC9MdzZeDr7vuIUG6LgTaguBn469csIwzNIG9N9TFVoYgM4Ov5PG1V1l" crossorigin="anonymous">
 <!-- DataTables CSS-->
@@ -67,16 +71,16 @@
         
         <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-3 mb-4">
           <div id="containerExcelPendencias" class="flex-shrink-0"></div>
-          <div id="containerPesquisaPendencias" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
+          <div id="containerPesquisaPendencias" class="flex-grow-1 mx-md-4 mw-600px-adpt minw-280px-adpt"></div>
           <div class="pilulas-container flex-shrink-0">
             <button type="button" id="pillTodos" class="btn-pilula ativa">
-              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countTodos" style="font-size: 0.75rem;">0</span>
+              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1 fs-075rem-adpt" id="countTodos">0</span>
             </button>
             <button type="button" id="pillNoPrazo" class="btn-pilula">
-              No Prazo <span class="badge rounded-pill bg-success font-numeric ms-1" id="countNoPrazo" style="font-size: 0.75rem;">0</span>
+              No Prazo <span class="badge rounded-pill bg-success font-numeric ms-1 fs-075rem-adpt" id="countNoPrazo">0</span>
             </button>
             <button type="button" id="pillExpirado" class="btn-pilula">
-              Expirados <span class="badge rounded-pill bg-danger font-numeric ms-1" id="countExpirados" style="font-size: 0.75rem;">0</span>
+              Expirados <span class="badge rounded-pill bg-danger font-numeric ms-1 fs-075rem-adpt" id="countExpirados">0</span>
             </button>
           </div>
         </div>
@@ -171,7 +175,7 @@
     <div class="card shadow-sm bg-dark border-secondary text-light">
       <div class="card-body p-3">
         <h2 class="mb-4 fw-bold fs-5"><i class="bi bi-graph-up"></i> Desempenho de Arrecadação</h2>
-        <div style="position: relative; height: 40vh; width: 100%">
+        <div class="position-relative h-40vh-adpt w-100">
           <canvas id="graficoDoacoes"></canvas>
         </div>
         <script id="dados-nomes" type="application/json">{{ nomes | tojson | safe }}</script>
@@ -254,30 +258,30 @@
         <h2 class="mb-4 fw-bold fs-5"><i class="bi bi-megaphone"></i> Gestão de Campanhas</h2>
         <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-3 mb-4">
           <div id="containerExcelCampanhas" class="flex-shrink-0"></div>
-          <div id="containerPesquisaCampanhas" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
+          <div id="containerPesquisaCampanhas" class="flex-grow-1 mx-md-4 mw-600px-adpt minw-280px-adpt"></div>
           
           <!-- Filtro Duplo: Status (Todos/Ativo/Pausado/Arquivado) + Dropdown de Categoria -->
-          <div class="pilulas-container flex-shrink-0" style="overflow: visible !important;">
+          <div class="pilulas-container flex-shrink-0 overflow-visible">
             <button type="button" id="pillCampanhasTodas" class="btn-pilula ativa">
-              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countCampanhasTodas" style="font-size: 0.75rem;">0</span>
+              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1 fs-075rem-adpt" id="countCampanhasTodas">0</span>
             </button>
             <div class="dropdown d-inline-block">
               <button type="button" id="pillCampanhasStatusDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoCampanhasStatusPill">Status</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countCampanhasStatusAtiva" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countCampanhasStatusAtiva">0</span>
               </button>
-              <ul id="menuStatusCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 180px;">
-                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Ativa" style="font-size: 0.75rem;">0</span></a></li>
-                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Pausada" style="font-size: 0.75rem;">0</span></a></li>
-                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Arquivada"><span><i class="bi bi-archive text-danger me-2"></i> Arquivada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item" data-status-name="Arquivada" style="font-size: 0.75rem;">0</span></a></li>
+              <ul id="menuStatusCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-180px-adpt">
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item fs-075rem-adpt" data-status-name="Ativa">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item fs-075rem-adpt" data-status-name="Pausada">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status-campanha py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Arquivada"><span><i class="bi bi-archive text-danger me-2"></i> Arquivada</span><span class="badge rounded-pill hard-color-badge count-status-campanha-item fs-075rem-adpt" data-status-name="Arquivada">0</span></a></li>
               </ul>
             </div>
             <div class="dropdown d-inline-block">
               <button type="button" id="pillCampanhasCategoriaDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoCampanhasCategoriaPill">Categoria</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countCampanhasCategoriaAtiva" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countCampanhasCategoriaAtiva">0</span>
               </button>
-              <ul id="menuDinamicoCategoriaCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 230px;">
+              <ul id="menuDinamicoCategoriaCampanhas" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-230px-adpt">
               </ul>
             </div>
           </div>
@@ -443,28 +447,28 @@
 
         <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-3 mb-4">
           <div id="containerExcelEstoque" class="flex-shrink-0"></div>
-          <div id="containerPesquisaEstoque" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
-          <div class="pilulas-container flex-shrink-0" style="overflow: visible !important;">
+          <div id="containerPesquisaEstoque" class="flex-grow-1 mx-md-4 mw-600px-adpt minw-280px-adpt"></div>
+          <div class="pilulas-container flex-shrink-0 overflow-visible">
             <button type="button" id="pillEstoqueTodos" class="btn-pilula ativa">
-              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countEstoqueTodos" style="font-size: 0.75rem;">0</span>
+              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1 fs-075rem-adpt" id="countEstoqueTodos">0</span>
             </button>
             <div class="dropdown d-inline-block">
               <button type="button" id="pillEstoqueCategoriaDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoCategoriaPill">Categoria</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countEstoqueCategoriaAtiva" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countEstoqueCategoriaAtiva">0</span>
               </button>
-              <ul id="menuDinamicoCategoriaEstoque" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 230px;">
+              <ul id="menuDinamicoCategoriaEstoque" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-230px-adpt">
               </ul>
             </div>
             <div class="dropdown d-inline-block">
               <button type="button" id="pillStatusCampanhaDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoStatusPill">Status Campanha</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countStatusCampanhaAtiva" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countStatusCampanhaAtiva">0</span>
               </button>
-              <ul id="menuStatusCampanhaEstoque" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 180px;">
-                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Ativa" style="font-size: 0.75rem;">0</span></a></li>
-                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Pausada" style="font-size: 0.75rem;">0</span></a></li>
-                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Sem campanha"><span><i class="bi bi-x-circle text-danger me-2"></i> Sem campanha</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Sem campanha" style="font-size: 0.75rem;">0</span></a></li>
+              <ul id="menuStatusCampanhaEstoque" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-180px-adpt">
+                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Ativa"><span><i class="bi bi-check-circle text-success me-2"></i> Ativa</span><span class="badge rounded-pill hard-color-badge count-status-item fs-075rem-adpt" data-status-name="Ativa">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Pausada"><span><i class="bi bi-pause-circle text-warning me-2"></i> Pausada</span><span class="badge rounded-pill hard-color-badge count-status-item fs-075rem-adpt" data-status-name="Pausada">0</span></a></li>
+                <li><a href="#" class="dropdown-item dropdown-item-status py-2 fw-semibold d-flex justify-content-between align-items-center" data-status="Sem campanha"><span><i class="bi bi-x-circle text-danger me-2 fs-075rem-adpt"></i> Sem campanha</span><span class="badge rounded-pill hard-color-badge count-status-item" data-status-name="Sem campanha">0</span></a></li>
               </ul>
             </div>
           </div>
@@ -661,29 +665,29 @@
         <h2 class="mb-4 fw-bold fs-5"><i class="bi bi-shield-lock"></i> Registros de Auditoria e Segurança</h2>
         <div class="d-flex flex-wrap flex-md-nowrap justify-content-between align-items-center gap-3 mb-4">
           <div id="containerExcelAuditoria" class="flex-shrink-0"></div>
-          <div id="containerPesquisaAuditoria" class="flex-grow-1 mx-md-4" style="max-width: 600px; min-width: 280px;"></div>
+          <div id="containerPesquisaAuditoria" class="flex-grow-1 mx-md-4 mw-600px-adpt minw-280px-adpt"></div>
           
-          <div class="pilulas-container flex-shrink-0" style="overflow: visible !important;">
+          <div class="pilulas-container flex-shrink-0 overflow-visible">
             
             <button type="button" id="pillAuditoriaTodos" class="btn-pilula ativa">
-              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1" id="countAuditoriaTodos" style="font-size: 0.75rem;">0</span>
+              Todos <span class="badge rounded-pill hard-color-badge font-numeric ms-1 fs-075rem-adpt" id="countAuditoriaTodos">0</span>
             </button>
             
             <div class="dropdown d-inline-block border-secondary pe-1 me-1">
               <button type="button" id="pillAuditoriaOperadorDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoAuditoriaOperadorPill">Operador</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countAuditoriaOperadorAtivo" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countAuditoriaOperadorAtivo">0</span>
               </button>
-              <ul id="menuDinamicoOperador" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 200px;">
+              <ul id="menuDinamicoOperador" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-200px-adpt">
               </ul>
             </div>
 
             <div class="dropdown d-inline-block">
               <button type="button" id="pillAuditoriaAcaoDropdown" class="btn-pilula dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <span id="textoAuditoriaAcaoPill">Ação</span>
-                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none" id="countAuditoriaAcaoAtiva" style="font-size: 0.75rem;">0</span>
+                <span class="badge rounded-pill bg-light text-dark font-numeric ms-1 d-none fs-075rem-adpt" id="countAuditoriaAcaoAtiva">0</span>
               </button>
-              <ul id="menuDinamicoAuditoria" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1" style="background-color: #111315; min-width: 200px;">
+              <ul id="menuDinamicoAuditoria" class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg m-0 mt-1 bg-casual-adpt minw-200px-adpt">
               </ul>
             </div>
 
@@ -884,9 +888,9 @@
 
         <div class="d-flex justify-content-between align-items-center mt-5 mb-4">
           <label class="form-label m-0">Categorias</label>
-          <input type="text" id="inputPesquisaCategoria" class="form-control form-control-sm bg-secondary bg-opacity-50 text-light border-secondary" style="max-width: 200px;" placeholder="Buscar categoria..." autocomplete="off">
+          <input type="text" id="inputPesquisaCategoria" class="form-control form-control-sm bg-secondary bg-opacity-50 text-light border-secondary mw200px-adpt" placeholder="Buscar categoria..." autocomplete="off">
         </div>
-        <ul id="listaCategoriasUl" class="list-group list-group-flush rounded border border-secondary shadow-sm" style="max-height: 280px; overflow-y: auto;">
+        <ul id="listaCategoriasUl" class="list-group list-group-flush rounded border border-secondary shadow-sm mh-280px-adpt overflow-y-auto">
           {% for cat in categorias %}
           <li class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center py-3 item-categoria">
             <span class="nome-da-categoria"><i class="bi bi-tag text-info me-2"></i> {{ cat[1] }}</span>   
@@ -911,7 +915,7 @@
   </div>
 </div>
 
-<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100;">
+<div class="toast-container position-fixed bottom-0 end-0 p-3 z-1100-adpt">
   <div id="toastNovaDoacao" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
     <div class="d-flex">
       <div class="toast-body fw-bold">

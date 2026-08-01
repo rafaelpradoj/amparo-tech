@@ -11,12 +11,17 @@
 .h-1-adpt {
   height: 1px;
 }
+.h-40vh-adpt {
+  height: 40vh;
+}
+.height3rem-adpt {
+  height: 3rem;
+}
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 /*Line Height REM (lh-*)*/
 .lh-1-6em-adpt {
   line-height: 1.6Rem;
 }
-
 /*Line Height EM (lh-*)*/
 .lh-1-6em-adpt {
   line-height: 1.6em;
@@ -93,6 +98,11 @@
 .whatsapp-color-adpt {
   color: #25D366;
 }
+
+.bg-casual-adpt {
+  background-color: #111315;
+}
+
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 /*Max Width (mw-*)*/
 .mw-320px-adpt {
@@ -101,7 +111,33 @@
 .mw-500px-adpt {
   max-width: 500px;
 }
+.mw-600px-adpt {
+  max-width: 600px;
+}
 
+.mw200px-adpt {
+  max-width: 200px;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Min Width*/
+.minw-280px-adpt {
+  min-width: 280px;
+}
+.minw-180px-adpt {
+  min-width: 180px;
+}
+.minw-230px-adpt {
+  min-width: 230px;
+}
+.minw-200px-adpt {
+  min-width: 200px;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+
+/*Max Height (maxh-*)*/
+.mh-280px-adpt {
+  max-height: 280px;
+}
 /*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
 /*Cursor (cursor-*)*/
 .cursor-pointer-adpt {
@@ -112,7 +148,8 @@
 width3rem-adpt {
   width: 300rem;
 }
-
-height3rem-adpt {
-  height: 3rem;
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/* Z-INDEX */
+.z-1100-adpt {
+  z-index: 1100;
 }

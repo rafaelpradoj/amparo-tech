@@ -9,7 +9,6 @@
     --opacity-50: 0.5rem;
     --opacity-70: 0.75rem;
 }
-
 /* =========================================================================
    1. DATATABLES - CUSTOMIZAÇÃO DE BOTÕES E GRADIENTES
    ========================================================================= */
@@ -33,7 +32,7 @@ div.dt-buttons .btn-outline-success:hover {
    ========================================================================= */
 /* Container principal que agrupa os botões de filtro rápido no painel */
 .pilulas-container {
-    background-color: #111315 !important; /* Fundo escuro profundo */
+    background-color: #111315 !important;
     padding: 4px;
     border-radius: 8px;
     border: 1px solid #2d3135;
@@ -71,8 +70,8 @@ div.dt-buttons .btn-outline-success:hover {
 
 /* Inverte as cores do badge numérico interno quando a pílula correspondente estiver ativa */
 .btn-pilula.ativa .badge {
-    background-color: #ffffff !important;
-    color: #111315 !important;
+    background-color: white !important;
+    color: black !important;
 }
 
 /* Badge neutro com cor sólida para os estados não ativos */
