@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" integrity="sha384-XGjxtQfXaH2tnPFa9x+ruJTuLE3Aa6LhHSWRr1XeTyhezb4abCG4ccI5AkVDxqC+" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/globais.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/adapt.css') }}" />
   </head>
   <body class="d-flex align-items-center min-vh-100 bg-dark text-light py-5">
     <div class="container text-center">
@@ -21,7 +22,7 @@
             Para manter tudo seguro e organizado, pedimos uma pausa de alguns segundos.
           </p>
           <div id="area-carregamento" class="mt-5">
-            <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+            <div class="spinner-border text-success mb-3 width3rem-adpt height3rem-adpt" role="status"></div>
             <p class="text-warning fw-bold font-monospace small mb-0">
               Liberando o acesso em: <span id="contador" class="fs-5 text-light">60</span> segundos...
             </p>

@@ -1,5 +1,5 @@
-/* Folha de estilos criada para adaptar as classes do Bootstrap 5, sem precisar baixar o Sass no projeto. */
-/* As regras seguem a mesma estrutura das classes nativas do Bootstrap 5, mas cada classe recebe o sufixo `adpt` ao final. */
+/* Folha de estilos criada para adaptar as classes do Bootstrap 5 e outras, sem precisar baixar o Sass no projeto. */
+/* Algumas regras seguem a mesma estrutura das classes nativas do Bootstrap 5, mas cada classe recebe o sufixo `adpt` ao final. */
 /* Exemplo: `fs-1` (Bootstrap) -> `fs-1-adpt` (Adaptado) */
 
 /*vindo de folha de estilo global*/
@@ -98,7 +98,6 @@
 .mw-320px-adpt {
   max-width: 320px;
 }
-
 .mw-500px-adpt {
   max-width: 500px;
 }
@@ -107,4 +106,13 @@
 /*Cursor (cursor-*)*/
 .cursor-pointer-adpt {
   cursor: pointer;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Width e Height*/
+width3rem-adpt {
+  width: 300rem;
+}
+
+height3rem-adpt {
+  height: 3rem;
 }
