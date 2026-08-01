@@ -1,0 +1,110 @@
+/* Folha de estilos criada para adaptar as classes do Bootstrap 5, sem precisar baixar o Sass no projeto. */
+/* As regras seguem a mesma estrutura das classes nativas do Bootstrap 5, mas cada classe recebe o sufixo `adpt` ao final. */
+/* Exemplo: `fs-1` (Bootstrap) -> `fs-1-adpt` (Adaptado) */
+
+/*vindo de folha de estilo global*/
+.ff-titles-adpt {
+  font-family: var(--font-titles) !important;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Height (h-*)*/
+.h-1-adpt {
+  height: 1px;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Line Height REM (lh-*)*/
+.lh-1-6em-adpt {
+  line-height: 1.6Rem;
+}
+
+/*Line Height EM (lh-*)*/
+.lh-1-6em-adpt {
+  line-height: 1.6em;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Background (bg-*)*/
+.bg-success-adpt {
+  background: linear-gradient(90deg, transparent, rgba(25, 135, 84, 0.1) 15%, rgba(25, 135, 84, 0.7) 50%, rgba(25, 135, 84, 0.1) 85%, transparent);
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Font Sizes REM (fs-*)*/
+.fs-1-6rem-adpt {
+  font-size: 1.6rem;
+}
+.fs-080rem-adpt {
+  font-size: 0.8rem;
+}
+.fs-075rem-adpt {
+  font-size: 0.75rem;
+}
+.fs-070rem-adpt {
+  font-size: 0.7rem;
+}
+
+/*Font Sizes EM (fs-*)*/
+.fs-1-6em-adpt {
+  font-size: 1.6em;
+}
+.fs-075em-adpt {
+  font-size: 0.75em;
+}
+.fs-070rem-adpt {
+  font-size: 0.7em;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Letter Spacing REM (ls-*)*/
+.ls-015rem-adpt {
+  letter-spacing: 0.15rem;
+}
+.ls-n01rem-adpt {
+  letter-spacing: -0.1rem;
+}
+.ls-01rem-adpt {
+  letter-spacing: 0.1rem;
+}
+.ls-n003rem-adpt {
+  letter-spacing: -0.03rem;
+}
+
+/*Letter Spacing EM (ls-*)*/
+.ls-015em-adpt {
+  letter-spacing: 0.15em;
+}
+
+.ls-01em-adpt {
+  letter-spacing: 0.1em;
+}
+
+.ls-n01em-adpt {
+  letter-spacing: -0.1em;
+}
+
+.ls-n003em-adpt {
+  letter-spacing: -0.03em;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Cores especiais*/
+.instagram-color-adpt {
+  color: #E1306C;
+}
+.facebook-color-adpt {
+  color: #1877F2;
+}
+.whatsapp-color-adpt {
+  color: #25D366;
+}
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Max Width (mw-*)*/
+.mw-320px-adpt {
+  max-width: 320px;
+}
+
+.mw-500px-adpt {
+  max-width: 500px;
+}
+
+/*=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-*/
+/*Cursor (cursor-*)*/
+.cursor-pointer-adpt {
+  cursor: pointer;
+}

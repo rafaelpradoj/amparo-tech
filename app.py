@@ -89,7 +89,6 @@ def inject_global_context():
         'pix': os.getenv('PIX', 'pix@exemplo.com'),
         'instagram': os.getenv('INSTAGRAM', '@sua_ong'),
         'facebook': os.getenv('FACEBOOK', 'sua_ong'),
-        'whatsapp': os.getenv('WHATSAPP', 'seu_whatsap_aqui'),
         'nome_ong': os.getenv('NOME_ONG', 'AmparoTech'),
         'paroquia_url': os.getenv('PAROQUIA_URL', 'AmparoTech'),
         'diocese_url': os.getenv('DIOCESE_URL', 'AmparoTech'),       
