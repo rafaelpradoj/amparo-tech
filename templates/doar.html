@@ -1,6 +1,10 @@
 {% extends "base.html" %} 
 {% block title %}Doar - {{ item[1]|title }}{% endblock %} 
 
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/adapt.css') }}" />
+{% endblock %}
+
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-md-6">
@@ -15,19 +19,31 @@
         </a>
       </div>
       <div class="card-body">
-        <span class="text-success text-uppercase d-block mb-3 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">// Campanha: <span class="text-info">{{ item[2] }}</span></span>
+        <span class="text-success text-uppercase d-block mb-3 font-monospace fw-bold fs-075rem-adpt ls-015em-adpt">// Campanha: <span class="text-info">{{ item[2] }}</span></span>
         <h2 class="card-title text-info fs-3">{{ item[1]|title }}</h2>
         
 
         <div class="my-4">
           <div class="d-flex justify-content-between align-items-center mb-1">
-            <small class="text-body-secondary">Progresso:</small>
-            <small class="text-success fw-bold font-numeric">{{ (item[3] / item[4] * 100) | round | int }}%</small>
+            <p class="text-body-secondary">Progresso:</p>
+            <p class="text-success fw-bold font-numeric">{{ (item[3] / item[4] * 100) | round | int }}%</p>
           </div>
           
-          <div class="progress bg-secondary bg-opacity-25 mb-2" style="height: 15px;">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success rounded-pill" role="progressbar" style="width: {{ (item[3] / item[4] * 100) | round | int }}%;" aria-valuenow="{{ item[3] }}" aria-valuemin="0" aria-valuemax="{{ item[4] }}"></div>
+
+          <!-- Define o cálculo da porcentagem progresso arrecadação -->
+          {% set pct = (item[3] / item[4] * 100) | round | int %}
+          {% set w_class = 'w-0' if pct < 12 else ('w-25' if pct < 38 else ('w-50' if pct < 63 else ('w-75' if pct < 88 else 'w-100'))) %}
+          <!-- div de exibição do progresso --></88>
+          <div class="progress bg-secondary bg-opacity-25 mb-2 h-15px-adpt">
+            <div 
+            class="progress-bar progress-bar-striped progress-bar-animated bg-success rounded-pill {{ w_class }}" 
+            role="progressbar" 
+            aria-valuenow="{{ item[3] }}" 
+            aria-valuemin="0" 
+            aria-valuemax="{{ item[4] }}"></div>
           </div>
+
+
           
           <p class="text-body-secondary">
             {% set cor_arrecadado = 'text-success' if item[3] >= item[4] else 'text-warning' %}
