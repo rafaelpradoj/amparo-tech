@@ -1,3 +1,4 @@
+.vscode
 
 .venv/
 venv/
@@ -16,4 +17,7 @@ Thumbs.db
 ARCHITECTURE.md
 BUG_REPORT.md
 SECURITY_AUDIT.md
+
+#kiloCode configs
 .kilo
+kilo.jsonc

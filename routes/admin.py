@@ -133,10 +133,10 @@ def aprovar_doacao(id_doacao):
         # TENTA atualizar o status da doação, apenas se o status atual ainda for 'Pendente'.
         # O banco de dados garante que apenas UMA requisição simultânea conseguirá fazer isso.
         cursor.execute("UPDATE doacoes SET status = 'Aprovado' WHERE id = %s AND status = 'Pendente'", (id_doacao,))
-        
+         
         # Se nenhuma linha foi afetada, o ataque (ou duplo clique) foi interceptado!
         if cursor.rowcount == 0:
-            flash("Doação já processada!", "danger")
+            flash("Ops! Essa doação já foi processada.", "warning")
             return redirect(url_for('admin.painel'))
 
         # Se passou da trava acima, temos garantia absoluta de que esta é a única thread processando a aprovação.
@@ -167,7 +167,7 @@ def aprovar_doacao(id_doacao):
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Aprovação', %s, %s)", (descricao_legivel, session['operador_id']))
         conn.commit()
         
-    flash("Doação aprovada! Estoque atualizado.", "success")
+    flash("Doação aprovada com sucesso! O estoque foi atualizado.", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/recusar/<int:id_doacao>", methods=["POST"])
@@ -180,9 +180,9 @@ def recusar_doacao(id_doacao):
         # Mesma trava atômica aplicada na função de aprovar promessa. TENTA atualizar o status da doação, apenas se o status atual ainda for 'Pendente'.
         # O banco de dados garante que apenas UMA requisição simultânea conseguirá fazer isso.
         cursor.execute("UPDATE doacoes SET status = 'Recusado' WHERE id = %s AND status = 'Pendente'", (id_doacao,))
-        
+         
         if cursor.rowcount == 0:
-            flash("Doação já processada!", "danger")
+            flash("Ops! Essa doação já foi processada.", "warning")
             return redirect(url_for('admin.painel'))
         
         cursor.execute("""
@@ -204,7 +204,7 @@ def recusar_doacao(id_doacao):
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (descricao_legivel, session['operador_id']))
         conn.commit()
         
-    flash("Doação recusada. O estoque não foi alterado!", "warning")
+    flash("Doação recusada com sucesso. O estoque não foi alterado.", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/novo", methods=["POST"])
@@ -221,28 +221,28 @@ def novo_item():
     try:
         meta = int(meta_raw)
     except (TypeError, ValueError):
-        flash("Meta inválida! Insira apenas números positivos.", "danger")
+        flash("Ops! A meta precisa ser um número positivo.", "danger")
         return redirect(url_for('admin.painel'))
 
     if meta <= 0:
-        flash("Meta deve ser maior que zero!", "danger")
+        flash("Ops! A meta precisa ser maior que zero.", "danger")
         return redirect(url_for('admin.painel'))
 
     if not categoria:
-        flash("Selecione uma categoria!", "danger")
+        flash("Ops! Selecione uma categoria para a campanha.", "danger")
         return redirect(url_for('admin.painel'))
     
     # Valida se a categoria existe no sistema
     with get_db_connection() as conn, conn.cursor() as cursor:
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
         if not cursor.fetchone():
-            flash(f"A categoria '{categoria}' não existe no sistema! Cadastre-a primeiro.", "danger")
+            flash(f"A categoria '{categoria}' não foi encontrada. Cadastre-a antes de continuar.", "danger")
             return redirect(url_for('admin.painel'))
 
     nome_normalizado = normalizar_nome(produto_nome)
 
     if len(nome_normalizado) > 150:
-        flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
+        flash(f"O nome do produto ultrapassa o limite de 150 caracteres.", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
@@ -251,7 +251,7 @@ def novo_item():
         produto = cursor.fetchone()
 
         if not produto:
-            flash(f"Produto '{produto_nome}' não encontrado no estoque!", "danger")
+            flash(f"O produto '{produto_nome}' não foi encontrado no estoque.", "danger")
             return redirect(url_for('admin.painel'))
 
         id_do_produto = produto[0]
@@ -260,7 +260,7 @@ def novo_item():
 
         # Validação: categoria informada deve corresponder à do produto
         if categoria != categoria_produto:
-            flash(f"A categoria '{categoria}' não corresponde ao produto '{nome_produto}' (categoria correta: {categoria_produto})!", "warning")
+            flash(f"A categoria '{categoria}' não corresponde ao produto '{nome_produto}' (categoria correta: {categoria_produto}).", "warning")
             return redirect(url_for('admin.painel'))
 
         # Impede duplicatas de campanhas ativas (inclui pausadas) para o mesmo produto
@@ -272,9 +272,9 @@ def novo_item():
             id_campanha_existente, ativo_existente, pausada_existente = campanha_existente
 
             if not pausada_existente:
-                flash(f"Já existe campanha ATIVA para '{nome_produto}'", "warning")
+                flash(f"Já existe uma campanha ativa para '{nome_produto}'.", "warning")
             else:
-                flash(f"Já existe campanha PAUSADA para '{nome_produto}'", "warning")
+                flash(f"Já existe uma campanha pausada para '{nome_produto}'.", "warning")
                 
             return redirect(url_for('admin.painel'))
 
@@ -283,7 +283,7 @@ def novo_item():
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou nova campanha para '{nome_produto}' com meta {meta}", session['operador_id']))
         conn.commit()
 
-    flash(f"Campanha para '{nome_produto}' criada com sucesso! Meta: {meta}", "success")
+    flash(f"Campanha para '{nome_produto}' criada com sucesso! A meta é {meta}.", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/estoque/novo_produto", methods=["POST"])
@@ -296,41 +296,41 @@ def novo_produto_estoque():
     categoria = (request.form.get("categoria") or "").strip()
 
     if not produto_base:
-        flash("O nome do produto é obrigatório!", "danger")
+        flash("Ops! O nome do produto é obrigatório.", "danger")
         return redirect(url_for('admin.painel'))
 
     if not categoria:
-        flash("Selecione uma categoria!", "danger")
+        flash("Ops! Selecione uma categoria.", "danger")
         return redirect(url_for('admin.painel'))
-    
+     
     # Valida se a categoria existe no sistema
     with get_db_connection() as conn, conn.cursor() as cursor:
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
         if not cursor.fetchone():
-            flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
+            flash(f"A categoria '{categoria}' não foi encontrada no sistema.", "danger")
             return redirect(url_for('admin.painel'))
-    
+     
     # O nome já é o texto completo fornecido pelo usuário
     nome_normalizado = normalizar_nome(produto_base)
 
 # Impede estouro do limite VARCHAR(150) do banco de dados (Improper Input Validation Mitigation)
     if len(nome_normalizado) > 150:
-        flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
+        flash(f"O nome do produto ultrapassa o limite de 150 caracteres.", "danger")
         return redirect(url_for('admin.painel'))
-        
+         
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Impede o cadastro de produtos com nomes idênticos no estoque
         cursor.execute("SELECT id FROM produtos WHERE nome = %s", (nome_normalizado,))
         if cursor.fetchone():
-            flash(f"Produto '{produto_base}' já cadastrado no estoque!", "warning")
+            flash(f"O produto '{produto_base}' já está cadastrado no estoque.", "warning")
             return redirect(url_for('admin.painel'))
-            
+             
         # Registra o novo item
         cursor.execute("INSERT INTO produtos (nome, categoria, estoque_fisico) VALUES (%s, %s, 0)", (nome_normalizado, categoria))
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Cadastrou '{produto_base}' no estoque interno", session['operador_id']))
         conn.commit()
-        
-    flash(f"Produto '{produto_base}' adicionado com sucesso!", "success")
+         
+    flash(f"Produto '{produto_base}' adicionado ao estoque com sucesso!", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/editar/<int:id_campanha>", methods=["POST"])
@@ -346,11 +346,11 @@ def editar_item(id_campanha):
     try:
         nova_meta = int(nova_meta_raw)
     except (TypeError, ValueError):
-        flash("Meta inválida! Insira apenas números positivos.", "danger")
+        flash("Ops! A meta precisa ser um número positivo.", "danger")
         return redirect(url_for('admin.painel'))
 
     if nova_meta <= 0:
-        flash("Meta deve ser maior que zero!", "danger")
+        flash("Ops! A meta precisa ser maior que zero.", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
@@ -359,11 +359,11 @@ def editar_item(id_campanha):
         resultado_campanha = cursor.fetchone()
 
         if not resultado_campanha:
-            flash("Campanha inexistente ou arquivada!", "danger")
+            flash("Ops! Essa campanha não foi encontrada ou já foi arquivada.", "danger")
             return redirect(url_for('admin.painel'))
-        
+         
         id_do_produto = resultado_campanha[0]
-        
+         
         # Busca nome do produto para descrição de auditoria
         cursor.execute("SELECT nome FROM produtos WHERE id = %s", (id_do_produto,))
         nome_produto_row = cursor.fetchone()
@@ -371,11 +371,11 @@ def editar_item(id_campanha):
 
         # Atualiza APENAS a meta da campanha
         cursor.execute("UPDATE campanhas SET meta = %s WHERE id = %s", (nova_meta, id_campanha))
-        
+         
         descricao_legivel = f"Editou a Meta da campanha '{nome_produto}' para {nova_meta}"
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-        
-        flash("Meta da campanha atualizada com sucesso!", "success")
+         
+        flash("A meta da campanha foi atualizada com sucesso!", "success")
         conn.commit()
         
     return redirect(url_for('admin.painel'))
@@ -391,23 +391,23 @@ def editar_produto(id_produto):
     categoria = (request.form.get("categoria") or "").strip()
 
     if not produto_base:
-        flash("O nome do produto é obrigatório!", "danger")
+        flash("Ops! O nome do produto é obrigatório.", "danger")
         return redirect(url_for('admin.painel'))
 
     if not categoria:
-        flash("Selecione uma categoria!", "danger")
+        flash("Ops! Selecione uma categoria.", "danger")
         return redirect(url_for('admin.painel'))
     # Valida se a categoria existe no sistema    
     with get_db_connection() as conn, conn.cursor() as cursor:
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (categoria,))
         if not cursor.fetchone():
-            flash(f"A categoria '{categoria}' não existe no sistema!", "danger")
+            flash(f"A categoria '{categoria}' não foi encontrada no sistema.", "danger")
             return redirect(url_for('admin.painel'))
 
     nome_normalizado = normalizar_nome(produto_base)
 
     if len(nome_normalizado) > 150:
-        flash(f"O nome do produto excede o limite de 150 caracteres!", "danger")
+        flash(f"O nome do produto ultrapassa o limite de 150 caracteres.", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
@@ -416,7 +416,7 @@ def editar_produto(id_produto):
         produto_atual = cursor.fetchone()
 
         if not produto_atual:
-            flash("Produto inexistente!", "danger")
+            flash("Ops! Esse produto não foi encontrado.", "danger")
             return redirect(url_for('admin.painel'))
 
         nome_antigo = produto_atual[0]
@@ -424,12 +424,12 @@ def editar_produto(id_produto):
 
         # Verifica se houve alteração real
         if nome_normalizado == nome_antigo and categoria == categoria_antiga:
-            flash("Nenhuma alteração de produto detectada!", "warning")
+            flash("Nenhuma alteração foi detectada.", "warning")
             return redirect(url_for('admin.painel'))
         # Trava de campanha ativa: impede alteração de nome/categoria
         cursor.execute("SELECT id FROM campanhas WHERE id_produto = %s AND ativo = TRUE", (id_produto,))
         if cursor.fetchone():
-            flash("Produto com campanha ativa não pode ser alterado!", "danger")
+            flash("Ops! Esse produto tem uma campanha ativa e não pode ser alterado.", "danger")
             return redirect(url_for('admin.painel'))
         # Atualiza o produto
         cursor.execute("UPDATE produtos SET nome = %s, categoria = %s WHERE id = %s", (nome_normalizado, categoria, id_produto))
@@ -438,7 +438,7 @@ def editar_produto(id_produto):
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao, session['operador_id']))
         conn.commit()
 
-    flash(f"Produto '{produto_base}' atualizado com sucesso!", "success")
+    flash(f"Produto '{produto_base}' atualizado no estoque com sucesso!", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/item/pausar/<int:id_campanha>", methods=["POST"])
@@ -458,21 +458,21 @@ def pausar_campanha(id_campanha):
         resultado = cursor.fetchone()
         
         if not resultado:
-            flash("Campanha inexistente!", "danger")
+            flash("Ops! Essa campanha não foi encontrada.", "danger")
             return redirect(url_for('admin.painel'))
-        
+         
         nome_produto, pausada = resultado
-        
+         
         if pausada:
             cursor.execute("UPDATE campanhas SET pausada = FALSE WHERE id = %s", (id_campanha,))
             descricao = f"Reativou a campanha '{nome_produto}'"
             acao = "Reativação"
-            mensagem = f"Campanha '{nome_produto}' reativada com sucesso!"
+            mensagem = f"A campanha '{nome_produto}' foi reativada com sucesso!"
         else:
             cursor.execute("UPDATE campanhas SET pausada = TRUE WHERE id = %s", (id_campanha,))
             descricao = f"Pausou a campanha '{nome_produto}'"
             acao = "Pausamento"
-            mensagem = f"Campanha '{nome_produto}' pausada com sucesso!"
+            mensagem = f"A campanha '{nome_produto}' foi pausada com sucesso!"
         
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES (%s, %s, %s)", (acao, descricao, session['operador_id']))
         conn.commit()
@@ -493,7 +493,7 @@ def excluir_item(id_campanha):
         """, (id_campanha,))
         nome_item_row = cursor.fetchone()
         if not nome_item_row:
-            flash("Campanha inexistente!", "danger")
+            flash("Ops! Essa campanha não foi encontrada.", "danger")
             return redirect(url_for('admin.painel'))
 
         nome_item = nome_item_row[0]
@@ -502,8 +502,8 @@ def excluir_item(id_campanha):
         cursor.execute("UPDATE campanhas SET ativo = FALSE WHERE id = %s", (id_campanha,))
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (f"Arquivou/Ocultou a campanha '{nome_item}'", session['operador_id']))
         conn.commit()
-        
-    flash("Campanha arquivada! O produto permanece no estoque interno.", "success")
+         
+    flash("Campanha arquivada! O produto continua disponível no estoque interno.", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/estoque/ajustar/<int:id_produto>", methods=["POST"])
@@ -519,29 +519,29 @@ def ajustar_estoque(id_produto):
     try:
         quantidade = int(request.form.get("quantidade", 0))
     except ValueError:
-        flash("Erro: A quantidade informada é inválida!", "danger")
+        flash("Ops! A quantidade informada é inválida.", "danger")
         return redirect(url_for('admin.painel'))
-    
+     
     motivo = request.form.get("motivo", "").strip()
-    
+     
     # Validações de campos obrigatórios e lógicos
     if not motivo:
-        flash("Informe o motivo para continuar (obrigatório para auditoria)!", "danger")
+        flash("Ops! É necessário informar um motivo para continuar.", "danger")
         return redirect(url_for('admin.painel'))
-    
+     
     if quantidade <= 0:
-        flash("A quantidade deve ser maior que zero!", "danger")
+        flash("Ops! A quantidade precisa ser maior que zero.", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Busca o produto garantindo estritamente que ele está ativo (Bloqueia Soft Delete Bypass)
         cursor.execute("SELECT nome, estoque_fisico FROM produtos WHERE id = %s AND ativo = TRUE;", (id_produto,))
         item_info = cursor.fetchone()
-        
+         
         if not item_info:
-            flash("Produto inexistente ou arquivado!", "danger")
+            flash("Ops! Esse produto não foi encontrado ou já foi arquivado.", "danger")
             return redirect(url_for('admin.painel'))
-            
+             
         nome_item, estoque_atual = item_info
 
         # Executa acréscimo de estoque (Entrada)
@@ -549,31 +549,31 @@ def ajustar_estoque(id_produto):
             cursor.execute("UPDATE produtos SET estoque_fisico = estoque_fisico + %s WHERE id = %s", (quantidade, id_produto))
             descricao_legivel = f"Adicionou {quantidade}x '{nome_item}' ao estoque. Motivo: {motivo}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-            flash(f"Entrada de {quantidade} unidade(s) de {nome_item} registrada!", "success")
+            flash(f"Entrada de {quantidade} unidade(s) de {nome_item} registrada com sucesso!", "success")
 
         # Executa decréscimo de estoque (Saída) com Proteção Atômica contra Race Conditions (TOCTOU)
         elif tipo_ajuste == "saida":
             if quantidade > estoque_atual:
-                flash(f"Você não pode retirar {quantidade}. O estoque possui apenas {estoque_atual}!", "danger")
+                flash(f"Ops! Não é possível retirar {quantidade} unidade(s). O estoque atual é de {estoque_atual}.", "danger")
                 return redirect(url_for('admin.painel'))
-                
+                 
             # Tenta atualizar o estoque fisicamente apenas se o saldo atual no banco for suficiente no momento exato do UPDATE
             cursor.execute("""
                 UPDATE produtos 
                 SET estoque_fisico = estoque_fisico - %s 
                 WHERE id = %s AND estoque_fisico >= %s
             """, (quantidade, id_produto, quantidade))
-            
+             
             # Se rowcount for 0, significa que entre o nosso SELECT lá em cima e este UPDATE, outra requisição consumiu o estoque!
             if cursor.rowcount == 0:
-                flash("Saldo insuficiente: estoque alterado por outra operação!", "warning")
+                flash("Ops! O estoque foi alterado por outra operação neste momento.", "warning")
                 return redirect(url_for('admin.painel'))
 
             descricao_legivel = f"Retirou {quantidade}x '{nome_item}' do estoque. Motivo: {motivo}"
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Edição', %s, %s)", (descricao_legivel, session['operador_id']))
-            flash(f"Saída de {quantidade} unidade(s) de {nome_item} registrada!", "success")
+            flash(f"Saída de {quantidade} unidade(s) de {nome_item} registrada com sucesso!", "success")
         else:
-            flash("Tipo de ajuste inválido!", "danger")
+            flash("Ops! O tipo de ajuste informado é inválido.", "danger")
             return redirect(url_for('admin.painel'))
 
         conn.commit()
@@ -595,21 +595,21 @@ def novo_operador():
     palavra_chave = request.form.get("palavra_chave")
 
     if not novo_login:
-        flash("O login do operador não pode estar vazio!", "danger")
+        flash("Ops! O login do operador não pode ficar vazio.", "danger")
         return redirect(url_for('admin.painel'))
 
     if not palavra_chave:
-        flash("A palavra-chave de recuperação é obrigatória!", "danger")
+        flash("Ops! A palavra-chave de recuperação é obrigatória.", "danger")
         return redirect(url_for('admin.painel'))
 
     # Validação de complexidade mínima de senha
     if not nova_senha or len(nova_senha) < 6:
-        flash("A senha deve ter pelo menos 6 caracteres!", "danger")
+        flash("Ops! A senha precisa ter pelo menos 6 caracteres.", "danger")
         return redirect(url_for('admin.painel'))
 
     # Validação de confirmação de senha
     if nova_senha != confirma_senha:
-        flash("As senhas digitadas não coincidem!", "danger")
+        flash("Ops! As senhas digitadas não coincidem.", "danger")
         return redirect(url_for('admin.painel'))
 
     # Hasheamento das strings sensíveis usando Werkzeug Security
@@ -620,15 +620,15 @@ def novo_operador():
         # Impede duplicidade de usernames (logins)
         cursor.execute("SELECT id FROM operadores WHERE login = %s", (novo_login,))
         if cursor.fetchone():
-            flash(f"O login '{novo_login}' já está em uso!", "danger")
+            flash(f"O login '{novo_login}' já está em uso por outro operador.", "danger")
             return redirect(url_for('admin.painel'))
 
         # Insere a nova credencial de operador comum
         cursor.execute("INSERT INTO operadores (login, senha, palavra_recuperacao, is_master) VALUES (%s, %s, %s, FALSE)", (novo_login, senha_hash, palavra_hash))
         cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Concedeu acesso de operador para '{novo_login}'", session['operador_id']))
         conn.commit()
-        
-    flash(f"Operador '{novo_login}' cadastrado!", "success")
+         
+    flash(f"O operador '{novo_login}' foi cadastrado com sucesso!", "success")
     return redirect(url_for('admin.painel'))
 
 @admin_bp.route("/admin/operador/excluir/<int:id_op>", methods=["POST"])
@@ -648,12 +648,12 @@ def excluir_operador(id_op):
             eh_master, login_op = operador
             if eh_master:
                 # Bloqueia a auto-exclusão ou a exclusão do administrador raiz
-                flash("Erro: A conta Master do sistema não pode ser excluída!", "danger")
+                flash("Ops! A conta Master do sistema não pode ser excluída.", "danger")
             else:
                 # Efetua a revogação lógica do operador comum
                 cursor.execute("UPDATE operadores SET ativo = FALSE WHERE id = %s", (id_op,))
                 cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (f"Revogou o acesso do operador '{login_op}'", session['operador_id']))
-                flash(f"Acesso do operador '{login_op}' revogado!", "success")
+                flash(f"O acesso do operador '{login_op}' foi revogado com sucesso!", "success")
         conn.commit()
     return redirect(url_for('admin.painel'))
 
@@ -689,21 +689,21 @@ def nova_categoria():
     nome = escape(nome_normalizado)
     
     if not nome:
-        flash("O nome da categoria não pode estar vazio!", "danger")
+        flash("Ops! O nome da categoria não pode ficar vazio.", "danger")
         return redirect(url_for('admin.painel'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Evita a colisão/duplicação comparando as versões normalizadas sem acento
         cursor.execute("SELECT id FROM categorias WHERE nome = %s", (nome,))
-        
+         
         if cursor.fetchone():
-            flash(f"A categoria '{nome}' já existe!", "warning")
+            flash(f"A categoria '{nome}' já existe no sistema.", "warning")
         else:
             # Cria a nova categoria e gera o log
             cursor.execute("INSERT INTO categorias (nome) VALUES (%s)", (nome,))
             cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Criação', %s, %s)", (f"Criou a categoria '{nome}'", session['operador_id']))
             conn.commit()
-            flash(f"Categoria '{nome}' criada com sucesso!", "success")
+            flash(f"A categoria '{nome}' foi criada com sucesso!", "success")
             
     return redirect(url_for('admin.painel'))
 
@@ -723,12 +723,12 @@ def excluir_categoria(id_cat):
             # Verifica se há restrição de chave por produtos que dependem desta categoria
             cursor.execute("SELECT id FROM produtos WHERE categoria = %s LIMIT 1", (nome_categoria,))
             if cursor.fetchone():
-                flash(f"Categoria '{nome_categoria}' não pode ser excluída: há produtos vinculados!.", "danger")
+                flash(f"A categoria '{nome_categoria}' não pode ser excluída: há produtos vinculados a ela.", "danger")
             else:
                 # Remove definitivamente a categoria livre de dependências
                 cursor.execute("DELETE FROM categorias WHERE id = %s", (id_cat,))
                 cursor.execute("INSERT INTO auditoria (acao, descricao, id_operador) VALUES ('Exclusão', %s, %s)", (f"Removeu a categoria '{nome_categoria}'", session['operador_id']))
                 conn.commit()
-                flash(f"Categoria '{nome_categoria}' removida com sucesso!", "success")
+                flash(f"A categoria '{nome_categoria}' foi removida com sucesso!", "success")
                 
     return redirect(url_for('admin.painel'))
