@@ -18,6 +18,8 @@ ARCHITECTURE.md
 BUG_REPORT.md
 SECURITY_AUDIT.md
 
-#kiloCode configs
-.kilo
+# Configurações locais do Kilo / MCP
+.kilo/
+.kilorules
 kilo.jsonc
+kilo.json
