@@ -2,11 +2,15 @@
 
 {% block title %}AmparoTech - Início{% endblock %}
 
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/adapt.css') }}" />
+{% endblock %}
+
 {% block content %}
   <div class="mb-5 pb-5 pt-3 px-2">
     <div class="mb-5 d-flex justify-content-between align-items-end flex-wrap gap-3">
       <div>
-        <span class="text-success text-uppercase d-block mb-1 font-monospace fw-bold" style="font-size: 0.75rem; letter-spacing: 0.15em;">
+        <span class="text-success text-uppercase d-block mb-1 font-monospace fw-bold fs-075rem-adpt ls-015em-adpt">
           {% if categoria_ativa %}
             // Campanha
           {% else %}
@@ -34,7 +38,7 @@
 
       {% if categoria_ativa %}
         <div>
-          <a href="{{ url_for('public.index') }}" class="btn btn-outline-secondary text-warning btn-sm rounded-pill px-3 fw-medium">
+          <a href="{{ url_for('public.index') }}" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-medium">
             <i class="bi bi-arrow-left me-1"></i> Voltar para Necessidades
           </a>
         </div>
@@ -43,7 +47,7 @@
   {# --- TELA 1: EXIBIÇÃO DE CATEGORIAS (HOME) --- #}
 {% if categorias %}
   {# Lista de cores do Bootstrap que combinam com o Dark Theme #}
-  {% set cores_bootstrap = ['text-success', 'text-info', 'text-warning', 'text-primary', 'text-danger'] %}
+  {% set cores_bootstrap = ['text-primary-emphasis', 'text-success-emphasis', 'text-danger-emphasis', 'text-warning-emphasis', 'text-info-emphasis'] %}
 
   <div class="row g-3">
     {% for cat in categorias %}
@@ -55,8 +59,8 @@
           <div class="p-4 border border-secondary border-opacity-50 rounded-3 bg-dark text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all">
             <div>
               {# Aplica a cor dinâmica no título da categoria #}
-              <h2 class="fs-5 fw-bold {{ cor_categoria }} mb-2">{{ cat[0] }}</h2>
-              <span class="text-body-secondary font-monospace">
+              <h2 class="fs-5 fw-medium {{ cor_categoria }} mb-2">{{ cat[0] }}</h2>
+              <span class="text-light-emphasys font-monospace">
                 <span class="text-warning font-numeric">{{ cat[1] }}</span> {% if cat[1] == 1 %}causa precisando de apoio{% else %}causas precisando de apoio{% endif %}
               </span>
             </div>
@@ -74,13 +78,12 @@
       
       {# Tabela Desktop #}
       <div class="table-responsive d-none d-md-block">
-        <table class="table table-dark table-striped table-hover align-middle mb-0" 
-               style="--bs-table-bg: transparent; --bs-table-striped-bg: rgba(255, 255, 255, 0.05); --bs-table-hover-bg: rgba(255, 255, 255, 0.08);">
+        <table class="table table-dark table-striped align-middle">
           <thead class="border-bottom border-light border-opacity-75">
             <tr>
-              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em;">Campanha</th>
-              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 40%; font-size: 0.75rem; letter-spacing: 0.1em;">Arrecadado</th>
-              <th class="text-center text-uppercase fw-semibold text-body-secondary" style="width: 20%; font-size: 0.75rem; letter-spacing: 0.1em;">Ação</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary fs-075rem-adpt ls-01em-adpt">Campanha</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary fs-075rem-adpt ls-01em-adpt">Arrecadado</th>
+              <th class="text-center text-uppercase fw-semibold text-body-secondary fs-075rem-adpt ls-01em-adpt">Ação</th>
             </tr>
           </thead>
           <tbody class="border-top-0">
@@ -90,28 +93,38 @@
                 <td class="text-center text-info fw-medium">{{ produto[1]|title }}</td>
                 
                 
-                <td class="py-3">
+                <td class="p-3">
                   <div class="d-flex justify-content-between align-items-center mb-2  text-body-secondary">
                     <span>
                       {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
                       {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
                       
-                      <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
+                      <strong class="{{ cor_arrecadado }} opacity-75 font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
                     </span>
                     <span class="font-numeric text-success fw-semibold">
                       {{ (produto[3] / produto[4] * 100) | round | int }}%
                     </span>
-                  </div>
-                  <div class="progress bg-secondary bg-opacity-25 mb-2" style="height: 15px;">
-                    <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: {{ (produto[3] / produto[4] * 100) | round | int }}%;" aria-valuenow="{{ produto[3] }}" aria-valuemin="0" aria-valuemax="{{ produto[4] }}"></div>
+                  </div>  
+                  <!-- Define o cálculo da porcentagem progresso arrecadação -->
+                  {% set percent = (produto[3] / produto[4] * 100) | round | int %}
+                  {% set w_class = 'w-0' if percent < 12 else ('w-25' if percent < 38 else ('w-50' if percent < 63 else ('w-75' if percent < 88 else 'w-100'))) %}
+                  <!-- div de exibição do progresso -->
+                  <div class="progress bg-secondary bg-opacity-25 mb-3 h-15px-adpt">
+                    {% set animation_class = '' if percent >= 100 else 'progress-bar-striped progress-bar-animated' %}
+                    <div class="progress-bar bg-success opacity-75 rounded-pill {{ animation_class }} {{ w_class }}" 
+                    role="progressbar" 
+                    aria-valuenow="{{ produto[3] }}" 
+                    aria-valuemin="0" 
+                    aria-valuemax="{{ produto[4] }}">
+                    </div>
                   </div>
                 </td>
                 
-                <td class="py-3 text-center" style="padding-right: 1rem;">
+                <td class="p-3 text-center">
                   {% if produto[3] >= produto[4] %}
                     <div class="text-success small font-monospace text-uppercase d-inline-flex align-items-center gap-2" title="Meta Atingida">
                       <i class="bi bi-check-circle-fill fs-5"></i>
-                      <span class="fw-semibold" style="font-size: 0.75rem;">Meta Atingida!</span>
+                      <span class="fw-semibold fs-075rem-adpt">Meta Atingida!</span>
                     </div>
                   {% else %}
                     <a href="/doar/{{ produto[0] }}" class="btn btn-sm btn-success rounded-pill px-4 py-1 fw-semibold shadow-sm text-nowrap">
@@ -136,26 +149,38 @@
               <span>
                 {% set cor_arrecadado = 'text-success' if produto[3] >= produto[4] else 'text-danger' %}
                 {% set cor_meta = 'text-success' if produto[3] >= produto[4] else 'text-warning' %}
-                <strong class="{{ cor_arrecadado }} font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
+                <strong class="{{ cor_arrecadado }} opacity-75 font-numeric">{{ produto[3] }}</strong> de <span class="{{ cor_meta }} font-numeric">{{ produto[4] }}</span> unidades
               </span>
               <span class="font-numeric text-success fw-semibold">
                 {{ (produto[3] / produto[4] * 100) | round | int }}%
               </span>
             </div>
-            <div class="progress bg-secondary bg-opacity-25 mb-4" style="height: 15px;">
-              <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: {{ (produto[3] / produto[4] * 100) | round | int }}%;" aria-valuenow="{{ produto[3] }}" aria-valuemin="0" aria-valuemax="{{ produto[4] }}"></div>
+
+            <!-- Define o cálculo da porcentagem progresso arrecadação -->
+            {% set percent = (produto[3] / produto[4] * 100) | round | int %}
+            {% set w_class = 'w-0' if percent < 12 else ('w-25' if percent < 38 else ('w-50' if percent < 63 else ('w-75' if percent < 88 else 'w-100'))) %}
+            <!-- div de exibição do progresso -->
+            <div class="progress bg-secondary bg-opacity-25 mb-4 h-15px-adpt">
+              {% set animation_class = '' if percent >= 100 else 'progress-bar-striped progress-bar-animated' %}
+              <div 
+                class="progress-bar {{ animation_class }} bg-success opacity-75 rounded-pill {{ w_class }}" 
+                role="progressbar" 
+                aria-valuenow="{{ produto[3] }}" 
+                aria-valuemin="0" 
+                aria-valuemax="{{ produto[4] }}">
+              </div>
             </div>
             
             <div class="text-start">
               {% if produto[3] >= produto[4] %}
-                <div class="text-success small font-monospace text-uppercase d-inline-flex align-items-center gap-2" title="Meta Atingida">
+              <div class="text-success small font-monospace text-uppercase d-inline-flex align-items-center gap-2" title="Meta Atingida">
                   <i class="bi bi-check-circle-fill fs-5"></i> 
-                  <span class="fw-semibold" style="font-size: 0.75rem;">Meta Atingida</span>
-                </div>
+                  <span class="fw-semibold fs-075rem-adpt">Meta Atingida</span>
+              </div>
               {% else %}
-                <a href="/doar/{{ produto[0] }}" class="btn btn-success rounded-pill px-5 py-2 fw-semibold shadow-sm" style="font-size: 0.85rem;">
-                  <i class="bi bi-heart-fill me-1"></i> Doar
-                </a>
+              <a href="/doar/{{ produto[0] }}" class="btn btn-success rounded-pill px-5 py-2 fw-semibold shadow-sm fs-085rem-adpt">
+                <i class="bi bi-heart-fill me-1"></i> Doar
+              </a>
               {% endif %}
             </div>
             

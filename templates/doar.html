@@ -31,16 +31,17 @@
           
 
           <!-- Define o cálculo da porcentagem progresso arrecadação -->
-          {% set pct = (item[3] / item[4] * 100) | round | int %}
-          {% set w_class = 'w-0' if pct < 12 else ('w-25' if pct < 38 else ('w-50' if pct < 63 else ('w-75' if pct < 88 else 'w-100'))) %}
-          <!-- div de exibição do progresso --></88>
+          {% set percent = (item[3] / item[4] * 100) | round | int %}
+          {% set w_class = 'w-0' if percent < 12 else ('w-25' if percent < 38 else ('w-50' if percent < 63 else ('w-75' if percent < 88 else 'w-100'))) %}
+          <!-- div de exibição do progresso -->
           <div class="progress bg-secondary bg-opacity-25 mb-2 h-15px-adpt">
             <div 
             class="progress-bar progress-bar-striped progress-bar-animated bg-success rounded-pill {{ w_class }}" 
             role="progressbar" 
             aria-valuenow="{{ item[3] }}" 
             aria-valuemin="0" 
-            aria-valuemax="{{ item[4] }}"></div>
+            aria-valuemax="{{ item[4] }}">
+            </div>
           </div>
 
 
