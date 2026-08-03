@@ -76,12 +76,12 @@ def login():
         senha_digitada = request.form.get("senha")
 
         if not usuario_digitado or not senha_digitada:
-            flash("Usuário ou senha inválidos!", "danger")
+            flash("Ops! Preencha o usuário e a senha para continuar.", "danger")
             return render_template("login.html")
 
         # Verifica se a conta está bloqueada por excesso de tentativas
         if _is_account_locked(usuario_digitado):
-            flash("Conta bloqueada temporariamente! Tente novamente em 1 minuto.", "danger")
+            flash("Ops! Sua conta está temporariamente bloqueada. Tente novamente em 1 minuto.", "danger")
             return render_template("login.html")
 
         with get_db_connection() as conn, conn.cursor() as cursor:
@@ -106,7 +106,7 @@ def login():
                 """, (operador[0],))
                 conn.commit()
                 
-                flash(f"Login realizado com sucesso, {usuario_digitado}.", "success")
+                flash(f"Login realizado com sucesso, {usuario_digitado}!", "success")
                 return redirect(url_for('admin.painel'))
             else:
                 # Registra a tentativa falha e bloqueia a conta se o limite for atingido
@@ -124,7 +124,7 @@ def login():
                     conn2.commit()
 
                 # Retorna erro genérico caso o usuário não exista ou o hash não bata (boa prática de segurança)
-                flash("Usuário ou senha inválidos!", "danger")
+                flash("Ops! O usuário ou a senha informados não são válidos.", "danger")
             
     return render_template("login.html")
 
@@ -138,7 +138,7 @@ def logout():
     session.pop('operador_login', None)
     session.pop('is_master', None)
     
-    flash("Você saiu do sistema.", "success")
+    flash("Você saiu do sistema com sucesso!", "success")
     return redirect(url_for('auth.login'))
 
 @auth_bp.route("/recuperar_senha", methods=["POST"])
@@ -153,17 +153,17 @@ def recuperar_senha():
     confirma_senha = request.form.get("confirma_nova_senha")
 
     if not usuario or not palavra:
-        flash("Usuário ou Palavra-Chave incorretos. Tente novamente!", "danger")
+        flash("Ops! Preencha o usuário e a palavra-chave para continuar.", "danger")
         return redirect(url_for('auth.login'))
 
     # Validação de complexidade mínima de senha
     if not nova_senha or len(nova_senha) < 6:
-        flash("A nova senha deve ter no mínimo 6 caracteres!", "danger")
+        flash("Ops! A nova senha precisa ter pelo menos 6 caracteres.", "danger")
         return redirect(url_for('auth.login'))
 
     # Validação inicial: impede o avanço se a confirmação de senha falhar
     if nova_senha != confirma_senha:
-        flash("As senhas não coincidem. Tente novamente!", "danger")
+        flash("Ops! As senhas digitadas não coincidem.", "danger")
         return redirect(url_for('auth.login'))
 
     with get_db_connection() as conn, conn.cursor() as cursor:
@@ -186,9 +186,9 @@ def recuperar_senha():
             """, (operador[0],))
             
             conn.commit()
-            flash("Senha redefinida com sucesso! Faça login para acessar.", "success")
+            flash("Sua senha foi redefinida com sucesso! Faça login para acessar.", "success")
         else:
             # Mensagem de erro caso o login ou a palavra-chave estejam incorretos
-            flash("Usuário ou Palavra-Chave incorretos. Tente novamente!", "danger")
+            flash("Ops! O usuário ou a palavra-chave informados estão incorretos.", "danger")
 
     return redirect(url_for('auth.login'))
