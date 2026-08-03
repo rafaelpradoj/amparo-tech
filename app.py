@@ -1,6 +1,6 @@
 import os
 import secrets
-from flask import Flask, render_template, g
+from flask import Flask, render_template, g, request, redirect, url_for
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
@@ -142,6 +142,13 @@ def adicionar_cabecalhos_seguranca(response):
 
     response.headers['Content-Security-Policy'] = csp    
     return response
+
+
+# Middleware para redirecionar HTTP para HTTPS
+@app.before_request
+def enforce_https():
+    if not is_dev and not request.is_secure:
+        return redirect(request.url.replace('http://', 'https://'), code=301)
 
 
 # Verifica se o script está sendo executado diretamente pelo terminal
