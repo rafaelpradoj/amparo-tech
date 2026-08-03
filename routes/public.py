@@ -43,7 +43,7 @@ def ver_categoria(nome_categoria):
         lista_campanhas = cursor.fetchall()
         
         if not lista_campanhas:
-            flash("Nenhuma campanha ativa nesta categoria.", "danger")
+            flash("Nenhuma campanha ativa nesta categoria.", "warning")
             return redirect(url_for('public.index'))
 
     return render_template("index.html", produtos=lista_campanhas, categoria_ativa=nome_categoria)
@@ -73,14 +73,14 @@ def doar(id_campanha):
             if quantidade_doada <= 0:
                 raise ValueError("Quantidade negativa ou zero.")
         except (ValueError, TypeError):
-            flash("Quantidade informada inválida. Insira apenas números positivos!", "danger")
+            flash("Ops! A quantidade precisa ser um número positivo.", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         if not nome_doador:
-            flash("Você precisa inserir um nome!", "danger")
+            flash("Ops! Você precisa inserir um nome!", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
         elif len(nome_doador) > 100:
-            flash("Nome do doador não pode ultrapassar 100 caracteres!", "danger")
+            flash("Ops! Nome do doador não pode ultrapassar 100 caracteres.", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         # POST: Registra a promessa de doação no banco de dados com o status inicial 'Pendente'
@@ -95,7 +95,7 @@ def doar(id_campanha):
             campanha_status = cursor.fetchone()
             
             if not campanha_status or not campanha_status[0] or campanha_status[1]:
-                flash("Esta campanha foi encerrada e não aceita mais doações!", "danger")
+                flash("Ops! Esta campanha foi encerrada e não aceita mais doações.", "danger")
                 return redirect(url_for('public.index'))
 
             cursor.execute("""
@@ -120,7 +120,7 @@ def doar(id_campanha):
         
         # Se o atacante tentar forçar o link de uma campanha oculta, ele é barrado aqui
         if not campanha:
-            flash("Campanha não encontrada!", "danger")
+            flash("Ops! Campanha não encontrada!", "danger")
             return redirect(url_for('public.index'))
             
     return render_template("doar.html", item=campanha)
