@@ -121,6 +121,12 @@ def adicionar_cabecalhos_seguranca(response):
     
     # Permissions Policy 
     response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+    
+    # Strict-Transport-Security (HSTS) — Força navegadores a usar HTTPS
+    # max-age=31536000 (1 ano), includeSubDomains cobre todos os subdomínios,
+    # preload permite inclusão em listas pré-carregadas de navegadores
+    if not is_dev:
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
 
     # Resgata o nonce de forma segura garantindo sua existência
     nonce = get_csp_nonce()
