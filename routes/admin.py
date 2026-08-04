@@ -103,7 +103,7 @@ def painel():
 
         # 7. Lista de categorias disponíveis para ordenação alfabética
         cursor.execute("SELECT id, nome FROM categorias ORDER BY nome ASC;")
-        lista_categorias = crystal = cursor.fetchall()
+        lista_categorias = cursor.fetchall()
             
     # Processa os arrays isolados para alimentar os gráficos do relatório no front-end
     nomes_itens = [d[0] for d in dados_relatorio]
