@@ -11,6 +11,10 @@ from utils.db import get_db_connection
 # Carrega as variáveis de ambiente do arquivo .env (como as credenciais do banco)
 load_dotenv(override=True)
 
+# Trava de segurança crítica: impede que o script seja rodado em ambiente de Produção
+if os.getenv("FLASK_ENV") != "development" and os.getenv("FLASK_DEBUG") != "1":
+    sys.exit("⚠️ ERRO CRÍTICO: Execução bloqueada! Este script apaga as tabelas e não pode ser executado em produção.")
+
 print("A tentar conectar à base de dados...")
 
 with get_db_connection() as conn, conn.cursor() as cursor:
