@@ -38,7 +38,9 @@ app.config.update(
     # Impede que o cookie seja acessível via JavaScript (mitigação de XSS/sequestro de sessão)
     SESSION_COOKIE_HTTPONLY=True,
     # Impede que o cookie seja enviado por requisições originadas de outros sites
-    SESSION_COOKIE_SAMESITE='Lax'
+    SESSION_COOKIE_SAMESITE='Strict',
+    # Limita o tamanho do payload para evitar DoS por requisições grandes.
+    MAX_CONTENT_LENGTH= 1 * 1024 * 1024,
 )
 
 # Inicializa a proteção global contra CSRF blindando todas as rotas
