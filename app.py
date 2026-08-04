@@ -25,12 +25,16 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
 # Define a chave secreta essencial para criptografar os cookies de sessão (session) do Flask
 # Se a chave não existir ou for a string padrão do .env.example, gera uma chave segura em tempo de execução
 secret_key = os.getenv("SECRET_KEY")
-if not secret_key or secret_key == "sua_chave_super_secreta_aqui":    
+is_dev = os.getenv("FLASK_DEBUG") == "1" or os.getenv("FLASK_ENV") == "development" or os.getenv("DEBUG") == "1"
+
+if not secret_key or secret_key == "sua_chave_super_secreta_aqui":
+    if not is_dev:
+        # Fail-Fast em Produção: Se não houver chave no Heroku, derruba o app para alertar o admin
+        raise RuntimeError("⚠️ SEGURANÇA: SECRET_KEY não configurada no ambiente de Produção!")
+    # Apenas em desenvolvimento local geramos uma chave aleatória
     secret_key = secrets.token_hex(32)
 
 app.secret_key = secret_key
-
-is_dev = os.getenv("FLASK_DEBUG") == "1" or os.getenv("FLASK_ENV") == "development" or os.getenv("DEBUG") == "1"
 
 app.config.update(
     # Exige que o cookie só seja transmitido em conexões HTTPS (criptografadas)
