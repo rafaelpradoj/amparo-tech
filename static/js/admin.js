@@ -47,15 +47,40 @@ document.addEventListener("DOMContentLoaded", function () {
         data: {
           labels: labels,
           datasets: [
-            { label: "Estoque Arrecadado", data: dataEstoque, backgroundColor: "rgba(25, 135, 84, 0.7)" },
-            { label: "Meta Necessária", data: dataMeta, backgroundColor: "rgba(255, 115, 115, 0.7)" },
+            { 
+              label: "Estoque Arrecadado", 
+              data: dataEstoque, 
+              backgroundColor: "#198754",
+              borderRadius: 4,
+            },
+            { 
+              label: "Meta Necessária", 
+              data: dataMeta, 
+              backgroundColor: "rgba(255, 115, 115, 0.7)",
+              borderRadius: 4,
+              borderSkipped: false
+            },
           ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
-          plugins: { legend: { labels: { color: "white" } } },
+          indexAxis: 'y',
+          scales: { 
+            x: { 
+              beginAtZero: true,
+              grid: { color: "rgba(255, 255, 255, 0.05)" },
+              ticks: { color: "#adb5bd" }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: "#adb5bd", font: { weight: 'bold' } }
+            }
+          },
+          plugins: { 
+            legend: { position: 'top', labels: { color: "#ffffff", usePointStyle: true } },
+            tooltip: { backgroundColor: 'rgba(0, 0, 0, 0.8)', padding: 12 }
+          },
         },
       });
       graficoRenderizado = true; // Sinaliza que a renderização foi concluída com sucesso
