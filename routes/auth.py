@@ -34,6 +34,11 @@ def _get_lockout_store():
 
 def _is_account_locked(login):
     """Verifica se a conta está bloqueada por excesso de tentativas falhas."""
+    # Verificação explícita (is not None) para satisfazer o Type Checker (Linter)
+    if _redis_client is not None:
+        return _redis_client.exists(f"lockout:{login}")
+    
+    # Fallback para memória local (Desenvolvimento)
     store = _get_lockout_store()
     entry = store.get(login)
     if not entry:
@@ -45,9 +50,25 @@ def _is_account_locked(login):
         del store[login]
     return False
 
-
 def _record_failed_attempt(login):
     """Registra uma tentativa falha e bloqueia a conta se o limite for atingido."""
+    # Verificação explícita (is not None) para satisfazer o Type Checker (Linter)
+    if _redis_client is not None:
+        key = f"attempts:{login}"
+        
+        # O '# type: ignore' silencia o falso positivo do linter sobre tipagem assíncrona
+        attempts = int(_redis_client.incr(key))  # type: ignore
+        
+        if attempts == 1:
+            # Expira a contagem de falhas após a janela de tempo se a conta não for bloqueada
+            _redis_client.expire(key, LOCKOUT_DURATION) 
+        if attempts >= MAX_FAILED_ATTEMPTS:
+            # Bloqueia a conta pelo tempo definido e limpa o contador
+            _redis_client.setex(f"lockout:{login}", LOCKOUT_DURATION, "locked")
+            _redis_client.delete(key)
+        return
+
+    # Fallback para memória local (Desenvolvimento)
     store = _get_lockout_store()
     entry = store.get(login, {"count": 0, "locked_until": None})
     entry["count"] += 1
@@ -58,9 +79,15 @@ def _record_failed_attempt(login):
 
 def _reset_failed_attempts(login):
     """Zera o contador de tentativas falhas após login bem-sucedido."""
+    # Verificação explícita (is not None) para satisfazer o Type Checker (Linter)
+    if _redis_client is not None:
+        _redis_client.delete(f"attempts:{login}")
+        _redis_client.delete(f"lockout:{login}")
+        return
+        
+    # Fallback para memória local (Desenvolvimento)
     store = _get_lockout_store()
     store.pop(login, None)
-
 
 @auth_bp.route("/login", methods=["GET", "POST"])
 def login():
