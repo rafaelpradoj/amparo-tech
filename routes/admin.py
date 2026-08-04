@@ -41,7 +41,7 @@ def painel():
             JOIN campanhas c ON d.id_campanha = c.id
             JOIN produtos p ON c.id_produto = p.id
             WHERE d.status = 'Pendente'
-            ORDER BY d.data ASC;
+            ORDER BY d.data DESC;
         """)
         doacoes_pendentes = cursor.fetchall()
         
@@ -64,7 +64,7 @@ def painel():
             SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta, c.ativo, c.pausada 
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
-            ORDER BY c.ativo DESC, p.nome ASC;
+            ORDER BY c.ativo DESC, p.nome ASC, c.arrecadado DESC;
         """)
         lista_campanhas = cursor.fetchall()
 
@@ -84,7 +84,7 @@ def painel():
                 END as status_campanha
             FROM produtos p
             LEFT JOIN campanhas c ON c.id_produto = p.id AND c.ativo = TRUE
-            ORDER BY p.ativo DESC, p.nome ASC;
+            ORDER BY p.nome ASC, p.estoque_fisico DESC;
         """)
         lista_produtos = cursor.fetchall()
 
@@ -97,7 +97,7 @@ def painel():
                    a.descricao 
             FROM auditoria a
             JOIN operadores o ON a.id_operador = o.id
-            ORDER BY a.id DESC;
+            ORDER BY a.data DESC;
         """)
         lista_auditoria = cursor.fetchall()
 

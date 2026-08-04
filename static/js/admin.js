@@ -109,7 +109,7 @@ $(document).ready(function() {
     language: configuracaoIdioma,
     pageLength: 10,
     lengthMenu: [5, 10, 25, 50],
-    order: [[2, 'desc']], // Ordena inicialmente pelo status da campanha
+    order: [], // Está ordendando pelo banco de dados
     columnDefs: [ { type: 'sem-acentos', targets: 0 }, { orderable: false, targets: 5 } ],
     layout: {
       topStart: {
@@ -312,8 +312,8 @@ $(document).ready(function() {
 
   const tabelaAuditoria = $('#tabelaAuditoria').DataTable({
     language: configuracaoIdioma,
-    pageLength: 10, 
-    order: [], // Ficou vazio para respeitar a ordem imutável de IDs do backend
+    pageLength: 25, 
+    order: [], // Está ordendando pelo banco de dados
     columnDefs: [ { type: 'sem-acentos', targets: [1, 2, 3] } ],
     layout: {
       topStart: {
@@ -517,7 +517,7 @@ $(document).ready(function() {
   const tabelaEstoque = $('#tabelaEstoque').DataTable({
     language: configuracaoIdioma,
     pageLength: 10,
-    order: [[2, 'desc']], // Ordena inicialmente pela maior quantidade em estoque físico
+    order: [], // Está ordendando pelo banco de dados
     columnDefs: [ { type: 'sem-acentos', targets: 0 }, { orderable: false, targets: [3, 4] } ],
     layout: {
       topStart: {
@@ -712,7 +712,7 @@ $(document).ready(function() {
     language: configuracaoIdioma,
     pageLength: 5,
     lengthMenu: [5, 10, 25, 50],
-    order: [], // Mantém a ordenação cronológica definida nativamente no backend (ORDER BY d.data ASC)
+    order: [], // Está ordendando pelo banco de dados
     columnDefs: [ { type: 'sem-acentos', targets: [2, 4] }, { orderable: false, targets: 5 } ],
     layout: {
       topStart: {
@@ -795,7 +795,7 @@ document.addEventListener('DOMContentLoaded', function() {
         threshold: 0.0
       }
     });
-  });
+  }); 
 
   // 2. Select em cascata da modal NOVA CAMPANHA
   const categoriaEl = document.getElementById('selectCategoria');
