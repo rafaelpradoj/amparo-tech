@@ -8,14 +8,15 @@ services:
       - .:/app 
     environment:
       - FLASK_ENV=development
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
     env_file:
       - .env
 
     # Remove todas as capacidades extras do Linux e impede o processo de ganhar novos privilégios
-    security_opt:
-      - no-new-privileges:true
-    cap_drop:
-      - ALL
+    #security_opt:
+    #  - no-new-privileges:true
+    #cap_drop:
+    #  - ALL
 
     # Adição de healthcheck para o Flask usando biblioteca nativa do Python (evita dependência de curl)
     healthcheck:
