@@ -175,7 +175,9 @@ $(document).ready(function() {
           extend: 'excelHtml5',
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
-          title: 'Campanhas',
+          title: 'Relatório de Campanhas',
+          filename: function() { return 'Campanhas_' + new Date().toISOString().slice(0, 10); },
+          messageTop: function() { return 'Documento gerado em: ' + new Date().toLocaleString('pt-BR'); },
           exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
@@ -371,8 +373,15 @@ $(document).ready(function() {
   const tabelaAuditoria = $('#tabelaAuditoria').DataTable({
     language: configuracaoIdioma,
     pageLength: 25, 
-    order: [], // Está ordendando pelo banco de dados
-    columnDefs: [ { type: 'sem-acentos', targets: [1, 2, 3] } ],
+    order: [], // Está ordenando pelo banco de dados
+    autoWidth: false, // <-- Desliga o cálculo automático que esmaga as colunas
+    columnDefs: [ 
+      { type: 'sem-acentos', targets: [1, 2, 3] },
+      { width: "15%", targets: 0 }, // Data e Hora
+      { width: "20%", targets: 1 }, // Operador
+      { width: "15%", targets: 2 }, // Ação
+      { width: "50%", targets: 3 }  // Descrição
+    ],
     layout: {
       topStart: {
         buttons: [{
@@ -380,6 +389,8 @@ $(document).ready(function() {
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
           title: 'Registro de Auditoria',
+          filename: function() { return 'Auditoria_' + new Date().toISOString().slice(0, 10); },
+          messageTop: function() { return 'Documento gerado em: ' + new Date().toLocaleString('pt-BR'); },
           exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3] }
         }]
       },
@@ -584,6 +595,8 @@ $(document).ready(function() {
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
           title: 'Estoque Atual',
+          filename: function() { return 'Estoque_' + new Date().toISOString().slice(0, 10); },
+          messageTop: function() { return 'Documento gerado em: ' + new Date().toLocaleString('pt-BR'); },
           exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2] }
         }]
       },
@@ -779,6 +792,8 @@ $(document).ready(function() {
           text: '<i class="bi bi-file-earmark-excel-fill"></i> Exportar para Excel',
           className: 'btn btn-outline-success btn-sm fw-bold',
           title: 'Doações Pendentes',
+          filename: function() { return 'Pendencias_' + new Date().toISOString().slice(0, 10); },
+          messageTop: function() { return 'Documento gerado em: ' + new Date().toLocaleString('pt-BR'); },
           exportOptions: { modifier: { search: 'none' }, columns: [0, 1, 2, 3, 4] }
         }]
       },
