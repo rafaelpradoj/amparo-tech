@@ -1,25 +1,58 @@
 // =========================================================================
-// 1. POLLING DE NOVAS DOAÇÕES (Notificação em Tempo Real)
+// 1. ESTADO DAS ABAS E POLLING DE NOVAS DOAÇÕES (Notificação)
 // =========================================================================
 document.addEventListener("DOMContentLoaded", function () {
-  // Captura a quantidade inicial de pendências armazenada em um input oculto no HTML
-  let qtdAtual = parseInt(document.getElementById("qtd_pendencias_atual").value);
-  const toastElement = document.getElementById("toastNovaDoacao");
-  const toast = new bootstrap.Toast(toastElement, { autohide: false });
+  
+  // --- A. Lógica de Persistência das Abas ---
+  try {
+    const abaAtivaSalva = localStorage.getItem('abaAdminAtiva');
+    if (abaAtivaSalva) {
+      const botaoAba = document.getElementById(abaAtivaSalva);
+      if (botaoAba) {
+        const tab = new bootstrap.Tab(botaoAba);
+        tab.show();
+      }
+    }
+    
+    const botoesAbas = document.querySelectorAll('button[data-bs-toggle="tab"]');
+    botoesAbas.forEach(botao => {
+      botao.addEventListener('shown.bs.tab', function (event) {
+        localStorage.setItem('abaAdminAtiva', event.target.id);
+      });
+    });
+  } catch (erro) {
+    console.error("Erro ao carregar estado da aba:", erro);
+  }
 
-  // Executa uma checagem assíncrona a cada 8 segundos (8000ms)
-  setInterval(function () {
-    fetch("/admin/api/novas_pendencias")
-      .then(response => response.json())
-      .then(data => {
-        // Se o contador do banco for maior que o exibido na tela, dispara a notificação Toast
-        if (data.count > qtdAtual) {
-          toast.show();
-          qtdAtual = data.count; // Atualiza a variável local para sincronizar o estado
-        }
-      })
-      .catch(erro => console.error("Erro ao checar pendências:", erro));
-  }, 8000);
+  // --- B. Lógica do Toast de Novas Doações ---
+  try {
+    const inputQtd = document.getElementById("qtd_pendencias_atual");
+    const toastElement = document.getElementById("toastNovaDoacao");
+    
+    // Trava de segurança: só tenta rodar o relógio se o HTML do toast realmente existir na tela
+    if (inputQtd && toastElement) {
+      // O "|| 0" garante que não quebre se o input vier vazio
+      let qtdAtual = parseInt(inputQtd.value) || 0;
+      const toast = new bootstrap.Toast(toastElement, { autohide: false });
+
+      setInterval(function () {
+        fetch("/admin/api/novas_pendencias")
+          .then(response => {
+              if (!response.ok) throw new Error("Falha na resposta da rede");
+              return response.json();
+          })
+          .then(data => {
+            if (data && data.count > qtdAtual) {
+              toast.show();
+              qtdAtual = data.count; 
+            }
+          })
+          .catch(erro => console.error("Silenciando erro de polling:", erro));
+      }, 30000);
+    }
+  } catch (erro) {
+    console.error("Erro ao carregar o Toast:", erro);
+  }
 });
 
 // =========================================================================

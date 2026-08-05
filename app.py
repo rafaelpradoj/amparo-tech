@@ -60,7 +60,7 @@ limiter = Limiter(
     get_remote_address,
     app=app,
     storage_uri=redis_url, # Usa Redis em produção; memória como fallback local
-    default_limits=["1000 per day", "200 per hour"] # Limite global grande para não atrapalhar o uso normal
+    default_limits=["3000 per day", "800 per hour"] # Limite global grande para não atrapalhar o uso normal
 )
 
 # Permite apenas 5 tentativas por minuto nas rotas de Login e Recuperação de Senha (Rate Limiter)
