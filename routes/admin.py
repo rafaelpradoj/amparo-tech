@@ -46,14 +46,18 @@ def painel():
         doacoes_pendentes = cursor.fetchall()
         
         # 2. Dados para o relatório de progresso das campanhas ativas
-        cursor.execute("""
-            SELECT p.nome, c.arrecadado, c.meta 
-            FROM campanhas c 
-            JOIN produtos p ON c.id_produto = p.id 
-            WHERE c.ativo = TRUE 
-            ORDER BY c.arrecadado DESC;
-        """)
-        dados_relatorio = cursor.fetchall()
+        if session.get('is_master'):
+            cursor.execute("""
+                SELECT p.nome, c.arrecadado, c.meta 
+                FROM campanhas c 
+                JOIN produtos p ON c.id_produto = p.id 
+                WHERE c.ativo = TRUE 
+                ORDER BY c.arrecadado DESC;
+            """)
+            dados_relatorio = cursor.fetchall()
+        else:
+            dados_relatorio = []
+        
 
         # 3. Lista de operadores do sistema que estão ativos
         cursor.execute("SELECT id, login, is_master FROM operadores WHERE ativo = TRUE ORDER BY id ASC;")
