@@ -54,9 +54,9 @@
       {# Seleciona a cor alternando de acordo com a posição da categoria #}
       {% set cor_categoria = cores_bootstrap[loop.index0 % cores_bootstrap|length] %}
 
-      <div class="my-3 col-12 col-md-6 col-lg-4">
+      <div class="mt-3 mb-4 col-12 col-md-6 col-lg-4">
         <a href="{{ url_for('public.ver_categoria', nome_categoria=cat[0]) }}" class="text-decoration-none">
-          <div class="p-4 border border-secondary border-opacity-50 rounded-3 bg-dark text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all">
+          <div class="p-4 border border-info rounded-3 bg-dark text-white h-100 d-flex justify-content-between align-items-center shadow-sm hover-border-success transition-all">
             <div>
               {# Aplica a cor dinâmica no título da categoria #}
               <h2 class="fs-5 fw-medium {{ cor_categoria }} mb-2">{{ cat[0] }}</h2>

@@ -300,9 +300,9 @@
           <tbody>
             {% for item in inventario %}
             <tr>
-              <td class="align-middle"><strong>{{ item[1]|title }}</strong></td>
-              <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
-              <td class="align-middle text-center">
+              <td class="align-middle py-3"><strong>{{ item[1]|title }}</strong></td>
+              <td class="align-middle text-center py-3"><span class="badge bg-secondary">{{ item[2] }}</span></td>
+              <td class="align-middle text-center py-3">
                 {% if item[5] %}
                   {% if item[6] %}
                   <span class="badge bg-warning text-dark">Pausada</span>
@@ -313,13 +313,13 @@
                   <span class="badge bg-danger">Arquivada</span>
                 {% endif %}
               </td>
-              <td class="align-middle text-center font-numeric">
+              <td class="align-middle text-center font-numeric py-3">
                 {% if item[3] >= item[4] %}
                 <strong class="text-success" title="Meta atingida!">{{ item[3] }} <i class="bi bi-check-circle-fill"></i></strong>
                 {% else %} {{ item[3] }} {% endif %}
               </td>
-              <td class="align-middle text-center font-numeric">{{ item[4] }}</td>
-              <td class="align-middle text-nowrap text-center">
+              <td class="align-middle text-center font-numeric py-3">{{ item[4] }}</td>
+              <td class="align-middle text-nowrap text-center py-3">
                 {% if item[5] %}
                 <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarItem{{ item[0] }}">
                   <i class="bi bi-pencil"></i>
@@ -488,10 +488,10 @@
             {% for item in produtos %}
               {% if item[5] or item[3] > 0 %}
               <tr>
-                <td class="align-middle text-center"><strong>{{ item[1]|title }}</strong></td>
-                <td class="align-middle text-center"><span class="badge bg-secondary">{{ item[2] }}</span></td>
-                <td class="align-middle fs-5 fw-bold text-info text-center font-numeric">{{ item[3] }}</td>
-                <td class="align-middle text-center">
+                <td class="align-middle text-center py-3"><strong>{{ item[1]|title }}</strong></td>
+                <td class="align-middle text-center py-3"><span class="badge bg-secondary">{{ item[2] }}</span></td>
+                <td class="align-middle fs-5 fw-bold text-info text-center font-numeric py-3">{{ item[3] }}</td>
+                <td class="align-middle text-center py-3">
                   {% if item[6] == 'ativa' %}
                     <span class="badge bg-success">Ativa</span>
                   {% elif item[6] == 'pausada' %}
@@ -501,16 +501,28 @@
                   {% endif %}
                 </td>
                 <td class="align-middle text-nowrap text-center">
-                  <button type="button" class="btn btn-sm btn-outline-warning mx-2" data-bs-toggle="modal" data-bs-target="#modalEditarEstoque{{ item[0] }}" title="Editar Produto">
+                  <button type="button" class="btn btn-sm btn-outline-warning mx-1" data-bs-toggle="modal" data-bs-target="#modalEditarEstoque{{ item[0] }}" title="Editar Produto">
                     <i class="bi bi-pencil"></i>
                   </button>
-                  <button type="button" class="btn btn-sm btn-outline-success mx-2" data-bs-toggle="modal" data-bs-target="#modalEntrada{{ item[0] }}" title="Adicionar ao Estoque">
+                  <button type="button" class="btn btn-sm btn-outline-success mx-1" data-bs-toggle="modal" data-bs-target="#modalEntrada{{ item[0] }}" title="Adicionar ao Estoque">
                     <i class="bi bi-plus-lg"></i>
                   </button>
-                  <button type="button" class="btn btn-sm btn-outline-danger mx-2" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Remover do Estoque">
+                  <button type="button" class="btn btn-sm btn-outline-danger mx-1" data-bs-toggle="modal" data-bs-target="#modalSaida{{ item[0] }}" title="Remover do Estoque">
                     <i class="bi bi-dash-lg"></i>
                   </button>
-                  
+                  <!-- Lógica: Só exibe o botão se o produto estiver "Sem Campanha" -->
+                  {% if item[6] != 'ativa' and item[6] != 'pausada' %}
+                  <button type="button" class="btn btn-sm btn-outline-info mx-1 shadow-sm btn-nova-campanha-shortcut" 
+                          data-bs-toggle="modal" 
+                          data-bs-target="#modalNovoItem"
+                          data-categoria="{{ item[2] }}"
+                          data-produto="{{ item[1] }}"
+                          title="Criar Campanha Rápida">
+                    <i class="bi bi-megaphone"></i>
+                  </button>
+                  {% endif %}
+
+                  <!-- ================= MODAIS DE AÇÃO DO ESTOQUE ================= -->
                   <div class="modal fade" id="modalEditarEstoque{{ item[0] }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog text-start text-wrap">
                       <div class="modal-content bg-dark text-light border-secondary">
@@ -528,15 +540,7 @@
                                 <small class="font-numeric text-warning">Categoria: {{ item[2] }}</small>
                               </p>
                               <label class="form-label text-light">Editar Nome:</label>
-                              <input 
-                              type="text" 
-                              class="form-control bg-secondary bg-opacity-50 text-light border-secondary" 
-                              name="produto" 
-                              maxlength="150" 
-                              placeholder="Ex: Leite Integral - Caixa (1 Litro)"
-                              oninvalid="this.setCustomValidity('Insira um nome válido!')"
-                              oninput="this.setCustomValidity('')"
-                              required />
+                              <input type="text" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="produto" maxlength="150" placeholder="Ex: Leite Integral - Caixa (1 Litro)" oninvalid="this.setCustomValidity('Insira um nome válido!')" oninput="this.setCustomValidity('')" required />
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Editar Categoria:</label>
@@ -573,22 +577,11 @@
                             <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-4">
                               <label class="form-label">Quantidade:</label>
-                              <input 
-                              type="number" 
-                              class="form-control bg-secondary bg-opacity-50 text-light border-secondary" 
-                              name="quantidade" 
-                              min="1"
-                              placeholder="Ex: 10"
-                              oninvalid="this.setCustomValidity('Insira um valor positivo!')"
-                              oninput="this.setCustomValidity('')"
-                              required />
+                              <input type="number" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="quantidade" min="1" placeholder="Ex: 10" oninvalid="this.setCustomValidity('Insira um valor positivo!')" oninput="this.setCustomValidity('')" required />
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Motivo:</label>
-                              <input type="text" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="motivo" placeholder="Ex: Compra com recursos próprios"
-                              oninvalid="this.setCustomValidity('Motivo de entrada é obrigatório!')"
-                              oninput="this.setCustomValidity('')" 
-                              required />
+                              <input type="text" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="motivo" placeholder="Ex: Compra com recursos próprios" oninvalid="this.setCustomValidity('Motivo de entrada é obrigatório!')" oninput="this.setCustomValidity('')" required />
                             </div>
                           </div>
                           <div class="modal-footer border-secondary">
@@ -613,32 +606,14 @@
                           <input type="hidden" name="tipo_ajuste" value="saida">
                           <div class="modal-body">
                             <h3 class="fs-5 text-light">{{ item[1]|title }}</h3>
-                            <p>
-                              <small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small>
-                            </p>
+                            <p><small class="font-numeric text-warning">Estoque atual: {{ item[3] }}</small></p>
                             <div class="mb-4">
                               <label class="form-label">Quantidade:</label>
-                              <input 
-                              type="number" 
-                              class="form-control bg-secondary bg-opacity-50 text-light border-secondary" 
-                              name="quantidade" 
-                              min="1"
-                              placeholder="Ex: 5"
-                              max="{{ item[3] }}" 
-                              oninvalid="this.setCustomValidity('Valor precisa ser positivo e não exceder o estoque atual!')"
-                              oninput="this.setCustomValidity('')"
-                              required />
+                              <input type="number" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="quantidade" min="1" placeholder="Ex: 5" max="{{ item[3] }}" oninvalid="this.setCustomValidity('Valor precisa ser positivo e não exceder o estoque atual!')" oninput="this.setCustomValidity('')" required />
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Motivo:</label>
-                              <input 
-                              type="text" 
-                              class="form-control bg-secondary bg-opacity-50 text-light border-secondary" 
-                              name="motivo" 
-                              placeholder="Ex: Doação para a família Silva" 
-                              oninvalid="this.setCustomValidity('Motivo de saída é obrigatório!')"
-                              oninput="this.setCustomValidity('')"
-                              required />
+                              <input type="text" class="form-control bg-secondary bg-opacity-50 text-light border-secondary" name="motivo" placeholder="Ex: Doação para a família Silva" oninvalid="this.setCustomValidity('Motivo de saída é obrigatório!')" oninput="this.setCustomValidity('')" required />
                             </div>
                           </div>
                           <div class="modal-footer border-secondary">
@@ -706,9 +681,9 @@
           <tbody>
             {% for log in auditoria %}
             <tr class="text-center">
-              <td class="align-middle font-numeric">{{ log[1].strftime('%d/%m/%Y %H:%M') if log[1] else '-' }}</td>
-              <td class="align-middle text-info fw-bold">{{ log[2] }}</td>
-              <td class="align-middle">
+              <td class="align-middle font-numeric py-3">{{ log[1].strftime('%d/%m/%Y %H:%M') if log[1] else '-' }}</td>
+              <td class="align-middle text-info fw-bold py-3">{{ log[2] }}</td>
+              <td class="align-middle py-3">
                 {% if log[3] == 'Exclusão' %}
                 <span class="text-danger fw-bold"><i class="bi bi-x-circle"></i> {{ log[3] }}</span>
                 {% elif log[3] == 'Criação' or log[3] == 'Aprovação' %}
@@ -719,7 +694,7 @@
                 <span class="text-warning fw-bold"><i class="bi bi-pencil"></i> {{ log[3] }}</span>
                 {% endif %}
               </td>
-              <td class="align-middle">{{ log[4] }}</td>
+              <td class="align-middle py-3">{{ log[4] }}</td>
             </tr>
             {% endfor %}
           </tbody>

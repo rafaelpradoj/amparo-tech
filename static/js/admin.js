@@ -879,8 +879,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // 3. Reset Automático (O Anjo da Guarda das Modais)
+  // 3. Reset Automático e Destrancamento de Campos
   const todasAsModais = document.querySelectorAll('.modal');
+  const formNovaCampanha = document.querySelector('#modalNovoItem form');
+  
   todasAsModais.forEach(modal => {
     modal.addEventListener('hidden.bs.modal', function () {
       const formulario = modal.querySelector('form');
@@ -890,24 +892,80 @@ document.addEventListener('DOMContentLoaded', function() {
         const selects = formulario.querySelectorAll('.choices-basico');
         selects.forEach(s => {
           if (s.choicesInstance) {
+            s.choicesInstance.removeActiveItems(); // <-- Ordem explícita para limpar
             s.choicesInstance.setChoiceByValue(''); 
           }
         });
 
-        if (modal.id === 'modalNovoItem' && choicesProduto) {
-          choicesProduto.removeActiveItems(); 
-          choicesProduto.clearChoices();
-          choicesProduto.setChoices([{
-            value: '', 
-            label: '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Selecione uma categoria primeiro!</span>', 
-            selected: true, 
-            disabled: true
-          }], 'value', 'label', true);
-          choicesProduto.disable();
+        if (modal.id === 'modalNovoItem') {
+          const selectCategoriaNode = document.getElementById('selectCategoria');
+          
+          // Garante o desbloqueio E o reset forçado da Categoria
+          if (selectCategoriaNode && selectCategoriaNode.choicesInstance) {
+            selectCategoriaNode.choicesInstance.enable();
+            selectCategoriaNode.choicesInstance.removeActiveItems(); 
+            selectCategoriaNode.choicesInstance.setChoiceByValue('');
+          }
+
+          // Reseta a cascata do Produto
+          if (choicesProduto) {
+            choicesProduto.removeActiveItems(); 
+            choicesProduto.clearChoices();
+            choicesProduto.setChoices([{
+              value: '', 
+              label: '<span class="text-warning"><i class="bi bi-exclamation-circle"></i> Selecione uma categoria primeiro!</span>', 
+              selected: true, 
+              disabled: true
+            }], 'value', 'label', true);
+            choicesProduto.disable();
+          }
+          
+          if (formNovaCampanha) formNovaCampanha.dataset.isShortcut = "false";
         }
       }
     });
   });
+
+  // 4. Lógica do Botão de Atalho (Nova Campanha via Estoque)
+  document.addEventListener('click', function(e) {
+    const btnShortcut = e.target.closest('.btn-nova-campanha-shortcut');
+    if (btnShortcut) {
+      const categoria = btnShortcut.getAttribute('data-categoria');
+      const produto = btnShortcut.getAttribute('data-produto');
+      const selectCategoriaNode = document.getElementById('selectCategoria');
+
+      // Preenche e bloqueia a Categoria
+      if (selectCategoriaNode && selectCategoriaNode.choicesInstance) {
+        selectCategoriaNode.choicesInstance.setChoiceByValue(categoria);
+        selectCategoriaNode.dispatchEvent(new Event('change'));
+        selectCategoriaNode.choicesInstance.disable(); 
+      }
+
+      // Preenche e bloqueia o Produto com pequeno delay
+      setTimeout(() => {
+        if (choicesProduto) {
+          choicesProduto.setChoiceByValue(produto);
+          choicesProduto.disable();
+        }
+      }, 50);
+
+      if (formNovaCampanha) formNovaCampanha.dataset.isShortcut = "true";
+    }
+  });
+
+  // 5. Intercepta o Submit para reativar os campos invisivelmente
+  if (formNovaCampanha) {
+    formNovaCampanha.addEventListener('submit', function() {
+      if (this.dataset.isShortcut === "true") {
+        const selectCategoriaNode = document.getElementById('selectCategoria');
+        if (selectCategoriaNode && selectCategoriaNode.choicesInstance) {
+          selectCategoriaNode.choicesInstance.enable();
+        }
+        if (choicesProduto) choicesProduto.enable();
+      }
+    });
+  }
+
 });
 
 // =========================================================================
