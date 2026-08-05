@@ -108,11 +108,14 @@ def doar(id_campanha):
         flash("Promessa registrada! Você tem até 7 dias para fazer a entrega. Agradecemos sua colaboração!", "success")
         return redirect(url_for('public.index'))
 
+    
     # GET: Apresenta os dados da campanha escolhida em um formulário de intenção.
     with get_db_connection() as conn, conn.cursor() as cursor:
         # Impede carregar a tela se o ativo for FALSE (IDOR Mitigation)
+        # Adicionada Subquery para somar as doações pendentes e retornar no índice 5
         cursor.execute("""
-            SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta 
+            SELECT c.id, p.nome, p.categoria, c.arrecadado, c.meta,
+                   (SELECT COALESCE(SUM(quantidade), 0) FROM doacoes WHERE id_campanha = c.id AND status = 'Pendente') as pendentes
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
             WHERE c.id = %s AND c.ativo = TRUE AND c.pausada = FALSE
