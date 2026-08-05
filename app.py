@@ -1,5 +1,6 @@
 import os
 import secrets
+from datetime import timedelta
 from flask import Flask, render_template, g, request, redirect, url_for
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -45,6 +46,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Strict',
     # Limita o tamanho do payload para evitar DoS por requisições grandes.
     MAX_CONTENT_LENGTH= 1 * 1024 * 1024,
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=15),
 )
 
 # Inicializa a proteção global contra CSRF blindando todas as rotas
@@ -106,7 +108,10 @@ def inject_global_context():
 def ratelimit_handler(e):
     return render_template("429.html"), 429
 
-
+# Captura o erro 404 globalmente e exibe uma página customizada
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template("404.html"), 404
 
 # Security Headers HTTP
 @app.after_request

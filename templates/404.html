@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}AmparoTech - Página não encontrada (404){% endblock %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/adapt.css') }}" />
+{% endblock %}
+
+{% block content %}
+<div class="container text-center py-5 my-md-5 flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+  <div class="fs-2 text-success fw-bold mb-4">
+    <i class="bi bi-heart-fill"></i> AmparoTech
+  </div>
+  
+  <h1 class="text-success fw-bold mb-2 display-1 font-numeric">404</h1>
+  <h2 class="fw-bold mb-4 fs-3 text-light">Ops! Parece que você se perdeu.</h2>
+  
+  <p class="text-body-secondary mb-5 mw-600px-adpt mx-auto fs-095rem-adpt">
+    A página que você está procurando não existe, foi removida, ou o endereço foi digitado incorretamente. Não se preocupe, vamos te ajudar a encontrar o caminho de volta.
+  </p>
+  
+  <a href="/" class="btn btn-success btn-lg rounded-pill fw-bold shadow-sm px-5 py-3 fs-095rem-adpt">
+    Voltar ao Início
+  </a>
+</div>
+{% endblock %}

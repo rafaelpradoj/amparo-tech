@@ -125,6 +125,9 @@ def login():
                 session['operador_id'] = operador[0]
                 session['operador_login'] = usuario_digitado
                 session['is_master'] = operador[2]
+
+                # Inicia o relógio de inatividade de 15 minutos definido no app.py
+                session.permanent = True  # <-- ADICIONE ESTA LINHA
                 
                 # Registra o sucesso do login na tabela de auditoria
                 cursor.execute("""
