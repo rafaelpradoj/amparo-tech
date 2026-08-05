@@ -71,10 +71,10 @@ def doar(id_campanha):
         try:
             # Tenta converter obrigatoriamente para inteiro numérico
             quantidade_doada = int(quantidade_raw)
-            if quantidade_doada <= 0:
-                raise ValueError("Quantidade negativa ou zero.")
+            if quantidade_doada <= 0 or quantidade_doada > 1000:
+                raise ValueError("Quantidade fora do limite permitido.")
         except (ValueError, TypeError):
-            flash("Ops! A quantidade precisa ser um número positivo.", "danger")
+            flash("Ops! A quantidade precisa ser um número positivo menor ou igual a 1.000.", "danger")
             return redirect(url_for('public.doar', id_campanha=id_campanha))
 
         if not nome_doador:
