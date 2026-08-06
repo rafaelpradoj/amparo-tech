@@ -49,13 +49,14 @@ amparotech/
 │   └── public.py
 ├── scripts/
 │   ├── banco_setup.py
-|   ├── popular_apresentacao.py
-│   └── setup_master.py
+│   └── reset_master.py
 ├── static/
 │   ├── css/
 │   │   ├── adapt.css
 │   │   ├── admin.css
 │   │   └── globais.css
+│   ├── img/
+│   │   └── favicon.png
 │   └── js/
 │       ├── admin.js
 |       ├── pt-BR.json
@@ -119,8 +120,8 @@ Com a infraestrutura confirmada como saudável, instancie as tabelas e a sua cre
 # Passo A: Criação das tabelas e relacionamentos DDL
 docker compose exec web python scripts/banco_setup.py
 
-# Passo B: Geração criptografada da conta de acesso Master
-docker compose exec web python scripts/setup_master.py
+# Passo B (Opcional): Reset da conta master, caso digitado algo errado no .env
+docker compose exec web python scripts/reset_master.py
 ```
 
 ## 💻 Acesso ao Sistema
