@@ -6,14 +6,25 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash
 from utils.db import get_db_connection
 
-# Carrega as variáveis de ambiente do arquivo .env (como as credenciais do banco)
+# Carrega as variáveis de ambiente forçando a sobrescrita (override=True)
 load_dotenv(override=True)
 
-# Trava de segurança crítica: impede que o script seja rodado em ambiente de Produção
+# 1. TRAVA DE SEGURANÇA CRÍTICA: Impede execução em Produção
 if os.getenv("FLASK_ENV") != "development" and os.getenv("FLASK_DEBUG") != "1":
     sys.exit("⚠️ ERRO CRÍTICO: Execução bloqueada! Este script apaga as tabelas e não pode ser executado em produção.")
+
+# 2. RECUPERAÇÃO E VALIDAÇÃO DE CREDENCIAIS MASTER (.env)
+admin_login = os.getenv("MASTER_LOGIN")
+admin_senha = os.getenv("MASTER_PASSWORD")
+admin_recup = os.getenv("MASTER_RECOVERY")
+
+if not admin_login or not admin_senha or not admin_recup:
+    print("Falha ao iniciar: As credenciais Master não foram encontradas nas variáveis de ambiente.")
+    print("Ação abortada (Fail-Fast). O sistema foi impedido de usar credenciais padrão inseguras.")
+    sys.exit(1)
 
 print("A tentar conectar à base de dados...")
 
@@ -30,7 +41,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     cursor.execute("DROP TABLE IF EXISTS operadores CASCADE;")
 
     # --- TABELA: CATEGORIAS ---
-    # Armazena as categorias para classificação dos produtos
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS categorias (
             id SERIAL PRIMARY KEY,
@@ -38,14 +48,7 @@ with get_db_connection() as conn, conn.cursor() as cursor:
         );
     """)
 
-    # Popula o banco inicialmente com as categorias padrão do sistema
-    cursor.execute("""
-        INSERT INTO categorias (nome) 
-        VALUES ('Alimentos'), ('Geral');
-    """)
-
     # --- TABELA: OPERADORES ---
-    # Armazena os usuários administradores/operadores do painel
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS operadores (
             id SERIAL PRIMARY KEY,
@@ -58,7 +61,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     """)
 
     # --- TABELA: PRODUTOS ---
-    # Representa o estoque físico interno. Possui uma trava para evitar estoque negativo
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS produtos (
             id SERIAL PRIMARY KEY,
@@ -70,9 +72,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     """)
 
     # --- TABELA: CAMPANHAS ---
-    # Gerencia as metas públicas de arrecadação. Depende diretamente da tabela de produtos.
-    # ON DELETE RESTRICT impede a exclusão de um produto que possua uma campanha vinculada.
-    # 'pausada' permite pausar temporariamente a campanha sem arquivá-la.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS campanhas (
             id SERIAL PRIMARY KEY,
@@ -88,8 +87,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     """)
 
     # --- TABELA: DOAÇÕES ---
-    # Registra as promessas e intenções de doações. 
-    # Possui chaves estrangeiras que apontam para a campanha e para o operador que a processou.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS doacoes (
             id SERIAL PRIMARY KEY,
@@ -109,8 +106,6 @@ with get_db_connection() as conn, conn.cursor() as cursor:
     """)
 
     # --- TABELA: AUDITORIA ---
-    # Tabela de segurança responsável por rastrear todas as ações críticas feitas no sistema.
-    # Armazena o tipo de ação (restrito pelo CHECK), descrição legível e o autor (operador).
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS auditoria(
             id SERIAL PRIMARY KEY,
@@ -126,6 +121,25 @@ with get_db_connection() as conn, conn.cursor() as cursor:
         );
     """)
 
-    # Efetiva todas as criações e inserções estruturadas acima no banco de dados
+    # --- POPULANDO DADOS INICIAIS ---
+    print("A criar categorias padrão...")
+    cursor.execute("""
+        INSERT INTO categorias (nome) 
+        VALUES ('Alimentos'), ('Geral');
+    """)
+
+    print("A configurar a conta Master...")
+    senha_criptografada = generate_password_hash(admin_senha)
+    palavra_criptografada = generate_password_hash(admin_recup)
+    
+    # Insere o novo operador raiz definindo explicitamente a flag 'is_master = TRUE'
+    cursor.execute("""
+        INSERT INTO operadores (login, senha, palavra_recuperacao, is_master)
+        VALUES (%s, %s, %s, TRUE);
+    """, (admin_login, senha_criptografada, palavra_criptografada))
+
+    print(f"Operador Master criado de forma segura! (Login: {admin_login})")
+
+    # Efetiva todas as criações e inserções
     conn.commit()
     print("Base de dados recriada na Nova Arquitetura de Estoque Híbrido com sucesso!")
