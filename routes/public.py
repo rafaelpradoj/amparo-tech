@@ -39,10 +39,11 @@ def ver_categoria(nome_categoria):
             FROM campanhas c 
             JOIN produtos p ON c.id_produto = p.id 
             WHERE c.ativo = TRUE AND c.pausada = FALSE
-            AND INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc')) = INITCAP(TRANSLATE(LOWER(%s), 'áéíóúâêôãõç', 'aeiouaeoaoc'));
+            AND INITCAP(TRANSLATE(LOWER(p.categoria), 'áéíóúâêôãõç', 'aeiouaeoaoc')) = INITCAP(TRANSLATE(LOWER(%s), 'áéíóúâêôãõç', 'aeiouaeoaoc'))
+            ORDER BY p.nome ASC;
         """, (nome_categoria,))
         lista_campanhas = cursor.fetchall()
-        
+
         if not lista_campanhas:
             flash("Nenhuma campanha ativa nesta categoria.", "warning")
             return redirect(url_for('public.index'))
